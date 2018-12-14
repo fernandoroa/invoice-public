@@ -1,0 +1,113 @@
+---
+title: "Consultancy Invoice"
+
+output: pdf_document
+fontsize: 11pt
+params: 
+  name: 'Janki'
+  date: 2018-10-21
+  start_date: 2018-10-15
+  end_date: 2018-10-20
+  details_file: 'baseline\\details.csv'
+  skip_days: 0
+  bonus: 0
+---
+```{r setup, message = F,echo=F,warning=F}
+library(lubridate)
+library(readr)
+library(dplyr)
+
+details <- read_csv(params$details_file,col_types = cols(ac_no = col_character()))
+df <- details %>% filter(name == params$name) %>% as.list()
+sd <- ymd(params$start_date)
+ed <-  ymd(params$end_date)
+sm <- month(params$start_date,label = T)
+em <- month(params$end_date,label = T)
+sdt <- day(params$start_date)
+edt <- day(params$end_date)
+sy <- year(params$start_date)
+ey <- year(params$end_date)
+
+
+days <- ed - sd + 1 - as.integer(params$skip_days)
+stipend <-as.numeric(df$salary)
+amt <- as.integer(as.integer(days) * stipend) 
+
+inv_dt <- day(params$date)
+inv_m <- month(params$date, label = T)
+inv_y <- year(params$date)
+bonus <- as.numeric(params$bonus)
+
+df$phone <- as.character(df$phone)
+df$ac_no <- toString(df$ac_no)
+
+sign_name <- paste0(params$name,".png")
+
+total <- as.character(amt+bonus)
+```
+
+
+\begin{flushright} 
+Consultant Name:  `r df$name`  \end{flushright}
+\begin{flushright} 
+Address:  `r df$addr_l1`  \end{flushright}
+\begin{flushright}`r df$addr_l2`, `r df$addr_l3`\end{flushright}
+\begin{flushright}
+Contact No:  `r df$phone` 
+\end{flushright} 
+ 
+ 
+ Bill To, 
+ 
+ Company Name
+ 
+ Company Address Line 1
+ 
+ Company Address Line 2
+ 
+ Company Address Line 3
+ 
+ **GSTIN: ABCXYZDEF** 
+ 
+ Place of Supply: Bengaluru
+ \begin{flushright} 
+Date:  `r inv_dt` `r inv_m` `r inv_y`  
+\end{flushright} 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **Invoice -  `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey`**
+
+|PARTICULARS|HSN/SAC Code|AMOUNT(INR)
+|-----------|------------|-----------
+|Consultancy Charges| | 
+| `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey`| | 
+|  `r days` days x `r as.character(stipend)` per day|  |`r as.character(amt)` INR
+|  Bonus: `r as.character(bonus)` INR|  |`r as.character(bonus)` INR
+|          |    |   |            |
+| CGST @ 9%, SGST @ 9% | |NA
+| 'OR' IGST @18%  ||NA
+|          |    |   |            |
+| **TOTAL** |     | **`r total` INR**|
+ 
+
+ ```{r, out.width = "50px",fig.align='right' ,echo=F}
+
+knitr::include_graphics(sign_name)
+```
+
+ 
+ Consultant Name: `r df$name`
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Signature  
+ 
+
+ **Bank Account Information** 
+ 
+Beneficiary Name:  `r df$ben_name `  
+Bank account name: `r df$bank_ac_name`  
+Bank branch address:	`r df$bank_branch_addr`  
+Account number `r df$ac_no`  
+IFSC Code: 	`r df$ifsc_code`  
+PAN: 	`r df$pan`  
+GSTIN: `r df$gstin`  
+ 
+
+                                                                
