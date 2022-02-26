@@ -34,7 +34,7 @@ shinyApp(
           textInput("finalCurrency","final Currency",
                     jsonSalaryL$finalCurrency),
           checkboxInput("inter",HTML("<strong>Include Intermediary bank</strong>")
-                        ,jsonSalaryL$inter),
+                        ,jsonSalaryL$intermediaryBank),
           actionButton("modify_salary"
                        , HTML("<strong>Update input_salary.json after changes!</strong>")
                        )
