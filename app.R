@@ -126,7 +126,7 @@ shinyApp(
         tempReport <- file.path(getwd(), "/inv_md_dont_modify.Rmd")
         file.copy("invoice.Rmd", tempReport, overwrite = TRUE)
 
-        params <<- reactiveValuesToList(input)
+        params <- reactiveValuesToList(input)
 
         pattern<-paste0(names(jsonL), collapse="|")
         pattern<-gsub("\\((.*?)\\)","\\\\(\\1\\\\)",pattern)
