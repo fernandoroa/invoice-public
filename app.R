@@ -2,16 +2,17 @@ library(shiny)
 library(dplyr)
 
 jsonL <- fromJSON(file = "input.json")
+originalSalary<-80
 
 shinyApp(
   ui = fluidPage(
     titlePanel('Invoice Generator'),
     sidebarLayout(
       sidebarPanel(
-        checkboxInput("inter","Include Intermediary bank",FALSE),
+        checkboxInput("inter",HTML("<strong>Include Intermediary bank</strong>"),FALSE),
         textInput("invoiceNumber","Invoice Number","2022-"),
         textInput("originalCurrency","original Currency","PLZ"),
-        numericInput("originalSalary","original Salary",80),
+        numericInput("originalSalary","original Salary",originalSalary),
         textInput("finalCurrency","final Currency","USD"),
         numericInput("exchangeRate","exchange Rate",4.1683),
         dateInput(inputId = 'start_date','Start Date: ', value = "2022-02-01"),
@@ -41,7 +42,8 @@ shinyApp(
     output$jsonfields<- renderUI({
       wellPanel(
         h3("This is the content of input.json"),
-        actionButton("modify", "Update .json after changes"),
+        actionButton("modify", HTML("<strong>Update .json after changes!</strong>") ),
+        br(),
         lapply(seq_along(jsonL), function(x) {
         textInput(names(jsonL[x]),names(jsonL[x]), value = jsonL[[x]])
       }),
