@@ -1,6 +1,7 @@
 library(shiny)
 library(dplyr)
 library(rjson)
+library(jsonlite)
 jsonL <- fromJSON(file = "input.json")
 jsonSalaryL <- fromJSON(file = "input_salary.json")
 
