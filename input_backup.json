@@ -1,0 +1,23 @@
+{
+  "consultantBusiness": ["Someone Software"],
+  "consultantAddress1": ["Rua ---, 274"],
+  "consultantAddress2": ["nome de bairro"],
+  "consultantAddress3": ["City - State - 74xxx-xxx"],
+  "consultantCountry": ["Brazil"],
+  "consultantIBAN": ["BRxxxxxxxxxxxxxxxx"],
+  "consultantPhone": ["+55 62 xxxxx xxxx"],
+  "billTo1": ["Enterprise Sp. z o. o"],
+  "billTo2": ["City at ul. "],
+  "billTo3": ["KRS xxxxxxxxxxxxx"],
+  "billTo4": ["EU VAT No.: xxxxxxxxxxxxxxx"],
+  "billTo5": ["REGON: xxxxxxxxxxx"],
+  "intermediary_bank_swift (for intermediary checkbox TRUE)": ["CITIxxxx"],
+  "intermediary_bank_name (for intermediary checkbox TRUE)": ["xxxxx, NEW YORK"],
+  "intermediary_bank_country (for intermediary checkbox TRUE)": ["UNITED STATES"],
+  "final_bank_swift": ["BPAxxxxxxxx"],
+  "final_bank_short_name": ["XXX"],
+  "final_bank_account (for intermediary checkbox TRUE)": ["000000000"],
+  "final_bank_name": ["BANCO xxxxxxx S.A."],
+  "final_bank_address": ["xxxxxxxxxxxxxxxxx, RIO DE JANEIRO"],
+  "final_bank_country": ["Brazil"]
+}
