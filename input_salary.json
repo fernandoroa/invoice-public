@@ -1,6 +1,6 @@
 {
-  "intermediaryBank": [true],
-  "originalSalary": [80],
+  "intermediaryBank": [false],
+  "originalSalary": [800],
   "originalBenefits": [180],
   "originalCurrency": ["PLZ"],
   "finalCurrency": ["USD"]

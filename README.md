@@ -11,7 +11,11 @@ It has several modifications, and now it is for single person use.
 
 2. The `invoice.Rmd` file is the RMarkdown file, which you can modify to suit your own particular invoice. 
 
-3. `input.json` and `input_salary.json` can be updated in the app.
+3. `input.json` and `input_salary.json` can be updated in the app. It is mandatory
+to save them, using buttons, while in the app, before creating the `.pdf`
 
-4. If you change the field values in the app, update the `.json` files with the buttons
+## Inner logic
+
+The content of `.json` files will build a field for each element.  
+The first box is manually built, and passes its values to the `.Rmd` via `params` in `yaml` header.
 

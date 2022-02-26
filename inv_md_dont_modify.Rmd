@@ -7,16 +7,10 @@ papersize: a4
 header-includes:
   - \usepackage{comment}
 params: 
-  name: ''
-  date: NA
+  inv_date: NA
   start_date: NA
   end_date: NA
-  inter: FALSE
   invoiceNumber: '2022-'
-  originalCurrency: "PLZ"
-  originalSalary: 80
-  originalBenefits: 80
-  finalCurrency: "USD"
   exchangeRate: 4.1683
 ---
 ```{r setup, message = F,echo=F,warning=F}
@@ -31,26 +25,28 @@ edt <- day(params$end_date)
 sy <- year(params$start_date)
 ey <- year(params$end_date)
 
-inv_dt <- day(params$date)
-inv_m <- month(params$date, label = T)
-inv_y <- year(params$date)
+inv_dt <- day(params$inv_date)
+inv_m <- month(params$inv_date, label = T)
+inv_y <- year(params$inv_date)
 
-condition<-params$originalCurrency==params$finalCurrency
+jsonSalaryL <- rjson::fromJSON(file = "input_salary.json")
+
+condition<- jsonSalaryL$originalCurrency==jsonSalaryL$finalCurrency
 
 exchange <- ifelse( condition
                     ,""
-                    ,paste(params$originalSalary,params$originalCurrency
+                    ,paste(jsonSalaryL$originalSalary,jsonSalaryL$originalCurrency
                             ,"/",params$exchangeRate
                             , "=")
 )
 
-result <- ifelse(condition,params$originalSalary
-                 , round(params$originalSalary/params$exchangeRate )
+result <- ifelse(condition,jsonSalaryL$originalSalary
+                 , round(jsonSalaryL$originalSalary/params$exchangeRate )
 )
 
 benefits <- ifelse(condition
-                   ,params$originalBenefits
-                 , round(params$originalBenefits/params$exchangeRate )
+                   ,jsonSalaryL$originalBenefits
+                 , round(jsonSalaryL$originalBenefits/params$exchangeRate )
 )
 
 total <- result+benefits
@@ -58,8 +54,6 @@ total <- result+benefits
 result <- format(result, scientific = F)
 
 total <- format(total, scientific = F)
-
-library("rjson")
 
 # Give the input file name to the function.
 jsonL <- rjson::fromJSON(file = "input.json")
@@ -92,8 +86,8 @@ Date:  `r inv_dt` `r inv_m` `r inv_y`
 |------------------------|-----------
 |Consultancy Charges     |                                         | 
 |\hspace{2mm} `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey` |                |
-|\hspace{2mm} 1 month: `r exchange`  | `r result`   `r params$finalCurrency`   |
-|Benefits                | `r benefits` `r params$finalCurrency`   |            
+|\hspace{2mm} 1 month: `r exchange`  | `r result`   `r jsonSalaryL$finalCurrency`   |
+|Benefits                | `r benefits` `r jsonSalaryL$finalCurrency`   |            
 | **TOTAL**              | **`r total` `r params$finalCurrency`** |
 
 
@@ -103,7 +97,7 @@ Signature
 
 \Large  \textbf{Wire Instructions} / \normalsize Bank Account Information
 
-``` {r , results="asis", echo=F, eval=params$inter} 
+``` {r , results="asis", echo=F, eval=jsonSalaryL$intermediaryBank} 
 cat("\\large \\textbf{Intermediary} / Correspondent Bank \\textbf{(Field 56):}  \n  ")
 cat(paste0("\\hspace{5mm} \\normalsize SWIFT: **",jsonL$intermediary_bank_swift,"**  \n") )    
 cat(paste0("\\hspace{5mm} Name:",    jsonL$intermediary_bank_name,"  \n")  )
@@ -113,7 +107,7 @@ cat(paste0("\\hspace{5mm} Country:", jsonL$intermediary_bank_country,"  \n") )
 \large Beneficiary \textbf{Bank (Field 57):}  
 \normalsize \hspace{5mm} SWIFT: \textbf{`r jsonL$final_bank_swift`}  
 ``` {r , results="asis", echo=F, eval=T} 
-if(params$inter){
+if(jsonSalaryL$intermediaryBank){
   cat(paste("\\hspace{5mm}", paste0("**",jsonL$final_bank_short_name," Account** with") ,jsonL$intermediary_bank_name,":",paste0("**",jsonL$final_bank_account,"**  \n") ) )
 } else {
   cat("<!-- some -->")
@@ -130,4 +124,4 @@ if(params$inter){
 \hspace{5mm} Country: `r jsonL$consultantCountry`  
 
 \large Remittance Information \textbf{(Field 70)}:  
-\hspace{5mm} \normalsize Include more details on field 70 as **invoice number**, **contract number**
+\hspace{5mm} \normalsize Include **invoice number**, **contract number**

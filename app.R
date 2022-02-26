@@ -3,8 +3,19 @@ library(dplyr)
 library(rjson)
 library(jsonlite)
 
+#
+# read .json
+#
 jsonL <- rjson::fromJSON(file = "input.json")
 jsonSalaryL <- rjson::fromJSON(file = "input_salary.json")
+
+#
+# subset of vars for one of the .json
+#
+
+char_names<-names(which(sapply(jsonSalaryL, function(x) is.character(x)) ))
+num_names <-names(which(sapply(jsonSalaryL, function(x) is.numeric(x)) ))
+logic_names <-names(which(sapply(jsonSalaryL, function(x) is.logical(x)) ))
 
 shinyApp(
   ui = fluidPage(
@@ -12,6 +23,9 @@ shinyApp(
     fluidPage(
       fluidRow(
         column(3
+               #
+               #    manual inputs, see params in .Rmd
+               #
         , wellPanel(
         h4("other info"),
         textInput("invoiceNumber","Invoice Number","2022-"),
@@ -21,33 +35,22 @@ shinyApp(
         dateInput('inv_date','Invoice Date: ',value = "2022-02-28")
         )
         , wellPanel(
+          helpText("clicking the other box buttons after changes is mandatory"),
         downloadButton("report", "Generate invoice in .pdf")
         )
         )
         ,column(3
-        , wellPanel(
-          h4("from input_salary.json"),
-          textInput("originalCurrency","original Currency"
-                    ,jsonSalaryL$originalCurrency),
-          numericInput("originalSalary","original Salary"
-                       ,jsonSalaryL$originalSalary),
-          numericInput("originalBenefits","original Benefits"
-                       ,jsonSalaryL$originalBenefits),
-          textInput("finalCurrency","final Currency",
-                    jsonSalaryL$finalCurrency),
-          checkboxInput("inter",HTML("<strong>Include Intermediary bank</strong>")
-                        ,jsonSalaryL$intermediaryBank),
-          actionButton("modify_salary"
-                       , HTML("<strong>Update input_salary.json after changes!</strong>")
-                       )
-
+                #
+                #   2nd box
+                #
+        , uiOutput("second_box")
+        ),
+        column(3,
+          div(style="max-width:600px",
+          uiOutput("third_box")
         )
-  ),
-  column(3,
-    div(style="max-width:600px",
-    uiOutput("jsonfields")
-  )
-  ))
+        )
+        )
   )
   )
   , server = function(input, output) {
@@ -76,7 +79,33 @@ shinyApp(
       write(jsonData, "input.json")
     })
 
-    output$jsonfields<- renderUI({
+    output$second_box<- renderUI({
+     wellPanel(
+      h4("from input_salary.json"),
+      lapply(char_names, function(x){
+        textInput(x,x
+                  ,jsonSalaryL[[x]])
+      }),
+      lapply(num_names, function(x){
+        numericInput(x,x
+                     ,jsonSalaryL[[x]])
+      }),
+      lapply(logic_names, function(x){
+        checkboxInput(x,x
+                      ,jsonSalaryL[[x]])
+      }),
+      helpText("this box content must be saved before generating .pdf"),
+
+      actionButton("modify_salary"
+                   , HTML("<strong>Update input_salary.json after changes!</strong>")
+      )
+    )
+    })
+
+    output$third_box<- renderUI({
+      #
+      #   3rd box
+      #
       wellPanel(
         h3("This is the content of input.json"),
         helpText("this box content must be saved before generating .pdf"),
@@ -97,18 +126,18 @@ shinyApp(
         tempReport <- file.path(getwd(), "/inv_md_dont_modify.Rmd")
         file.copy("invoice.Rmd", tempReport, overwrite = TRUE)
 
-        params <- list(name = input$name,
-                       start_date = input$start_date,
-                       end_date   = input$end_date,
-                       date       = input$inv_date,
-                       inter      = input$inter,
-                       invoiceNumber    = input$invoiceNumber,
-                       originalCurrency = input$originalCurrency,
-                       originalSalary   = input$originalSalary,
-                       originalBenefits = input$originalBenefits,
-                       finalCurrency    = input$finalCurrency,
-                       exchangeRate     = input$exchangeRate
-                       )
+        params <<- reactiveValuesToList(input)
+
+        pattern<-paste0(names(jsonL), collapse="|")
+        pattern<-gsub("\\((.*?)\\)","\\\\(\\1\\\\)",pattern)
+        pattern2<-"modify_salary|modify"
+        pattern3<-paste0(names(jsonSalaryL), collapse="|")
+        pattern3<-gsub("\\((.*?)\\)","\\\\(\\1\\\\)",pattern3)
+
+        params <-params[-grep(pattern, names(params))]
+        params <-params[-grep(pattern2, names(params))]
+        params <-params[-grep(pattern3, names(params))]
+        # names(jsonL)
 
         rmarkdown::render(tempReport, output_file = file,
                           params = params,
