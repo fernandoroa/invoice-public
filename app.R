@@ -41,7 +41,7 @@ shinyApp(
     output$jsonfields<- renderUI({
       wellPanel(
         h3("This is the content of input.json"),
-        actionButton("modify", "Update .json"),
+        actionButton("modify", "Update .json after changes"),
         lapply(seq_along(jsonL), function(x) {
         textInput(names(jsonL[x]),names(jsonL[x]), value = jsonL[[x]])
       }),

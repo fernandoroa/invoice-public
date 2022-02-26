@@ -12,7 +12,7 @@ params:
   inter: FALSE
   invoiceNumber: '2022-'
   originalCurrency: "PLZ"
-  originalSalary: 8000
+  originalSalary: 80
   finalCurrency: "USD"
   exchangeRate: 4.1683
 ---
