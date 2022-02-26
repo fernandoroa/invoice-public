@@ -44,6 +44,7 @@ shinyApp(
         h3("This is the content of input.json"),
         actionButton("modify", HTML("<strong>Update .json after changes!</strong>") ),
         br(),
+        br(),
         lapply(seq_along(jsonL), function(x) {
         textInput(names(jsonL[x]),names(jsonL[x]), value = jsonL[[x]])
       }),
