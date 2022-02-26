@@ -14,9 +14,9 @@
   "intermediary_bank_swift (for intermediary checkbox TRUE)": ["CITIxxxx"],
   "intermediary_bank_name (for intermediary checkbox TRUE)": ["xxxxx, NEW YORK"],
   "intermediary_bank_country (for intermediary checkbox TRUE)": ["UNITED STATES"],
-  "final_bank_swift": ["BPAxxxxxxxx"],
-  "final_bank_short_name": ["XXX"],
+  "final_bank_short_name (for intermediary checkbox TRUE)": ["XXX"],
   "final_bank_account (for intermediary checkbox TRUE)": ["000000000"],
+  "final_bank_swift": ["BPAxxxxxxxx"],
   "final_bank_name": ["BANCO xxxxxxx S.A."],
   "final_bank_address": ["xxxxxxxxxxxxxxxxx, RIO DE JANEIRO"],
   "final_bank_country": ["Brazil"]
