@@ -4,6 +4,8 @@ output: pdf_document
 geometry: "left=3cm,right=2cm,top=0cm,bottom=2cm"
 fontsize: 11pt
 papersize: a4
+header-includes:
+  - \usepackage{comment}
 params: 
   name: ''
   date: NA
@@ -12,7 +14,7 @@ params:
   inter: FALSE
   invoiceNumber: '2022-'
   originalCurrency: "PLZ"
-  originalSalary: 80
+  originalSalary: 8000
   finalCurrency: "USD"
   exchangeRate: 4.1683
 ---
@@ -44,6 +46,8 @@ result <- ifelse(condition,params$originalSalary
                  , round(params$originalSalary/params$exchangeRate )
 )
 
+result <- format(result, scientific = F)
+
 library("rjson")
 
 # Give the input file name to the function.
@@ -54,12 +58,12 @@ jsonL <- fromJSON(file = "input.json")
 
 \raggedright Invoice Number: `r params$invoiceNumber` \par
 
-\raggedleft Consultant Business:  `r jsonL$consultantBusiness` \par  
-\raggedleft `r jsonL$consultantAddress1` \par  
-\raggedleft `r jsonL$consultantAddress2` \par  
-\raggedleft `r jsonL$consultantAddress3` \par  
-\raggedleft `r jsonL$consultantCountry`  \par 
-\raggedleft Contact No:  `r jsonL$consultantPhone` \par  
+\raggedleft Consultant Business:  `r jsonL$consultantBusiness`    
+\raggedleft `r jsonL$consultantAddress1`  
+\raggedleft `r jsonL$consultantAddress2`   
+\raggedleft `r jsonL$consultantAddress3`   
+\raggedleft `r jsonL$consultantCountry`    
+\raggedleft Contact No:  `r jsonL$consultantPhone` 
 
 \raggedright Bill To, \par  
  
@@ -86,27 +90,33 @@ Date:  `r inv_dt` `r inv_m` `r inv_y`
 Signature
 \end{flushright}
 
-**Wire Instructions/Bank Account Information** 
- 
+\Large  \textbf{Wire Instructions} / \normalsize Bank Account Information
+
 ``` {r , results="asis", echo=F, eval=params$inter} 
-cat("**Intermediary / Correspondent Bank (Field 56)**  \n  ")
-cat(paste0("SWIFT: **",jsonL$intermediary_bank_swift,"**  \n") )    
-cat(paste0("Name:",    jsonL$intermediary_bank_name,"  \n")  )
-cat(paste0("Country:", jsonL$intermediary_bank_country,"  \n") )  
+cat("\\large \\textbf{Intermediary} / Correspondent Bank \\textbf{(Field 56):}  \n  ")
+cat(paste0("\\hspace{5mm} \\normalsize SWIFT: **",jsonL$intermediary_bank_swift,"**  \n") )    
+cat(paste0("\\hspace{5mm} Name:",    jsonL$intermediary_bank_name,"  \n")  )
+cat(paste0("\\hspace{5mm} Country:", jsonL$intermediary_bank_country,"  \n") )  
 ```
 
-Beneficiary **Bank (Field 57):**  
-SWIFT: **`r jsonL$final_bank_swift`**   
-``` {r , results="asis", echo=F, eval=params$inter} 
-cat(paste(paste0("**",jsonL$final_bank_short_name," Account** with")
-,jsonL$intermediary_bank_name,":",paste0("**",jsonL$final_bank_account,"**  \n") ) )
+\large Beneficiary \textbf{Bank (Field 57):}  
+\normalsize \hspace{5mm} SWIFT: \textbf{`r jsonL$final_bank_swift`}  
+``` {r , results="asis", echo=F, eval=T} 
+if(params$inter){
+  cat(paste("\\hspace{5mm}", paste0("**",jsonL$final_bank_short_name," Account** with") ,jsonL$intermediary_bank_name,":",paste0("**",jsonL$final_bank_account,"**  \n") ) )
+} else {
+  cat("<!-- some -->")
+}
 ```
-Name: **`r jsonL$final_bank_name`**  
-Address: `r jsonL$final_bank_address`  
-Country: `r jsonL$final_bank_country`  
+\hspace{5mm} Name: \textbf{`r jsonL$final_bank_name`}  
+\hspace{5mm} Address: `r jsonL$final_bank_address`  
+\hspace{5mm} Country: `r jsonL$final_bank_country`  
 
-Consultant Business / **Beneficiary Customer (Field 59):**  
-Name: `r jsonL$consultantBusiness`    
-IBAN: **`r jsonL$consultantIBAN`**  
-Address: `r paste(jsonL$consultantAddress1,jsonL$consultantAddress2,jsonL$consultantAddress3)`  
-Country: `r jsonL$consultantCountry`  
+\large \textbf{Consultant} Business / Beneficiary Customer \textbf{(Field 59)}:  
+\hspace{5mm} \normalsize Name: `r jsonL$consultantBusiness`    
+\hspace{5mm} IBAN: **`r jsonL$consultantIBAN`**  
+\hspace{5mm} Address: `r paste(jsonL$consultantAddress1,jsonL$consultantAddress2,jsonL$consultantAddress3)`  
+\hspace{5mm} Country: `r jsonL$consultantCountry`  
+
+\large Remittance Information \textbf{(Field 70)}:  
+\hspace{5mm} \normalsize Include more details on field 70 as **invoice number**, **contract number**
