@@ -2,10 +2,11 @@ library(shiny)
 library(dplyr)
 library(rjson)
 library(jsonlite)
-jsonL <- fromJSON(file = "input.json")
-jsonSalaryL <- fromJSON(file = "input_salary.json")
 
-originalSalary<-8000
+jsonL <- rjson::fromJSON(file = "input.json")
+jsonSalaryL <- rjson::fromJSON(file = "input_salary.json")
+
+originalSalary<-80
 
 shinyApp(
   ui = fluidPage(
