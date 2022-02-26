@@ -91,8 +91,8 @@ Date:  `r inv_dt` `r inv_m` `r inv_y`
 |Services                |AMOUNT    |
 |------------------------|-----------
 |Consultancy Charges     |                                         | 
-| `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey` |                |
-| 1 month: `r exchange`  | `r result`   `r params$finalCurrency`   |
+|\hspace{2mm} `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey` |                |
+|\hspace{2mm} 1 month: `r exchange`  | `r result`   `r params$finalCurrency`   |
 |Benefits                | `r benefits` `r params$finalCurrency`   |            
 | **TOTAL**              | **`r total` `r params$finalCurrency`** |
 
