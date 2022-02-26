@@ -31,6 +31,8 @@ shinyApp(
                     ,jsonSalaryL$originalCurrency),
           numericInput("originalSalary","original Salary"
                        ,jsonSalaryL$originalSalary),
+          numericInput("originalBenefits","original Benefits"
+                       ,jsonSalaryL$originalBenefits),
           textInput("finalCurrency","final Currency",
                     jsonSalaryL$finalCurrency),
           checkboxInput("inter",HTML("<strong>Include Intermediary bank</strong>")
@@ -100,11 +102,12 @@ shinyApp(
                        end_date   = input$end_date,
                        date       = input$inv_date,
                        inter      = input$inter,
-                       invoiceNumber = input$invoiceNumber,
+                       invoiceNumber    = input$invoiceNumber,
                        originalCurrency = input$originalCurrency,
-                       originalSalary = input$originalSalary,
-                       finalCurrency = input$finalCurrency,
-                       exchangeRate = input$exchangeRate
+                       originalSalary   = input$originalSalary,
+                       originalBenefits = input$originalBenefits,
+                       finalCurrency    = input$finalCurrency,
+                       exchangeRate     = input$exchangeRate
                        )
 
         rmarkdown::render(tempReport, output_file = file,

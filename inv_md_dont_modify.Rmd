@@ -14,7 +14,8 @@ params:
   inter: FALSE
   invoiceNumber: '2022-'
   originalCurrency: "PLZ"
-  originalSalary: 8000
+  originalSalary: 80
+  originalBenefits: 80
   finalCurrency: "USD"
   exchangeRate: 4.1683
 ---
@@ -35,6 +36,7 @@ inv_m <- month(params$date, label = T)
 inv_y <- year(params$date)
 
 condition<-params$originalCurrency==params$finalCurrency
+
 exchange <- ifelse( condition
                     ,""
                     ,paste(params$originalSalary,params$originalCurrency
@@ -46,7 +48,16 @@ result <- ifelse(condition,params$originalSalary
                  , round(params$originalSalary/params$exchangeRate )
 )
 
+benefits <- ifelse(condition
+                   ,params$originalBenefits
+                 , round(params$originalBenefits/params$exchangeRate )
+)
+
+total <- result+benefits
+
 result <- format(result, scientific = F)
+
+total <- format(total, scientific = F)
 
 library("rjson")
 
@@ -81,9 +92,9 @@ Date:  `r inv_dt` `r inv_m` `r inv_y`
 |------------------------|-----------
 |Consultancy Charges     |                                         | 
 | `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey` |                |
-| 1 month: `r exchange`  | `r result` `r params$finalCurrency`     |
-|                        |                                         |            
-| **TOTAL**              | **`r result` `r params$finalCurrency`** |
+| 1 month: `r exchange`  | `r result`   `r params$finalCurrency`   |
+|Benefits                | `r benefits` `r params$finalCurrency`   |            
+| **TOTAL**              | **`r total` `r params$finalCurrency`** |
 
 
 \begin{flushright} 
