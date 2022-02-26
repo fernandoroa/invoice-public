@@ -115,7 +115,7 @@ if(params$inter){
 \large \textbf{Consultant} Business / Beneficiary Customer \textbf{(Field 59)}:  
 \hspace{5mm} \normalsize Name: `r jsonL$consultantBusiness`    
 \hspace{5mm} IBAN: **`r jsonL$consultantIBAN`**  
-\hspace{5mm} Address: `r paste(jsonL$consultantAddress1,jsonL$consultantAddress2,jsonL$consultantAddress3)`  
+\hspace{5mm} Address: `r paste0(jsonL$consultantAddress1,", ",jsonL$consultantAddress2,", ",jsonL$consultantAddress3)`  
 \hspace{5mm} Country: `r jsonL$consultantCountry`  
 
 \large Remittance Information \textbf{(Field 70)}:  
