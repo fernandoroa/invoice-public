@@ -51,7 +51,7 @@ result <- format(result, scientific = F)
 library("rjson")
 
 # Give the input file name to the function.
-jsonL <- fromJSON(file = "input.json")
+jsonL <- rjson::fromJSON(file = "input.json")
 ```
 
 \pagenumbering{gobble} 
