@@ -6,8 +6,6 @@ library(jsonlite)
 jsonL <- rjson::fromJSON(file = "input.json")
 jsonSalaryL <- rjson::fromJSON(file = "input_salary.json")
 
-originalSalary<-80
-
 shinyApp(
   ui = fluidPage(
     titlePanel('Invoice Generator'),
