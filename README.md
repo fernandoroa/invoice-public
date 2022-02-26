@@ -7,7 +7,7 @@ It has several modifications, and now it is for single person use.
 
 ## Files
 
-1. The `app.R` file is the Shiny interface to the invoice generator, which has inputs for the monthly changes, and to the right the stable information.
+1. The `app.R` file is the Shiny interface to the invoice generator, which has inputs for the monthly changes (left box), and to the right the 'stable' `.json` information.
 
 2. The `invoice.Rmd` file is the RMarkdown file, which you can modify to suit your own particular invoice. 
 
@@ -16,6 +16,7 @@ to save them, using buttons, while in the app, before creating the `.pdf`
 
 ## Inner logic
 
-The content of `.json` files will build a field for each element.  
-The first box is manually built, and passes its values to the `.Rmd` via `params` in `yaml` header.
+- The content of `.json` files will build a field for each element in the app.   
+- The first box is manually built, and passes its values to the `.Rmd` via `params` in `yaml` header. 
+- The `.Rmd` reads the `.json` files directly.
 
