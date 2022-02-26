@@ -86,7 +86,7 @@ Date:  `r inv_dt` `r inv_m` `r inv_y`
 Signature
 \end{flushright}
 
-**Wire/Bank Account Information** 
+**Wire Instructions/Bank Account Information** 
  
 ``` {r , results="asis", echo=F, eval=params$inter} 
 cat("**Intermediary / Correspondent Bank (Field 56)**  \n  ")

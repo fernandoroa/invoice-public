@@ -55,7 +55,7 @@ shinyApp(
       filename = "invoice.pdf",
       content = function(file) {
 
-        tempReport <- file.path(getwd(), "/inv_md.Rmd")
+        tempReport <- file.path(getwd(), "/inv_md_dont_modify.Rmd")
         file.copy("invoice.Rmd", tempReport, overwrite = TRUE)
 
         params <- list(name = input$name,
