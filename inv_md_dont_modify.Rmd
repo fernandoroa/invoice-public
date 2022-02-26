@@ -124,4 +124,4 @@ if(jsonSalaryL$intermediaryBank){
 \hspace{5mm} Country: `r jsonL$consultantCountry`  
 
 \large Remittance Information \textbf{(Field 70)}:  
-\hspace{5mm} \normalsize Include **invoice number**, **contract number**
+\hspace{5mm} \normalsize Include also **invoice number**, **contract number**

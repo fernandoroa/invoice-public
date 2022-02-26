@@ -88,7 +88,7 @@ Date:  `r inv_dt` `r inv_m` `r inv_y`
 |\hspace{2mm} `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey` |                |
 |\hspace{2mm} 1 month: `r exchange`  | `r result`   `r jsonSalaryL$finalCurrency`   |
 |Benefits                | `r benefits` `r jsonSalaryL$finalCurrency`   |            
-| **TOTAL**              | **`r total` `r params$finalCurrency`** |
+| **TOTAL**              | **`r total` `r jsonSalaryL$finalCurrency`** |
 
 
 \begin{flushright} 
