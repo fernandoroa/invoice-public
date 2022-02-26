@@ -10,8 +10,11 @@ params:
   start_date: NA
   end_date: NA
   inter: FALSE
-  salary: 2000
   invoiceNumber: '2022-'
+  originalCurrency: "PLZ"
+  originalSalary: 8000
+  finalCurrency: "USD"
+  exchangeRate: 4.1683
 ---
 ```{r setup, message = F,echo=F,warning=F}
 library(lubridate)
@@ -28,6 +31,18 @@ ey <- year(params$end_date)
 inv_dt <- day(params$date)
 inv_m <- month(params$date, label = T)
 inv_y <- year(params$date)
+
+condition<-params$originalCurrency==params$finalCurrency
+exchange <- ifelse( condition
+                    ,""
+                    ,paste(params$originalSalary,params$originalCurrency
+                            ,"/",params$exchangeRate
+                            , "=")
+)
+
+result <- ifelse(condition,params$originalSalary
+                 , round(params$originalSalary/params$exchangeRate )
+)
 
 library("rjson")
 
@@ -58,13 +73,13 @@ jsonL <- fromJSON(file = "input.json")
 Date:  `r inv_dt` `r inv_m` `r inv_y`  
 \end{flushright} 
 
-|Services                |AMOUNT(USD)
+|Services                |AMOUNT    |
 |------------------------|-----------
 |Consultancy Charges     |          | 
-| `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey`|         | 
-| 1 month                | `r params$salary` USD |
+| `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey`| 
+| 1 month: `r exchange`  | `r result` `r params$finalCurrency` |
 |                        |          |            
-| **TOTAL**              | **`r params$salary` USD** |
+| **TOTAL**              | **`r result` `r params$finalCurrency`** |
 
 
 \begin{flushright} 

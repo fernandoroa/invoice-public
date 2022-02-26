@@ -1,8 +1,7 @@
 library(shiny)
 library(dplyr)
-library(jsonlite)
-library(rjson)
-jsonL <- rjson::fromJSON(file = "input.json")
+
+jsonL <- fromJSON(file = "input.json")
 
 shinyApp(
   ui = fluidPage(
@@ -10,13 +9,15 @@ shinyApp(
     sidebarLayout(
       sidebarPanel(
         checkboxInput("inter","Include Intermediary bank",FALSE),
-        numericInput("salary","Salary",value = 2000),
         textInput("invoiceNumber","Invoice Number","2022-"),
-    dateInput(inputId = 'start_date','Start Date: ', value = "2022-02-01"),
-    dateInput('end_date','End Date: ', value = "2022-02-28"),
-    dateInput('inv_date','Invoice Date: ',value = "2022-02-28"),
-   "Number of days counted: ",
-    downloadButton("report", "Generate invoice")
+        textInput("originalCurrency","original Currency","PLZ"),
+        numericInput("originalSalary","original Salary",80),
+        textInput("finalCurrency","final Currency","USD"),
+        numericInput("exchangeRate","exchange Rate",4.1683),
+        dateInput(inputId = 'start_date','Start Date: ', value = "2022-02-01"),
+        dateInput('end_date','End Date: ', value = "2022-02-28"),
+        dateInput('inv_date','Invoice Date: ',value = "2022-02-28"),
+        downloadButton("report", "Generate invoice")
   ),
   mainPanel(
     div(style="max-width:600px",
@@ -59,9 +60,11 @@ shinyApp(
                        end_date   = input$end_date,
                        date       = input$inv_date,
                        inter      = input$inter,
-                       salary     = input$salary,
-                       invoiceNumber = input$invoiceNumber
-
+                       invoiceNumber = input$invoiceNumber,
+                       originalCurrency = input$originalCurrency,
+                       originalSalary = input$originalSalary,
+                       finalCurrency = input$finalCurrency,
+                       exchangeRate = input$exchangeRate
                        )
 
         rmarkdown::render(tempReport, output_file = file,
