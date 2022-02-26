@@ -3,7 +3,7 @@
 This repository was copied from https://github.com/shubham-maurya/shiny-invoice-generator/
 by Fernando Roa
 
-It has several modifications, and now it is for personal use mainly
+It has several modifications, and now it is for single person use.
 
 ## Files
 
