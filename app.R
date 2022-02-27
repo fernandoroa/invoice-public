@@ -55,6 +55,9 @@ shinyApp(
   )
   , server = function(input, output) {
 
+    patternA <- "([[:lower:]]+)([[:upper:]])([[:alpha:]]+)([[:digit:]]?)"
+    patternB<-"\\1 \\2\\3 \\4"
+
     observeEvent(input$modify_salary, {
       inputList<-list()
 
@@ -81,40 +84,45 @@ shinyApp(
 
     output$second_box<- renderUI({
      wellPanel(
-      h4("from input_salary.json"),
+      h4(code("input_salary.json"), "content"),
       lapply(char_names, function(x){
-        textInput(x,x
+        textInput(x,gsub("(.*)([[:upper:]])", "\\1 \\2", x)
                   ,jsonSalaryL[[x]])
       }),
       lapply(num_names, function(x){
-        numericInput(x,x
+        numericInput(x,gsub("(.*)([[:upper:]])", "\\1 \\2", x)
                      ,jsonSalaryL[[x]])
       }),
       lapply(logic_names, function(x){
-        checkboxInput(x,x
+        checkboxInput(x,gsub("(.*)([[:upper:]])", "\\1 \\2", x)
                       ,jsonSalaryL[[x]])
       }),
       helpText("this box content must be saved before generating .pdf"),
 
       actionButton("modify_salary"
-                   , HTML("<strong>Update input_salary.json after changes!</strong>")
-      )
+                   , strong("Save",code("input_salary.json"), "required! after changes")
+                   )
+
     )
     })
 
     output$third_box<- renderUI({
+
       #
       #   3rd box
       #
+
       wellPanel(
-        h3("This is the content of input.json"),
+        h4(code("input.json"), "content"),
         helpText("this box content must be saved before generating .pdf"),
         actionButton("modify"
-                     , HTML("<strong>Save (input.json) required! after changes</strong>") ),
+                     , strong("Save",code("input.json"), "required! after changes") ),
         br(),
         br(),
         lapply(seq_along(jsonL), function(x) {
-        textInput(names(jsonL[x]),names(jsonL[x]), value = jsonL[[x]])
+        textInput(names(jsonL[x])
+                  , gsub("_"," ",gsub(patternA, patternB, names(jsonL[x])) )
+                  , value = jsonL[[x]])
       }),
       )
     })
