@@ -29,10 +29,28 @@ shinyApp(
         , wellPanel(
         h4("other info"),
         textInput("invoiceNumber","Invoice Number","2022-"),
-        numericInput("exchangeRate","exchange Rate",4.1683),
-        dateInput(inputId = 'start_date','Start Date: ', value = "2022-02-01"),
-        dateInput('end_date','End Date: ', value = "2022-02-28"),
-        dateInput('inv_date','Invoice Date: ',value = "2022-02-28")
+        numericInput("exchangeRate","exchange Rate",4.1683)
+        ,splitLayout(
+          div(style="display: flex;
+               flex-direction: column;
+               justify-content: space-between;
+               max-width:150px;
+               align-items:center;"
+              ,br(),br(),br()
+            , actionButton("decreaseDate", "decrease")
+            ,br()
+            , span("1 Month")
+            ,br()
+            , actionButton("increaseDate","increase")
+          )
+          ,
+          tagList(
+            dateInput(inputId = 'start_date','Start Date: ', value = "2022-02-01"),
+            dateInput('end_date','End Date: ', value = "2022-02-28"),
+            dateInput('inv_date','Invoice Date: ',value = "2022-02-28")
+
+          )
+        )
         )
         , wellPanel(
           helpText("clicking the other box buttons after changes is mandatory"),
@@ -53,10 +71,35 @@ shinyApp(
         )
   )
   )
-  , server = function(input, output) {
+  , server = function(session,input, output) {
 
     patternA <- "([[:lower:]]+)([[:upper:]])([[:alpha:]]+)([[:digit:]]?)"
     patternB<-"\\1 \\2\\3 \\4"
+
+    mon_span <- c(31,31,28,31,30,31,30,31,31,30,31,30,31,31)
+
+    observeEvent(input$increaseDate, {
+      cdate<-input$inv_date
+      sdate<-input$start_date
+      edate<-input$end_date
+      cmon<-month(cdate)
+      smon<-month(sdate)
+      emon<-month(edate)
+      updateDateInput(session, "inv_date", value=cdate+mon_span[cmon+2])
+      updateDateInput(session, "start_date", value=sdate+mon_span[smon+1])
+      updateDateInput(session, "end_date", value=edate+mon_span[emon+2])
+    })
+    observeEvent(input$decreaseDate, {
+      cdate<-input$inv_date
+      sdate<-input$start_date
+      edate<-input$end_date
+      cmon <-month(cdate)
+      smon<-month(sdate)
+      emon<-month(edate)
+      updateDateInput(session, "inv_date", value=cdate-mon_span[cmon+1])
+      updateDateInput(session, "start_date", value=sdate-mon_span[cmon])
+      updateDateInput(session, "end_date", value=edate-mon_span[cmon+1])
+    })
 
     observeEvent(input$modify_salary, {
       inputList<-list()
@@ -138,7 +181,7 @@ shinyApp(
 
         pattern<-paste0(names(jsonL), collapse="|")
         pattern<-gsub("\\((.*?)\\)","\\\\(\\1\\\\)",pattern)
-        pattern2<-"modify_salary|modify"
+        pattern2<-"modify_salary|modify|increaseDate|decreaseDate"
         pattern3<-paste0(names(jsonSalaryL), collapse="|")
         pattern3<-gsub("\\((.*?)\\)","\\\\(\\1\\\\)",pattern3)
 
