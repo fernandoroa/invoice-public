@@ -4,8 +4,6 @@ output: pdf_document
 geometry: "left=3cm,right=2cm,top=0cm,bottom=2cm"
 fontsize: 11pt
 papersize: a4
-header-includes:
-  - \usepackage{comment}
 params: 
   inv_date: NA
   start_date: NA
@@ -19,6 +17,7 @@ library(readr)
 library(dplyr)
 ed <-  ymd(params$end_date)
 sm <- month(params$start_date,label = T)
+smna <- month(params$start_date,label = T, abbr=F)
 em <- month(params$end_date,label = T)
 sdt <- day(params$start_date)
 edt <- day(params$end_date)
@@ -86,8 +85,9 @@ Date:  `r inv_dt` `r inv_m` `r inv_y`
 |------------------------|-----------
 |Consultancy Charges     |                                                        | 
 |\hspace{2mm} `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey` |                   |
+|\hspace{2mm} Delivery date: `r smna` `r sy`                                |
 |\hspace{2mm} 1 month: `r exchange`  | `r result`   `r jsonSalaryL$finalCurrency` |
-|Benefits                | `r benefits` `r jsonSalaryL$finalCurrency`             | 
+|Remote fees             | `r benefits` `r jsonSalaryL$finalCurrency`             | 
 | **TOTAL**              | **`r total` `r jsonSalaryL$finalCurrency`**            |
 
 
@@ -100,8 +100,7 @@ Signature
 ``` {r , results="asis", echo=F, eval=jsonSalaryL$intermediaryBank} 
 cat("\\large \\textbf{Intermediary} / Correspondent Bank \\textbf{(Field 56):}  \n  ")
 cat(paste0("\\hspace{5mm} \\normalsize SWIFT: **",jsonL$intermediary_bank_swift,"**  \n") )    
-cat(paste0("\\hspace{5mm} Name:",    jsonL$intermediary_bank_name,"  \n")  )
-cat(paste0("\\hspace{5mm} Country:", jsonL$intermediary_bank_country,"  \n") )  
+cat(paste0("\\hspace{5mm} Name:",    jsonL$intermediary_bank_name,", ",jsonL$intermediary_bank_country,"  \n")  )
 ```
 
 \large Beneficiary \textbf{Bank (Field 57):}  
@@ -114,14 +113,11 @@ if(jsonSalaryL$intermediaryBank){
 }
 ```
 \hspace{5mm} Name: \textbf{`r jsonL$final_bank_name`}  
-\hspace{5mm} Address: `r jsonL$final_bank_address`  
-\hspace{5mm} Country: `r jsonL$final_bank_country`  
+\hspace{5mm} Address: `r jsonL$final_bank_address`, `r jsonL$final_bank_country`  
 
 \large \textbf{Consultant} Business / Beneficiary Customer \textbf{(Field 59)}:  
 \hspace{5mm} \normalsize Name: `r jsonL$consultantBusiness`    
 \hspace{5mm} IBAN: **`r jsonL$consultantIBAN`**  
-\hspace{5mm} Address: `r paste0(jsonL$consultantAddress1,", ",jsonL$consultantAddress2,", ",jsonL$consultantAddress3)`  
-\hspace{5mm} Country: `r jsonL$consultantCountry`  
 
 \large Remittance Information \textbf{(Field 70)}:  
 \hspace{5mm} \normalsize Include also **invoice number**, **contract number**
