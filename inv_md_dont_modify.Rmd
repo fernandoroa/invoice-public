@@ -5,71 +5,122 @@ geometry: "left=3cm,right=2cm,top=0cm,bottom=2cm"
 fontsize: 11pt
 papersize: a4
 params: 
-  inv_date: NA
-  start_date: NA
-  end_date: NA
   invoiceNumber: '2022-'
-  exchangeRate: 4.1683
+  lang: 1
 ---
 ```{r setup, message = F,echo=F,warning=F}
 library(lubridate)
 library(readr)
 library(dplyr)
-ed <-  ymd(params$end_date)
-sm <- month(params$start_date,label = T)
-smna <- month(params$start_date,label = T, abbr=F)
-em <- month(params$end_date,label = T)
-sdt <- day(params$start_date)
-edt <- day(params$end_date)
-sy <- year(params$start_date)
-ey <- year(params$end_date)
+# sudo apt install texlive-latex-base
+# tinytex::install_tinytex()
+library(tinytex)
 
-inv_dt <- day(params$inv_date)
-inv_m <- month(params$inv_date, label = T)
-inv_y <- year(params$inv_date)
+lan_idx <- as.numeric(params$lang)
 
-jsonSalaryL <- rjson::fromJSON(file = "input_salary.json")
+#
+# json load
+#
 
-condition<- jsonSalaryL$originalCurrency==jsonSalaryL$finalCurrency
+jsonL    <- rjson::fromJSON(file = "input_address_bank.json")
+jFieldsL <- rjson::fromJSON(file = "fieldNames.json")
+jSalaryL <- rjson::fromJSON(file = "input_salary.json")
+j3rdL    <- rjson::fromJSON(file = "input_fedex.json")
+jSickL   <- rjson::fromJSON(file = "input_sick.json")
+mainL    <- rjson::fromJSON(file = "main.json")
 
-exchange <- ifelse( condition
+ed <-  ymd(mainL$endDate)
+sm <- month(mainL$startDate,label = T)
+smna <- month(mainL$startDate,label = T, abbr=F)
+em <- month(mainL$endDate,label = T)
+sdt <- day(mainL$startDate)
+edt <- day(mainL$endDate)
+sy <- year(mainL$startDate)
+ey <- year(mainL$endDate)
+
+inv_dt <- day(mainL$invoiceDate)
+inv_m <- month(mainL$invoiceDate, label = T)
+inv_y <- year(mainL$invoiceDate)
+
+condition<- jSalaryL$originalCurrency==jSalaryL$finalCurrency
+
+exchangeDestiny <- paste(j3rdL$destinationFEDEX, j3rdL$destinationCurrency
+                            ,"/", mainL$exchangeUSDBRL
+                            , "=")
+
+dayPay <- jSalaryL$originalSalary/20
+
+sickPay <-  jSickL$sickDays*dayPay*(jSickL$percentageSick/100)
+
+nonSickDays <- jSickL$totalDays - jSickL$sickDays
+
+nonSickPay <-  nonSickDays*dayPay
+
+sickPlusNonSick <- nonSickPay + sickPay
+
+sickPlusNonSick <- ifelse(jSickL$use_sick_option,
+                          sickPlusNonSick,
+                          jSalaryL$originalSalary)
+
+exchangeOrigin <- ifelse( condition
                     ,""
-                    ,paste(jsonSalaryL$originalSalary,jsonSalaryL$originalCurrency
-                            ,"/",params$exchangeRate
+                    ,paste(sickPlusNonSick,jSalaryL$originalCurrency
+                            ,"/", mainL$exchangeUSDPLN
                             , "=")
 )
 
-result <- ifelse(condition,jsonSalaryL$originalSalary
-                 , round(jsonSalaryL$originalSalary/params$exchangeRate )
+result <- ifelse(condition,
+                 sickPlusNonSick
+                 , round(sickPlusNonSick/mainL$exchangeUSDPLN )
 )
 
 benefits <- ifelse(condition
-                   ,jsonSalaryL$originalBenefits
-                 , round(jsonSalaryL$originalBenefits/params$exchangeRate )
+                   ,jSalaryL$originalBenefits
+                 , round(jSalaryL$originalBenefits/mainL$exchangeUSDPLN )
 )
 
-total <- result+benefits
+benefits <- ifelse(jSalaryL$`use_benefits (Remote fees)`
+                   ,benefits
+                 , 0
+)
+
+use_benefits <- jSalaryL$`use_benefits (Remote fees)`
+
+PDB <- ifelse(condition
+                   ,jSalaryL$originalPDB
+                 , round(jSalaryL$originalPDB/mainL$exchangeUSDPLN )
+)
+
+PDB <- ifelse(jSalaryL$usePDB
+                   , PDB
+                 , 0)
+
+FEDEXresult <- ifelse(j3rdL$use_FEDEX_option, 
+                      round(j3rdL$destinationFEDEX/mainL$exchangeUSDBRL ),
+                      0)
+
+total <- result + benefits + PDB + FEDEXresult
 
 result <- format(result, scientific = F)
 
+FEDEXresult <- format(FEDEXresult, scientific = F)
+
 total <- format(total, scientific = F)
 
-# Give the input file name to the function.
-jsonL <- rjson::fromJSON(file = "input.json")
 ```
 
 \pagenumbering{gobble} 
 
-\raggedright Invoice Number: `r params$invoiceNumber` \par
+\raggedright `r jFieldsL$invoiceNumber[lan_idx]`: `r params$invoiceNumber` \par
 
-\raggedleft Consultant Business:  `r jsonL$consultantBusiness`    
+\raggedleft `r jFieldsL$consultantBusiness[lan_idx]`: `r jsonL$consultantBusiness`    
 \raggedleft `r jsonL$consultantAddress1`  
 \raggedleft `r jsonL$consultantAddress2`   
 \raggedleft `r jsonL$consultantAddress3`   
 \raggedleft `r jsonL$consultantCountry`    
-\raggedleft Contact No:  `r jsonL$consultantPhone` 
+\raggedleft `r jFieldsL$consultantPhone[lan_idx]` :  `r jsonL$consultantPhone` 
 
-\raggedright Bill To, \par  
+\raggedright `r jFieldsL$billTo[lan_idx]` \par  
  
 `r jsonL$billTo1`  
 `r jsonL$billTo2`  
@@ -78,46 +129,79 @@ jsonL <- rjson::fromJSON(file = "input.json")
 `r jsonL$billTo5`  
 
 \begin{flushright} 
-Date:  `r inv_dt` `r inv_m` `r inv_y`  
+`r jFieldsL$date[lan_idx]`:  `r inv_dt` `r inv_m` `r inv_y`  
 \end{flushright} 
 
-|Services                |AMOUNT    |
-|------------------------|-----------
-|Consultancy Charges     |                                                        | 
-|\hspace{2mm} `r  sdt` `r sm` `r sy` to `r edt` `r em` `r ey` |                   |
-|\hspace{2mm} Delivery date: `r smna` `r sy`                                |
-|\hspace{2mm} 1 month: `r exchange`  | `r result`   `r jsonSalaryL$finalCurrency` |
-|Remote fees             | `r benefits` `r jsonSalaryL$finalCurrency`             | 
-| **TOTAL**              | **`r total` `r jsonSalaryL$finalCurrency`**            |
+| `r jFieldsL$Services[lan_idx]` | `r jFieldsL$amount[lan_idx]` |
+|------------------------|-----------:|
+|`r jFieldsL$ConsultancyCharges[lan_idx]`|    | 
+``` {r , results="asis", echo=F, eval=T}
+cat(
+paste0("|\\hspace{2mm}","",sdt," ", sm," ", sy," to ",edt," ", em," ", ey," |    |\n"),
+paste0("|\\hspace{2mm}", "Delivery date: ",smna," ",sy, "|    |\n"),
+if(jSickL$use_sick_option){
+paste0("|\\hspace{2mm}",jFieldsL$sickdays[lan_idx],": ", jSickL$sickDays,"/",jSickL$totalDays,"|", sickPay," ", jSalaryL$originalCurrency,"|","\n")
+},
+if(jSickL$use_sick_option){
+paste0("|\\hspace{2mm}", jFieldsL$otherdays[lan_idx],"",nonSickDays,"/",jSickL$totalDays,"|",nonSickPay," ", jSalaryL$originalCurrency,"|","\n")
+},
+paste0("|\\hspace{2mm}", "1 ", jFieldsL$month[lan_idx],": ", exchangeOrigin,"|",result," ", jSalaryL$finalCurrency,"|","\n")
+,
+  if(use_benefits){
+    paste0("|",jFieldsL$benefits[lan_idx],"|",benefits," ",jSalaryL$finalCurrency,"|","\n")
+  },
+  if(jSalaryL$usePDB){
+    paste0("|", jFieldsL$PDB[lan_idx],"|",PDB," ",jSalaryL$finalCurrency,"|","\n")
+  },
+  if(j3rdL$use_FEDEX_option){
+    paste0("|", jFieldsL$FEDEX_deliveryCosts[lan_idx]," ", exchangeDestiny,"|",FEDEXresult," ", jSalaryL$finalCurrency,"|","\n")
+  },
+  paste0("| **TOTAL**  | **",total,"** ",jSalaryL$finalCurrency,"|")
+, sep="")
+```
 
-
+&nbsp;  
+&nbsp;  
 \begin{flushright} 
-Signature
+`r jFieldsL$Signature[lan_idx]`
 \end{flushright}
 
-\Large  \textbf{Wire Instructions} / \normalsize Bank Account Information
+\Large  \textbf{`r jFieldsL$WireInstructions[lan_idx]`} / \normalsize `r jFieldsL$BankAccountInformation[lan_idx]`
 
-``` {r , results="asis", echo=F, eval=jsonSalaryL$intermediaryBank} 
-cat("\\large \\textbf{Intermediary} / Correspondent Bank \\textbf{(Field 56):}  \n  ")
-cat(paste0("\\hspace{5mm} \\normalsize SWIFT: **",jsonL$intermediary_bank_swift,"**  \n") )    
-cat(paste0("\\hspace{5mm} Name:",    jsonL$intermediary_bank_name,", ",jsonL$intermediary_bank_country,"  \n")  )
+``` {r , results="asis", echo=F, eval=jSalaryL$intermediaryBank} 
+cat(paste0("\\large \\textbf{",jFieldsL$Intermediary[lan_idx],"} /"
+, jFieldsL$CorrespondentBank[lan_idx],"\\textbf{ (Field 56):}  \n  ") )
+cat(paste0("\\hspace{5mm}\\normalsize SWIFT: **",jsonL$intermediary_bank_swift,"**  \n") )    
+cat(paste0("\\hspace{5mm}",jFieldsL$Name[lan_idx],": ",    jsonL$intermediary_bank_name,", ",jsonL$intermediary_bank_country,"  \n")  )
 ```
 
-\large Beneficiary \textbf{Bank (Field 57):}  
+\large `r jFieldsL$Beneficiary[lan_idx]` \textbf{`r jFieldsL$Bank[lan_idx]`:}  
 \normalsize \hspace{5mm} SWIFT: \textbf{`r jsonL$final_bank_swift`}  
 ``` {r , results="asis", echo=F, eval=T} 
-if(jsonSalaryL$intermediaryBank){
-  cat(paste("\\hspace{5mm}", paste0("**",jsonL$final_bank_short_name," Account** with") ,jsonL$intermediary_bank_name,":",paste0("**",jsonL$final_bank_account,"**  \n") ) )
+if(jSalaryL$intermediaryBank) {
+  cat(paste("\\hspace{5mm}"
+            ,paste0("**"
+                    ,paste(c(jsonL$final_bank_short_name
+                             ," "
+                             ,jFieldsL$Account[lan_idx])[jFieldsL$order[[lan_idx]] ],collapse=" ")
+                    ," **"
+                    , jFieldsL$with[lan_idx]
+                    )
+            ,jsonL$intermediary_bank_name
+            ,":"
+            ,paste0("**",jsonL$final_bank_account,"**  \n") 
+            ) 
+      )
 } else {
-  cat("<!-- some -->")
+  cat("<!-- avoid line break -->")
 }
 ```
-\hspace{5mm} Name: \textbf{`r jsonL$final_bank_name`}  
-\hspace{5mm} Address: `r jsonL$final_bank_address`, `r jsonL$final_bank_country`  
+\hspace{5mm} `r jFieldsL$Name[lan_idx]`: \textbf{`r jsonL$final_bank_name`}  
+\hspace{5mm} `r jFieldsL$Address[lan_idx]`: `r jsonL$final_bank_address`, `r jsonL$final_bank_country`  
 
-\large \textbf{Consultant} Business / Beneficiary Customer \textbf{(Field 59)}:  
-\hspace{5mm} \normalsize Name: `r jsonL$consultantBusiness`    
+\large\textbf{`r jFieldsL$consultantBusiness[lan_idx]` } / `r jFieldsL$BeneficiaryCustomer[lan_idx]` \textbf{}:  
+\hspace{5mm} \normalsize `r jFieldsL$Name[lan_idx]`: `r jsonL$consultantBusiness`    
 \hspace{5mm} IBAN: **`r jsonL$consultantIBAN`**  
 
-\large Remittance Information \textbf{(Field 70)}:  
-\hspace{5mm} \normalsize Include also **invoice number**, **contract number**
+<!-- \large `r jFieldsL$RemittanceInformation[lan_idx]` \textbf{(Field 70)}:   -->
+<!-- \hspace{5mm} \normalsize `r jFieldsL$Includealso[lan_idx]` **invoice number**, **contract number** -->

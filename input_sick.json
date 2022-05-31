@@ -1,0 +1,6 @@
+{
+  "totalDays": [30],
+  "sickDays": [15],
+  "percentageSick": [50],
+  "use_sick_option": [false]
+}

@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+invoice-public.Rproj
+*.log

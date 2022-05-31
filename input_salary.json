@@ -1,7 +1,10 @@
 {
   "intermediaryBank": [false],
-  "originalSalary": [800],
-  "originalBenefits": [180],
-  "originalCurrency": ["PLZ"],
-  "finalCurrency": ["USD"]
+  "originalSalary": [100],
+  "originalBenefits": [101],
+  "use_benefits (Remote fees)": [true],
+  "originalCurrency": ["PLN"],
+  "finalCurrency": ["USD"],
+  "originalPDB": [102],
+  "usePDB": [true]
 }

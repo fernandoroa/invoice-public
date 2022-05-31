@@ -1,0 +1,5 @@
+{
+  "destinationCurrency": ["BRL"],
+  "destinationFEDEX": [100],
+  "use_FEDEX_option": [false]
+}
