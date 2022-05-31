@@ -6,5 +6,5 @@
   "originalCurrency": ["PLN"],
   "finalCurrency": ["USD"],
   "originalPDB": [102],
-  "usePDB": [true]
+  "usePDB": [false]
 }
