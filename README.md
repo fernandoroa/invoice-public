@@ -1,4 +1,4 @@
-# shiny-invoice-generator
+# invoice creation with Shiny and RMarkdown
 
 This repository was copied from https://github.com/shubham-maurya/shiny-invoice-generator/
 by Fernando Roa
@@ -17,9 +17,11 @@ to save them after modifications done in the app, using buttons, before creating
 
 ### Inner logic
 
-- The content of `.json` files will build a field for each element in the app.   
 - The first box is manually built, and passes its values to the `.Rmd` via `params` in `yaml` header. 
+- The second box is manually built and is related to the `main.json`file 
+- The other boxes are based on the other `.json` files, one on one. A form field for each json field is built in the app.  
 - The `.Rmd` reads the `.json` files directly, that is why it is necessary to save them.
+- If you modify the `.json` outside the app, during app use, reload the app.
 - Includes benefits, sick options, FEDEX options
-- Names of 'fields' in `.Rmd` depend on the `fieldNames.json`
-
+- Includes bilingual option
+- Names of 'field' names in `.Rmd` depend on the `fieldNames.json` for bilingual management
