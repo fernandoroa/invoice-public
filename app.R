@@ -46,56 +46,60 @@ shinyApp(
                #
                #    manual inputs, see params in .Rmd
                #
-        , wellPanel(
-        h4("other options"),
-        textInput("invoiceNumber","Invoice Number","2022-"),
-        radioButtons("lang","Language",c("english"=1,"other"=2) ),
-        ),
-        wellPanel(
-        h4(code("main.json"), "content"),
-        numericInput("exchangeUSDPLN","exchange Rate USD (final) to PLN (original)",mainL$exchangeUSDPLN),
-        numericInput("exchangeUSDBRL","exchange Rate USD (final) to BRL (FEDEX)",mainL$exchangeUSDBRL)
-        ,splitLayout(
-          div(style="display: flex;
+               , wellPanel(
+                 h4("other options"),
+                 textInput("invoiceNumber","Invoice Number","2022-"),
+                 radioButtons("lang","Language",c("english"=1,"other"=2) ),
+               ),
+               wellPanel(
+                 h4(code("main.json"), strong("content")),
+                 numericInput("exchangeUSDPLN","exchange Rate USD (final) to PLN (original)",mainL$exchangeUSDPLN),
+                 numericInput("exchangeUSDBRL","exchange Rate USD (final) to BRL (FEDEX)",mainL$exchangeUSDBRL)
+                 ,splitLayout(
+                   div(style="display: flex;
                flex-direction: column;
                justify-content: space-between;
                max-width:150px;
                align-items:center;"
-              ,br(),br(),br()
-            , actionButton("decreaseDate", "decrease")
-            ,br()
-            , span("1 Month")
-            ,br()
-            , actionButton("increaseDate","increase")
-          )
-          ,
-          tagList(
-            dateInput(inputId = 'startDate','Start Date: ', value = as.Date(mainL$startDate)),
-            dateInput('endDate','End Date: ', value = as.Date(mainL$endDate) ),
-            dateInput('invoiceDate','Invoice Date: ',value = as.Date(mainL$invoiceDate) ),
-          )
-        ),
-        actionButton("modify_main"
-                     , strong("Save",code("main.json"), "required! after changes")
-        )
-        )
+                       ,br(),br(),br()
+                       , actionButton("decreaseDate", "decrease")
+
+                       ,br()
+                       , span("1 Month")
+                       ,br()
+                       , actionButton("increaseDate","increase")
+                   )
+                   ,
+                   tagList(
+                     dateInput(inputId = 'startDate','Start Date: ', value = as.Date(mainL$startDate)),
+                     dateInput('endDate','End Date: ', value = as.Date(mainL$endDate) ),
+                     dateInput('invoiceDate','Invoice Date: ',value = as.Date(mainL$invoiceDate) ),
+                   )
+                 ),
+                 actionButton("modify_main"
+                              , strong("Save",code("main.json"),
+                                       "required! after changes")
+                              , style=  "white-space: normal;
+                           word-wrap: break-word;"
+                 )
+               )
         )
         ,column(3
                 #
                 #   2nd box
                 #
-        , uiOutput("second_box")
-        , wellPanel(
-          h2("Generate invoice!"),
-          actionButton("modify_all"
-                       , strong("Save All",
-                                code("*.json"),
-                                "required!"
-                       )
-          ),
-          downloadButton("report", "Generate invoice in .pdf"),
-          helpText("saving .json changes is mandatory"),
-        )
+                , uiOutput("second_box")
+                , wellPanel(
+                  h2("Generate invoice!"),
+                  actionButton("modify_all"
+                               , strong("Save All",
+                                        code("*.json"),
+                                        "required!"
+                               )
+                  ),
+                  downloadButton("report", "Generate invoice in .pdf"),
+                  helpText("saving .json changes is mandatory"),
+                )
         ),
         column(3,
                uiOutput("second_box_b"),
@@ -106,12 +110,12 @@ shinyApp(
                #
                #   3rd box
                #
-          div(style="max-width:600px",
-          uiOutput("third_box")
+               div(style="max-width:600px",
+                   uiOutput("third_box")
+               )
         )
-        )
-        )
-  )
+      )
+    )
   )
   , server = function(session,input, output) {
 
@@ -210,28 +214,30 @@ shinyApp(
       #   2nd box
       #
 
-     wellPanel(
-      h4(code("input_salary.json"), "content"),
-      lapply(char_names, function(x){
-        textInput(x,gsub("(.*)([[:upper:]])", "\\1 \\2", x)
-                  ,jsonSalaryL[[x]])
-      }),
-      lapply(num_names, function(x){
-        numericInput(x,gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = T)
-                     ,jsonSalaryL[[x]])
-      }),
-      lapply(logic_names, function(x){
-        checkboxInput(x,
-                      gsub("_"," ",gsub(patternA, patternB, x ) )
-                      , jsonSalaryL[[x]])
-      }),
-      helpText("this box content must be saved before generating .pdf"),
+      wellPanel(
+        h4(code("input_salary.json"), strong("content")),
+        lapply(char_names, function(x){
+          textInput(x,gsub("(.*)([[:upper:]])", "\\1 \\2", x)
+                    ,jsonSalaryL[[x]])
+        }),
+        lapply(num_names, function(x){
+          numericInput(x,gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = T)
+                       ,jsonSalaryL[[x]])
+        }),
+        lapply(logic_names, function(x){
+          checkboxInput(x,
+                        gsub("_"," ",gsub(patternA, patternB, x ) )
+                        , jsonSalaryL[[x]])
+        }),
+        helpText("this box content must be saved before generating .pdf"),
 
-      actionButton("modify_salary"
-                   , strong("Save",code("input_salary.json"), "required! after changes")
-                   )
-
-    )
+        actionButton("modify_salary"
+                     , strong("Save",code("input_salary.json"),
+                              "required! after changes")
+                     , style=  "white-space: normal;
+                           word-wrap: break-word;"
+        )
+      )
     })
 
     output$second_box_b<- renderUI({
@@ -241,7 +247,7 @@ shinyApp(
       #
 
       wellPanel(
-        h4(code("input_fedex.json"), "content"),
+        h4(code("input_fedex.json"), strong("content")),
         lapply(char_names3, function(x){
           textInput(x,gsub("(.*)([[:upper:]])", "\\1 \\2", x)
                     ,json3rdCurrencyL[[x]])
@@ -259,9 +265,11 @@ shinyApp(
         helpText("this box content must be saved before generating .pdf"),
 
         actionButton("modify_3rd"
-                     , strong("Save",code("input_fedex.json"), "required! after changes")
+                     , strong("Save",code("input_fedex.json"), "required! after changes"
+                     )
+                     , style=  "white-space: normal;
+                           word-wrap: break-word;"
         )
-
       )
     })
 
@@ -272,7 +280,7 @@ shinyApp(
       #
 
       wellPanel(
-        h4(code("input_sick.json"), "content"),
+        h4(code("input_sick.json"), strong("content")),
         lapply(num_sick, function(x){
           numericInput(x,gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = T)
                        ,jsonSickL[[x]])
@@ -287,8 +295,10 @@ shinyApp(
 
         actionButton("modify_sick"
                      , strong("Save",code("input_sick.json"), "required! after changes")
+                     , style=  "white-space: normal;
+                           word-wrap: break-word;"
         )
-        )
+      )
     })
 
     output$third_box<- renderUI({
@@ -298,17 +308,21 @@ shinyApp(
       #
 
       wellPanel(
-        h4(code("input_address_bank.json"), "content"),
+        h4(code("input_address_bank.json"), strong("content")),
         helpText("this box content must be saved before generating .pdf"),
         actionButton("modify"
-                     , strong("Save",code("input_address_bank.json"), "required! after changes") ),
+                     , strong("Save",code("input_address_bank.json"), "required! after changes")
+                     , style=  "white-space: normal;
+                           word-wrap: break-word;"
+        ),
+
         br(),
         br(),
         lapply(seq_along(jsonL), function(x) {
-        textInput(names(jsonL[x])
-                  , gsub("_"," ",gsub(patternA, patternB, names(jsonL[x])) )
-                  , value = jsonL[[x]])
-      }),
+          textInput(names(jsonL[x])
+                    , gsub("_"," ",gsub(patternA, patternB, names(jsonL[x])) )
+                    , value = jsonL[[x]])
+        }),
       )
     })
 
