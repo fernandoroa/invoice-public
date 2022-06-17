@@ -25,3 +25,7 @@ to save them after modifications done in the app, using buttons, before creating
 - Includes benefits, sick options, FEDEX options
 - Includes bilingual option
 - Names of 'field' names in `.Rmd` depend on the `fieldNames.json` for bilingual management
+
+# Link
+https://ferapps.shinyapps.io/open-invoice/
+
