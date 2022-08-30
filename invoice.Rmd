@@ -25,7 +25,7 @@ lan_idx <- as.numeric(params$lang)
 jsonL    <- rjson::fromJSON(file = "input_address_bank.json")
 jFieldsL <- rjson::fromJSON(file = "fieldNames.json")
 jSalaryL <- rjson::fromJSON(file = "input_salary.json")
-j3rdL    <- rjson::fromJSON(file = "input_fedex.json")
+j3rdL    <- rjson::fromJSON(file = "input_local.json")
 jSickL   <- rjson::fromJSON(file = "input_sick.json")
 mainL    <- rjson::fromJSON(file = "main.json")
 
@@ -44,7 +44,7 @@ inv_y <- year(mainL$invoiceDate)
 
 condition<- jSalaryL$originalCurrency==jSalaryL$finalCurrency
 
-exchangeDestiny <- paste(j3rdL$destinationFEDEX, j3rdL$destinationCurrency
+exchangeDestiny <- paste(j3rdL$localCosts, j3rdL$destinationCurrency
                             ,"/", mainL$exchangeUSDBRL
                             , "=")
 
@@ -84,7 +84,11 @@ benefits <- ifelse(jSalaryL$`use_benefits (Remote fees)`
                  , 0
 )
 
+result <- ifelse(jSalaryL$use_salary, result, 0)
+
 use_benefits <- jSalaryL$`use_benefits (Remote fees)`
+
+use_salary <- jSalaryL$use_salary
 
 PDB <- ifelse(condition
                    ,jSalaryL$originalPDB
@@ -95,15 +99,15 @@ PDB <- ifelse(jSalaryL$usePDB
                    , PDB
                  , 0)
 
-FEDEXresult <- ifelse(j3rdL$use_FEDEX_option, 
-                      round(j3rdL$destinationFEDEX/mainL$exchangeUSDBRL ),
+localresult <- ifelse(j3rdL$use_local_option, 
+                      round(j3rdL$localCosts/mainL$exchangeUSDBRL ),
                       0)
 
-total <- result + benefits + PDB + FEDEXresult
+total <- result + benefits + PDB + localresult
 
 result <- format(result, scientific = F)
 
-FEDEXresult <- format(FEDEXresult, scientific = F)
+localresult <- format(localresult, scientific = F)
 
 total <- format(total, scientific = F)
 
@@ -137,27 +141,33 @@ total <- format(total, scientific = F)
 |`r jFieldsL$ConsultancyCharges[lan_idx]`|    | 
 ``` {r , results="asis", echo=F, eval=T}
 cat(
-paste0("|\\hspace{2mm}","",sdt," ", sm," ", sy," to ",edt," ", em," ", ey," |    |\n"),
-paste0("|\\hspace{2mm}", "Delivery date: ",smna," ",sy, "|    |\n"),
-if(jSickL$use_sick_option){
-paste0("|\\hspace{2mm}",jFieldsL$sickdays[lan_idx],": ", jSickL$sickDays,"/",jSickL$totalDays,"|", sickPay," ", jSalaryL$originalCurrency,"|","\n")
-},
-if(jSickL$use_sick_option){
-paste0("|\\hspace{2mm}", jFieldsL$otherdays[lan_idx],"",nonSickDays,"/",jSickL$totalDays,"|",nonSickPay," ", jSalaryL$originalCurrency,"|","\n")
-},
-paste0("|\\hspace{2mm}", "1 ", jFieldsL$month[lan_idx],": ", exchangeOrigin,"|",result," ", jSalaryL$finalCurrency,"|","\n")
-,
+  if(use_salary){
+    paste0("|\\hspace{2mm}","",sdt," ", sm," ", sy," to ",edt," ", em," ", ey," |    |\n")
+  },
+  if(use_salary){
+    paste0("|\\hspace{2mm}", "Delivery date: ",smna," ",sy, "|    |\n")
+  },
+  if(jSickL$use_sick_option){
+    paste0("|\\hspace{2mm}",jFieldsL$sickdays[lan_idx],": ", jSickL$sickDays,"/",jSickL$totalDays,"|", sickPay," ", jSalaryL$originalCurrency,"|","\n")
+  },
+  if(jSickL$use_sick_option){
+    paste0("|\\hspace{2mm}", jFieldsL$otherdays[lan_idx],"",nonSickDays,"/",jSickL$totalDays,"|",nonSickPay," ", jSalaryL$originalCurrency,"|","\n")
+  },
+  if(use_salary){
+    paste0("|\\hspace{2mm}", "1 ", jFieldsL$month[lan_idx],": ", exchangeOrigin,"|",result," ", jSalaryL$finalCurrency,"|","\n")
+  },
   if(use_benefits){
     paste0("|",jFieldsL$benefits[lan_idx],"|",benefits," ",jSalaryL$finalCurrency,"|","\n")
   },
   if(jSalaryL$usePDB){
     paste0("|", jFieldsL$PDB[lan_idx],"|",PDB," ",jSalaryL$finalCurrency,"|","\n")
   },
-  if(j3rdL$use_FEDEX_option){
-    paste0("|", jFieldsL$FEDEX_deliveryCosts[lan_idx]," ", exchangeDestiny,"|",FEDEXresult," ", jSalaryL$finalCurrency,"|","\n")
+  if(j3rdL$use_local_option){
+    paste0("|", jFieldsL$localCosts[lan_idx]," ", exchangeDestiny,"|",localresult," ", jSalaryL$finalCurrency,"|","\n")
   },
-  paste0("| **TOTAL**  | **",total,"** ",jSalaryL$finalCurrency,"|")
-, sep="")
+  paste0("| **TOTAL**  | **",total,"** ",jSalaryL$finalCurrency,"|"), 
+  sep=""
+)
 ```
 
 &nbsp;  

@@ -10,7 +10,7 @@
   "benefits": ["Remote fees","Beneficios"],
   "PDB": ["Costs related to contract execution - PDB",
   "Custos relacionados à execução do contrato"],
-  "FEDEX_deliveryCosts": ["FEDEX gift delivery costs:","Cobrança Fedex:"],
+  "localCosts": ["Preparation of Workplace:","Costos locais:"],
   "Signature": ["Signature","Assinatura"],
   "WireInstructions": ["Wire Instructions","Instruções do fio"],
   "BankAccountInformation": ["Bank Account Information","Conta bancária"],

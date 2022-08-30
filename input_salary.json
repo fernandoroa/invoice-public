@@ -3,6 +3,7 @@
   "originalSalary": [100],
   "originalBenefits": [101],
   "use_benefits (Remote fees)": [true],
+  "use_salary": [true],
   "originalCurrency": ["PLN"],
   "finalCurrency": ["USD"],
   "originalPDB": [102],

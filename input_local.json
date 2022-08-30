@@ -1,0 +1,5 @@
+{
+  "localCurrency": ["BRL"],
+  "localCosts": [100],
+  "use_local_option": [false]
+}
