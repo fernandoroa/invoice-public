@@ -1,12 +1,12 @@
 {
-  "currency_grouped": ["USD8"],
-  "exchange_Final_Grouped": [50],
+  "currency_grouped": ["BRL"],
+  "exchange_Final_Grouped": [5.123],
   "groupedCostsValue1": [50],
   "groupedCostsValue2": [100],
   "groupedCostsValue3": [80],
-  "groupedCostsGeneralName": ["Grouped Costs222"],
-  "groupedCostsName1": ["Grouped1"],
+  "groupedCostsGeneralName": ["Grouped Costs"],
+  "groupedCostsName1": ["Grouped Cost 1"],
   "groupedCostsName2": [""],
-  "groupedCostsName3": ["grouped3"],
-  "use_grouped": [false]
+  "groupedCostsName3": ["Grouped cost 3"],
+  "use_grouped": [true]
 }

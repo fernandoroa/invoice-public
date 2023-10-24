@@ -1,32 +1,12 @@
 {
-  "use_oneliners_1": [
-    false
-  ],
-  "exchange_Final_Oneliners_1": [
-    6
-  ],
-  "currency_oneliners_1": [
-    "USD"
-  ],
-  "oneliners_value_1": [
-    60
-  ],
-  "oneliners_text_1": [
-    "Benefits"
-  ],
-  "use_oneliners_2": [
-    false
-  ],
-  "exchange_Final_Oneliners_2": [
-    8
-  ],
-  "currency_oneliners_2": [
-    "USD"
-  ],
-  "oneliners_value_2": [
-    120
-  ],
-  "oneliners_text_2": [
-    "Costs Related to Contract Execution"
-  ]
+  "use_oneliners_1": [true],
+  "exchange_Final_Oneliners_1": [6],
+  "currency_oneliners_1": ["USD"],
+  "oneliners_value_1": [60],
+  "oneliners_text_1": ["Benefits"],
+  "use_oneliners_2": [true],
+  "exchange_Final_Oneliners_2": [3.5],
+  "currency_oneliners_2": ["USD"],
+  "oneliners_value_2": [120],
+  "oneliners_text_2": ["Costs Related to Contract Execution"]
 }

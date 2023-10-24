@@ -1,35 +1,13 @@
 {
-  "exchange_Final_Salary": [
-    3
-  ],
-  "salary": [
-    300
-  ],
-  "use_salary": [
-    true
-  ],
-  "currency_salary": [
-    "USD"
-  ],
-  "total_days": [
-    20
-  ],
-  "section_title": [
-    "Consultancy Charges"
-  ],
-  "use_period": [
-    false
-  ],
-  "number_of_periods": [
-    1
-  ],
-  "period_name": [
-    "month1(s)"
-  ],
-  "delivery_period_text": [
-    "Delivery date:"
-  ],
-  "common_days_text": [
-    ""
-  ]
+  "exchange_Final_Salary": [5],
+  "salary": [300],
+  "use_salary": [true],
+  "currency_salary": ["BRL"],
+  "total_days": [21],
+  "section_title": ["Consultancy Charges"],
+  "use_period": [false],
+  "number_of_periods": [1],
+  "period_name": ["month1(s)"],
+  "delivery_period_text": ["Delivery date:"],
+  "common_days_text": ["other:"]
 }

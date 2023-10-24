@@ -1,14 +1,6 @@
 {
-  "days": [
-    1
-  ],
-  "percentage": [
-    50
-  ],
-  "use_sick": [
-    false
-  ],
-  "text": [
-    "Services"
-  ]
+  "days": [1],
+  "percentage": [45],
+  "use_sick": [true],
+  "text": ["Services"]
 }
