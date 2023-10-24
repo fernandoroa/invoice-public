@@ -23,25 +23,9 @@
     "AMOUNT",
     "Valor"
   ],
-  "ConsultancyCharges": [
-    "Consultancy Charges",
-    "Encargos por consultoria"
-  ],
-  "month": [
-    "month",
-    "mês"
-  ],
-  "benefits": [
-    "Benefits",
+  "oneliners": [
+    "Oneliners",
     "Beneficios"
-  ],
-  "CCE": [
-    "Costs related to contract execution",
-    "Custos relacionados à execução do contrato"
-  ],
-  "groupedCosts": [
-    "Grouped Costs:",
-    "Costos locais:"
   ],
   "Signature": [
     "Signature",
@@ -118,13 +102,5 @@
   "Includealso": [
     "Include also",
     "Incluir também"
-  ],
-  "sickdays": [
-    "IT Services",
-    "Serviços de TI"
-  ],
-  "otherdays": [
-    "",
-    "Outros dias"
   ]
 }
