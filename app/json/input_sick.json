@@ -1,6 +1,14 @@
 {
-  "days": [1],
-  "percentage": [50],
-  "use_sick": [false],
-  "text": ["IT Services2"]
+  "days": [
+    1
+  ],
+  "percentage": [
+    50
+  ],
+  "use_sick": [
+    false
+  ],
+  "text": [
+    "Services"
+  ]
 }
