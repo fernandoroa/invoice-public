@@ -16,72 +16,134 @@ box::use(
 #' @export
 ui <- function(id) {
   ns <- NS(id)
-
   navbarPage(
+    selected = "Invoice, businesses and date",
     "Invoice Generator",
     tabPanel(
-      "Main Fields",
+      "Save and Generate",
       fluidPage(
         fluidRow(
           column(
-            3
-            #
-            #    manual inputs, see params in .Rmd
-            #
-            , wellPanel(
+            3,
+            wellPanel(
               div(
                 class = "two_column",
                 actionButton(ns("reload"), "Reload Json files"),
-                div(
-                  id = "invoice-form-container",
-                  textInput(ns("invoiceNumber"), "Invoice Number", paste(format(Sys.time(), "%Y-")))
-                ),
-                radioButtons(ns("lang"), "Language", c("english" = 1, "other" = 2)),
-              )
-            ),
-            uiOutput(ns("first_well_panel")),
-            uiOutput(ns("period_well_panel"))
-          ),
-          column(
-            3,
-            uiOutput(ns("salary_box")),
-            wellPanel(
-              h2("Generate invoice!"),
-              actionButton(
-                ns("modify_all"),
-                strong(
-                  "Save All",
-                  code("*.json"),
-                  "required!"
-                )
+                radioButtons(ns("lang"), "Language", c("english" = 1, "other" = 2))
               ),
-              downloadButton(ns("report"), "Generate invoice in .pdf"),
-              helpText("saving .json changes is mandatory"),
-            )
-          ),
-          column(
-            3,
-            uiOutput(ns("oneliners_box")),
-            uiOutput(ns("grouped_box")),
-            uiOutput(ns("sick_box"))
-          ),
-          column(
-            3,
-            #
-            #   3rd box
-            #
-            div(
-              style = "max-width:600px",
-              uiOutput(ns("bank_box")),
-              uiOutput(ns("consultant_account_box")),
-              uiOutput(ns("consultant_business_box"))
+              div(
+                id = "generate_buttons",
+                actionButton(
+                  ns("modify_all"),
+                  strong(
+                    "Save All",
+                    code("*.json"),
+                    "required!"
+                  )
+                ),
+                helpText("saving .json changes is mandatory"),
+                br(),
+                downloadButton(ns("report"), "Generate invoice in .pdf")
+              )
             )
           )
         )
       )
     ),
-    tabPanel("Component 2"),
-    tabPanel("Component 3")
+    tabPanel(
+      "Invoice, businesses and date",
+      fluidPage(
+        fluidRow(
+          column(
+            3,
+            wellPanel(
+              textInput(ns("invoiceNumber"), "Invoice Number", paste(format(Sys.time(), "%Y-")))
+            ),
+            uiOutput(ns("first_well_panel")),
+          ),
+          column(
+            3,
+            div(
+              style = "max-width:600px",
+              uiOutput(ns("consultant_business_box"))
+            )
+          ),
+          column(
+            3,
+            div(
+              style = "max-width:600px",
+              uiOutput(ns("business_to_bill_box")),
+            )
+          ),
+          column(
+            3,
+            img(src = "static/invoice_header.svg", style = "max-width:25vw")
+          )
+        )
+      )
+    ),
+    tabPanel(
+      "Salary dates and days",
+      fluidPage(
+        fluidRow(
+          column(
+            3,
+            uiOutput(ns("period_well_panel"))
+          ),
+          column(
+            3,
+            uiOutput(ns("salary_box"))
+          ),
+          column(
+            3,
+            uiOutput(ns("sick_box"))
+          ),
+          column(
+            3,
+            img(src = "static/invoice_salary.svg", style = "max-width:25vw")
+          )
+        )
+      )
+    ),
+    tabPanel(
+      "Oneliners & Grouped costs",
+      fluidPage(
+        fluidRow(
+          column(
+            3,
+            uiOutput(ns("oneliners_box"))
+          ),
+          column(
+            3,
+            img(src = "static/invoice_oneliners.svg", style = "max-width:25vw")
+          ),
+          column(
+            3,
+            uiOutput(ns("grouped_box"))
+          ),
+          column(
+            3,
+            img(src = "static/invoice_grouped.svg", style = "max-width:25vw")
+          )
+        )
+      )
+    ),
+    tabPanel(
+      "Bank Account information",
+      fluidPage(
+        fluidRow(
+          column(
+            3,
+            uiOutput(ns("consultant_account_box"))
+          ),
+          column(6),
+          column(
+            3,
+            img(src = "static/invoice_bank.svg", style = "max-width:25vw")
+          )
+        )
+      )
+    )
   )
 }
 
@@ -89,6 +151,7 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
 
     rv_json_lists <- reactiveValues(
       json_main_list = rjson::fromJSON(file = "app/json/main.json"),
@@ -346,6 +409,7 @@ server <- function(id) {
             actionButton(ns("increaseDate"), "increase")
           ),
           tagList(
+            textInput(ns("date_connector"), "date connector", rv_json_lists$json_dates_list$date_connector),
             checkboxInput(ns("use_dates"), "Show Dates", rv_json_lists$json_dates_list$use_dates),
             dateInput(ns("start"), "Start Date: ", value = as.Date(rv_json_lists$json_dates_list$start)),
             dateInput(ns("end"), "End Date: ", value = as.Date(rv_json_lists$json_dates_list$end))
@@ -680,7 +744,7 @@ server <- function(id) {
       )
     })
 
-    output$bank_box <- renderUI({
+    output$business_to_bill_box <- renderUI({
       wellPanel(
         h4(code("input_business_to_bill.json"), strong("content")),
         helpText("this box content must be saved before generating .pdf"),
@@ -765,5 +829,10 @@ server <- function(id) {
         )
       }
     )
+    outputOptions(output, "oneliners_box", suspendWhenHidden = FALSE)
+
+    outputOptions(output, "grouped_box", suspendWhenHidden = FALSE)
+
+    outputOptions(output, "consultant_account_box", suspendWhenHidden = FALSE)
   })
 }

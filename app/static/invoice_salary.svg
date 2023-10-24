@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg186"
+   width="793.70135"
+   height="1122.52"
+   viewBox="0 0 793.70135 1122.52"
+   sodipodi:docname="invoice_salary.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs190" />
+  <sodipodi:namedview
+     id="namedview188"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1.102374"
+     inkscape:cx="396.4172"
+     inkscape:cy="-163.73754"
+     inkscape:window-width="1592"
+     inkscape:window-height="752"
+     inkscape:window-x="1970"
+     inkscape:window-y="114"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g194">
+    <inkscape:page
+       x="0"
+       y="0"
+       id="page192"
+       width="793.70135"
+       height="1122.52" />
+  </sodipodi:namedview>
+  <g
+     id="g194"
+     inkscape:groupmode="layer"
+     inkscape:label="Page 1"
+     transform="matrix(1.3333333,0,0,-1.3333333,0,1122.52)">
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,287.779,787.195)"
+       style="font-variant:normal;font-weight:normal;font-size:17.2154px;font-family:LMRoman17;-inkscape-font-specification:LMRoman17-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text198"><tspan
+         x="0 5.6397653 13.987513 21.884216 29.7792 34.077885 41.074223"
+         y="0"
+         sodipodi:role="line"
+         id="tspan196">Invoice</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,85.039,728.405)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text228"><tspan
+         x="0 3.939276 9.6938267 15.157104 20.611654 23.631292 28.480387 36.973122 45.154945 51.214951 60.00005 66.365509 71.214607 75.487701 83.361885 88.816437 94.270988 99.72554 105.18008 108.81609"
+         y="0"
+         sodipodi:role="line"
+         id="tspan200">InvoiceNumber:2023-7</tspan><tspan
+         x="277.06 284.93854 290.3931 296.45309 300.75565 306.81567 309.84622 314.08875 319.5433 325.29785 333.18405 340.91095 346.97098 351.27353 354.30408 360.36407 365.21317 369.51572 373.81827 381.69244 389.41937 395.47937 399.78192 402.81247 408.87247 413.72156 418.02411 425.97031 434.15213 439.60669 448.69724"
+         y="18.653"
+         sodipodi:role="line"
+         id="tspan202">ConsultantBusiness:BusinessName</tspan><tspan
+         x="367.422 373.48199 377.72455 381.99765 386.84674 391.69583 399.57111 405.63113 408.66168 414.11621 418.9653 423.81442 429.87442 435.32898 438.35953 444.41953 449.26862"
+         y="32.202"
+         sodipodi:role="line"
+         id="tspan204">Streetplaceholder</tspan><tspan
+         x="386.54401 394.72583 399.57492 402.60547 408.06003 413.81458 420.18002 425.63458 429.90768 435.96768 441.72769 447.4877"
+         y="45.750999"
+         sodipodi:role="line"
+         id="tspan206">Neighborhood</tspan><tspan
+         x="350.302 358.18054 361.21109 365.14819 374.53876 379.99329 386.06421 395.75696 402.87512 408.32968 412.63223 416.87479 422.32935 429.00351 436.88208 442.63116 448.69116"
+         y="59.300999"
+         sodipodi:role="line"
+         id="tspan208">CityandPostalCode</tspan><tspan
+         x="414.12 421.99857 427.45309 433.51309 439.26767 443.51019 447.78329"
+         y="72.849998"
+         sodipodi:role="line"
+         id="tspan210">Country</tspan><tspan
+         x="293.54401 301.42255 306.87711 312.63165 316.87421 322.32877 327.17786 335.06403 343.24585 348.70041 355.36368 363.23788 371.72296 377.17752 386.27573 391.73026 400.81754 406.27209 411.72665 417.18118 422.63574 431.72302 437.17758 442.63211 448.08667"
+         y="86.399002"
+         sodipodi:role="line"
+         id="tspan212">ContactNo.:+0000000000000</tspan><tspan
+         x="0 7.7269154 10.757463 13.788012 20.45129 27.424387 32.878937"
+         y="105.052"
+         sodipodi:role="line"
+         id="tspan214">BillTo:</tspan><tspan
+         x="0 6.0600052 9.0905533 12.121101 18.78438 24.844385 30.90439 35.20694 38.237488 44.308399 49.146587 53.460045 61.395325 67.45533 72.909882 82.000435 90.482254 93.512802 96.54335 102.60336"
+         y="123.705"
+         sodipodi:role="line"
+         id="tspan216">billbusinessnameline</tspan><tspan
+         x="0 6.0600052 9.0905533 12.121101 18.78438 24.23893 30.298935 36.35894 40.632034 45.481129 49.783676 57.729866 60.760414 63.790962 69.850967 74.700066"
+         y="137.254"
+         sodipodi:role="line"
+         id="tspan218">billaddressline2</tspan><tspan
+         x="0 6.0600052 9.0905533 12.121101 18.78438 24.23893 30.298935 36.35894 40.632034 45.481129 49.783676 57.729866 60.760414 63.790962 69.850967 74.700066"
+         y="150.804"
+         sodipodi:role="line"
+         id="tspan220">billaddressline3</tspan><tspan
+         x="0 6.0600052 9.0905533 12.121101 18.78438 24.844385 30.90439 35.20694 41.881126 44.911674 47.942223 54.002228 58.851322"
+         y="164.353"
+         sodipodi:role="line"
+         id="tspan222">billbusiline4</tspan><tspan
+         x="0 6.0600052 9.0905533 12.121101 18.78438 24.844385 30.90439 35.20694 41.881126 44.911674 47.942223 54.002228 58.851322"
+         y="177.90199"
+         sodipodi:role="line"
+         id="tspan224">billbusiline5</tspan><tspan
+         x="371.11899 379.45245 384.90701 389.14957 393.99866 401.87283 410.97104 417.17612 422.02524 431.72888 437.18341 442.63797 448.09253"
+         y="203.26801"
+         sodipodi:role="line"
+         id="tspan226">Date:6Feb2021</tspan></text>
+    <g
+       id="g230"
+       transform="translate(107.681,509.529)">
+      <path
+         d="M 0,0 H 408.261"
+         style="fill:none;stroke:#000000;stroke-width:0.868;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+         id="path232" />
+    </g>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,107.681,496.558)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text236"><tspan
+         x="0 6.0600052 10.9091 15.182195 20.940018 23.970566 28.81966 33.668755 357.34613 365.52795 375.52832 384.0134 392.19522 400.37708"
+         y="0"
+         sodipodi:role="line"
+         id="tspan234">ServicesAMOUNT</tspan></text>
+    <g
+       id="g238"
+       transform="translate(107.681,490.344)">
+      <path
+         d="M 0,0 H 408.261"
+         style="fill:none;stroke:#000000;stroke-width:0.542;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+         id="path240" />
+    </g>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,107.681,477.536)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text266"><tspan
+         x="0 7.878552 13.333102 19.393106 23.695656 29.755661 32.786209 37.028759 42.483307 48.543312 53.392406 62.782963 70.661514 76.721519 82.176071 86.449165 91.903709 96.752808"
+         y="0"
+         sodipodi:role="line"
+         id="tspan242">ConsultancyCharges</tspan><tspan
+         x="5.6690001 14.75628 20.362467 25.817017 35.52066 40.975212 46.42976 51.884312 60.971592 65.214142 74.301422 79.755974 88.854156 94.46035 99.914894 109.60764 115.06218 120.51673 125.97128"
+         y="13.549"
+         sodipodi:role="line"
+         id="tspan244">1Jan2022to31Jan2022</tspan><tspan
+         x="5.6690001 14.002461 18.851557 21.882105 24.912653 30.365021 35.214115 39.487209 48.877762 54.937767 60.392319 64.634865 69.483963 77.369057 82.975243 88.429794 94.184349 100.24435 105.6989 109.97199 119.36255 124.8171 130.27165 135.7262"
+         y="27.098"
+         sodipodi:role="line"
+         id="tspan246">Deliverydate:January2022</tspan><tspan
+         x="22.677 28.737005 33.586102 37.859196 43.617016 46.647564 51.496662 56.345757 60.648304 194.22806 199.6826 205.13715 210.59171 273.43903 278.89359 281.92413 299.33505 307.06195 315.09216"
+         y="40.647999"
+         sodipodi:role="line"
+         id="tspan248">Services:1/216.4BRL</tspan><tspan
+         x="22.677 28.13155 32.3741 38.434105 43.283199 47.556293 188.77242 194.22696 199.68152 205.13606 210.59061 262.52884 267.9834 273.43793 278.89249 281.92303 299.33395 307.06088 315.09106"
+         y="54.196999"
+         sodipodi:role="line"
+         id="tspan250">other:19/21271.4BRL</tspan><tspan
+         x="228.00101 235.72792 243.7581 262.53265 267.98721 273.44177 278.8963 281.92685 299.3378 308.42508 317.51236 371.13931 376.59384 385.68112 393.86295 399.92297"
+         y="67.746002"
+         sodipodi:role="line"
+         id="tspan252">BRL277.9/5=56USD</tspan><tspan
+         x="0 7.7269154 12.576011 18.636015 23.485111 29.545116 33.787666 371.14505 376.59958 385.68686 393.86868 399.92871"
+         y="94.844002"
+         sodipodi:role="line"
+         id="tspan254">Benefts60USD</tspan><tspan
+         x="0 7.878552 13.333102 17.635651 21.878201 29.813478 37.843666 42.692764 45.723312 51.17786 55.42041 60.269505 69.973152 74.215698 83.302979 91.181534 96.636078 102.39063 106.63318 110.90627 116.36082 121.20992 129.09612 136.51974 142.27757 147.12666 151.96486 158.03577 162.27832 165.29796 170.7525 365.68176 371.13632 376.59085 385.68906 393.87088 399.93088"
+         y="121.943"
+         sodipodi:role="line"
+         id="tspan256">CostsRelatedtoContractExecution120USD</tspan><tspan
+         x="5.6690001 14.229371 18.502464 23.957016 30.017021 36.382481 41.231575 50.924309 58.802864 64.257416 68.559959 76.446152 276.4754 281.92996 299.34088 307.06781 315.09799"
+         y="149.041"
+         sodipodi:role="line"
+         id="tspan258">GroupedCost150BRL</tspan><tspan
+         x="271.01599 276.47055 281.92511 299.33603 307.06293 315.09314"
+         y="162.59"
+         sodipodi:role="line"
+         id="tspan260">100BRL</tspan><tspan
+         x="5.6690001 14.229371 18.502464 23.957016 30.017021 36.382481 41.231575 50.924309 55.773407 61.227955 65.530502 73.416695 276.46777 281.92233 299.33325 307.06015 315.09036"
+         y="176.13901"
+         sodipodi:role="line"
+         id="tspan262">Groupedcost380BRL</tspan><tspan
+         x="0 8.5603704 12.833466 18.288015 24.348021 30.71348 35.562576 45.25531 53.133862 58.588413 62.890961 67.133507 228.00346 235.73038 243.76057 271.01151 276.46603 281.92059 299.33151 308.42972 313.88425 316.91479 322.36935 327.82391 336.91119 371.14175 376.59631 385.68359 393.86542 399.92542"
+         y="189.689"
+         sodipodi:role="line"
+         id="tspan264">GroupedCostsBRL230/5.123=46USD</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,107.681,260.749)"
+       style="font-variant:normal;font-weight:bold;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Bold;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text270"><tspan
+         x="0 8.7272797 18.151651 25.831657 35.316029 363.2294 369.50214 375.77487"
+         y="0"
+         sodipodi:role="line"
+         id="tspan268">TOTAL282</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,493.366,260.749)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text274"><tspan
+         x="0 8.1818247 14.24183"
+         y="0"
+         sodipodi:role="line"
+         id="tspan272">USD</tspan></text>
+    <g
+       id="g276"
+       transform="translate(107.681,254.372)">
+      <path
+         d="M 0,0 H 408.261"
+         style="fill:none;stroke:#000000;stroke-width:0.868;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+         id="path278" />
+    </g>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,493.098,187.909)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text282"><tspan
+         x="0 6.0600052 9.0905533 14.545103 20.605108 26.059658 30.302208 36.362213 40.635307"
+         y="0"
+         sodipodi:role="line"
+         id="tspan280">Signature</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,85.039,162.542)"
+       style="font-variant:normal;font-weight:bold;font-size:14.3462px;font-family:LMRoman12;-inkscape-font-specification:LMRoman12-Bold;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text286"><tspan
+         x="0 16.670284 21.153471 27.74555 40.489281 46.50034 55.466713 61.832123 68.108582 74.700661 83.667038 90.840141 97.1166 101.59978 109.66953 118.6359"
+         y="0"
+         sodipodi:role="line"
+         id="tspan284">WireInstructions</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,214.725,162.542)"
+       style="font-variant:normal;font-weight:normal;font-size:14.3462px;font-family:LMRoman12;-inkscape-font-specification:LMRoman12-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text290"><tspan
+         x="0"
+         y="0"
+         id="tspan288">/</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,226.431,162.542)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text294"><tspan
+         x="0 7.7269154 13.181465 19.24147 28.632025 36.519302 41.368397 46.206585 51.661133 57.732048 63.486599 71.361877 75.301155 81.36116 84.693886 90.148438 94.421532 103.51208 108.96664 113.20918 116.23973 121.69428"
+         y="0"
+         sodipodi:role="line"
+         id="tspan292">BankAccountInformation</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,85.039,143.491)"
+       style="font-variant:normal;font-weight:normal;font-size:11.9552px;font-family:LMRoman12;-inkscape-font-specification:LMRoman12-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text298"><tspan
+         x="0 8.2897358 13.492639 19.996267 25.199171 31.702799 36.905701 40.157516 46.010784 50.563324"
+         y="0"
+         sodipodi:role="line"
+         id="tspan296">Benefciary</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,145.789,143.491)"
+       style="font-variant:normal;font-weight:bold;font-size:11.9552px;font-family:LMRoman12;-inkscape-font-specification:LMRoman12-Bold;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text302"><tspan
+         x="0 9.5605736 16.098873 23.570873 30.668674"
+         y="0"
+         sodipodi:role="line"
+         id="tspan300">Bank:</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,102.849,129.941)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text306"><tspan
+         x="0 6.0600052 17.272379 21.211655 28.333115 36.211666"
+         y="0"
+         sodipodi:role="line"
+         id="tspan304">SWIFT:</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,145.728,129.941)"
+       style="font-variant:normal;font-weight:bold;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Bold;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text310"><tspan
+         x="0 6.9698238 19.939653 24.697111 32.590935 45.496403 54.557499 63.981873 73.602608"
+         y="0"
+         sodipodi:role="line"
+         id="tspan308">SWIFTCODE</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,102.849,116.392)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text314"><tspan
+         x="0 8.1818247 13.636375 22.726929 27.576023"
+         y="0"
+         sodipodi:role="line"
+         id="tspan312">Name:</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,138.303,116.392)"
+       style="font-variant:normal;font-weight:bold;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Bold;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text318"><tspan
+         x="0 8.9236441 18.408016 28.226206 42.237854 52.056042 61.540417 73.449883"
+         y="0"
+         sodipodi:role="line"
+         id="tspan316">BANKNAME</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,102.849,102.843)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text322"><tspan
+         x="0 7.8763704 13.936376 19.99638 24.269474 29.11857 33.42112 37.723667 45.608765 53.335682 61.517506 69.699333 81.817162 89.998985 98.332443 106.66591 114.6961 122.11974 128.17975 134.23975 140.91394 148.64085 156.82268 165.0045 177.12233 185.00089 193.48598 201.6678 209.84962 217.72818 224.85292"
+         y="0"
+         sodipodi:role="line"
+         id="tspan320">Address:BANKADDRESS,BANKCOUNTRY</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,85.039,83.791)"
+       style="font-variant:normal;font-weight:bold;font-size:11.9552px;font-family:LMRoman12;-inkscape-font-specification:LMRoman12-Bold;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text326"><tspan
+         x="0 9.7136002 16.4384 23.9104 29.214922 36.686924 40.422924 45.653324 52.19162 59.293011 69.006607 78.567184 86.039185 91.343704 95.079704 102.5517 108.68831 113.99283"
+         y="0"
+         sodipodi:role="line"
+         id="tspan324">ConsultantBusiness</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,208.238,83.791)"
+       style="font-variant:normal;font-weight:normal;font-size:11.9552px;font-family:LMRoman12;-inkscape-font-specification:LMRoman12-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text330"><tspan
+         x="0 9.7506609 18.040398 23.243299 29.746929 34.949833 41.453461 46.656364 49.908176 55.761444 60.313984 70.401779 78.856499 85.36013 89.977226 94.52977 100.38303 110.13847 115.34138 123.79131"
+         y="0"
+         sodipodi:role="line"
+         id="tspan328">/BenefciaryCustomer:</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,103.115,70.242)"
+       style="font-variant:normal;font-weight:normal;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Regular;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text336"><tspan
+         x="0 8.1818247 13.636375 22.726929 27.576023 35.450211 43.177128 49.237133 53.53968 56.570229 62.630234 67.479332 71.781876 79.728065 87.909889 93.364441 102.45499"
+         y="0"
+         sodipodi:role="line"
+         id="tspan332">Name:BusinessName</tspan><tspan
+         x="-0.266 3.6732759 11.400191 19.582016 27.763842"
+         y="13.549"
+         sodipodi:role="line"
+         id="tspan334">IBAN:</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(1,0,0,-1,137.545,56.693)"
+       style="font-variant:normal;font-weight:bold;font-size:10.9091px;font-family:LMRoman10;-inkscape-font-specification:LMRoman10-Bold;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="text340"><tspan
+         x="0 8.9236441 14.502558 20.08147 25.649475 31.22839 36.807304 42.375309 47.954224 53.533134 59.112049 64.680054 70.258965 75.837883 81.405884 86.984802 92.563713 98.142624 103.71063 109.28954 114.86846 120.43646 126.01538 131.59428 137.1732 142.74121 148.32013 153.89903 159.46704 165.04596 170.62486 176.20378 182.47652 188.74925"
+         y="0"
+         sodipodi:role="line"
+         id="tspan338">B..............................222</tspan></text>
+    <path
+       style="opacity:0.994239;fill:none;stroke:#df003b;stroke-width:0.75"
+       d="M 96.109128,488.76248 V 404.55979 H 525.47751 l 0,81.88943"
+       id="path405" />
+    <path
+       style="opacity:0.994239;fill:none;stroke:#df003b;stroke-width:0.75"
+       d="M 95.702943,487.76906 525.42214,486.77179"
+       id="path417" />
+  </g>
+</svg>

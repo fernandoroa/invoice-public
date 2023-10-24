@@ -7,6 +7,13 @@
   background-color: antiquewhite;
 }
 
+#generate_buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
 .two_column {
   display: grid;
   grid-template-areas:
@@ -18,8 +25,18 @@
 
 #app-reload {
   grid-area: reload;
+  background-color: rgb(8, 197, 255);
+  box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
+}
+
+#app-report {
   background-color: aquamarine;
   box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
+}
+
+button[type="button"] {
+  background-color: rgb(250, 225, 156);
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
 }
 
 #invoice-form-container {
