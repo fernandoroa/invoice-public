@@ -61,8 +61,7 @@ ui <- function(id) {
           ),
           column(
             3,
-            uiOutput(ns("CCE_box")),
-            uiOutput(ns("benefits_box")),
+            uiOutput(ns("oneliners_box")),
             uiOutput(ns("grouped_box")),
             uiOutput(ns("sick_box"))
           ),
@@ -93,13 +92,12 @@ server <- function(id) {
 
     rv_json_lists <- reactiveValues(
       json_main_list = rjson::fromJSON(file = "app/json/main.json"),
-      json_period_list = rjson::fromJSON(file = "app/json/input_period.json"),
+      json_dates_list = rjson::fromJSON(file = "app/json/input_dates.json"),
       json_salary_list = rjson::fromJSON(file = "app/json/input_salary.json"),
-      json_benefits_list = rjson::fromJSON(file = "app/json/input_benefits.json"),
+      json_oneliners_list = rjson::fromJSON(file = "app/json/input_oneliners.json"),
       json_grouped_list = rjson::fromJSON(file = "app/json/input_grouped.json"),
       json_sick_list = rjson::fromJSON(file = "app/json/input_sick.json"),
       json_nwd_list = rjson::fromJSON(file = "app/json/input_nwd.json"),
-      json_CCE_list = rjson::fromJSON(file = "app/json/input_CCE.json"),
       json_business_to_bill_list = rjson::fromJSON(file = "app/json/input_business_to_bill.json"),
       json_consultant_account_list = rjson::fromJSON(file = "app/json/input_consultant_account.json"),
       json_consultant_business_list = rjson::fromJSON(file = "app/json/input_consultant_business.json")
@@ -115,12 +113,11 @@ server <- function(id) {
         rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/input_consultant_account.json")
         rv_json_lists$json_consultant_business_list <- rjson::fromJSON(file = "app/json/input_consultant_business.json")
         rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/input_salary.json")
-        rv_json_lists$json_period_list <- rjson::fromJSON(file = "app/json/input_period.json")
-        rv_json_lists$json_benefits_list <- rjson::fromJSON(file = "app/json/input_benefits.json")
+        rv_json_lists$json_dates_list <- rjson::fromJSON(file = "app/json/input_dates.json")
+        rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/input_oneliners.json")
         rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/input_grouped.json")
         rv_json_lists$json_sick_list <- rjson::fromJSON(file = "app/json/input_sick.json")
         rv_json_lists$json_nwd_list <- rjson::fromJSON(file = "app/json/input_nwd.json")
-        rv_json_lists$json_CCE_list <- rjson::fromJSON(file = "app/json/input_CCE.json")
       },
       ignoreInit = TRUE
     )
@@ -185,32 +182,17 @@ server <- function(id) {
       ignoreInit = TRUE
     )
 
-    observeEvent(c(input$modify_CCE, input$modify_all),
+    observeEvent(c(input$modify_oneliners, input$modify_all),
       {
         input_list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_CCE_list), function(x) {
+        input_list <- lapply(names(rv_json_lists$json_oneliners_list), function(x) {
           input[[x]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_CCE_list)
+        names(input_list) <- names(rv_json_lists$json_oneliners_list)
         json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_CCE.json")
-      },
-      ignoreInit = TRUE
-    )
-
-    observeEvent(c(input$modify_benefits, input$modify_all),
-      {
-        input_list <- list()
-
-        input_list <- lapply(names(rv_json_lists$json_benefits_list), function(x) {
-          input[[x]]
-        })
-
-        names(input_list) <- names(rv_json_lists$json_benefits_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_benefits.json")
+        write(json_data, "app/json/input_oneliners.json")
       },
       ignoreInit = TRUE
     )
@@ -265,13 +247,13 @@ server <- function(id) {
       {
         input_list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_period_list), function(x) {
+        input_list <- lapply(names(rv_json_lists$json_dates_list), function(x) {
           input[[x]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_period_list)
+        names(input_list) <- names(rv_json_lists$json_dates_list)
         json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_period.json")
+        write(json_data, "app/json/input_dates.json")
       },
       ignoreInit = TRUE
     )
@@ -348,7 +330,7 @@ server <- function(id) {
 
     output$period_well_panel <- renderUI({
       wellPanel(
-        h4(code("input_period.json"), strong("content")),
+        h4(code("input_dates.json"), strong("content")),
         splitLayout(
           div(
             style = "display: flex;
@@ -364,15 +346,15 @@ server <- function(id) {
             actionButton(ns("increaseDate"), "increase")
           ),
           tagList(
-            checkboxInput(ns("use_period"), "Show Period", rv_json_lists$json_period_list$use_period),
-            dateInput(ns("start"), "Start Date: ", value = as.Date(rv_json_lists$json_period_list$start)),
-            dateInput(ns("end"), "End Date: ", value = as.Date(rv_json_lists$json_period_list$end))
+            checkboxInput(ns("use_dates"), "Show Dates", rv_json_lists$json_dates_list$use_dates),
+            dateInput(ns("start"), "Start Date: ", value = as.Date(rv_json_lists$json_dates_list$start)),
+            dateInput(ns("end"), "End Date: ", value = as.Date(rv_json_lists$json_dates_list$end))
           )
         ),
         br(),
         actionButton(ns("modify_period"),
           strong(
-            "Save", code("input_period.json"),
+            "Save", code("input_dates.json"),
             "required! after changes"
           ),
           style = "white-space: normal;
@@ -471,158 +453,80 @@ server <- function(id) {
         )
       )
     })
-    output$CCE_box <- renderUI({
-      char_names_CCE <- names(which(sapply(rv_json_lists$json_CCE_list, function(x) is.character(x))))
-      num_names_CCE <- names(which(sapply(rv_json_lists$json_CCE_list, function(x) is.numeric(x))))
-      logic_names_CCE <- names(which(sapply(rv_json_lists$json_CCE_list, function(x) is.logical(x))))
+
+    output$oneliners_box <- renderUI({
+      char_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.character(x))))
+      num_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.numeric(x))))
+      logic_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.logical(x))))
 
       wellPanel(
-        h4(code("input_CCE.json"), strong("content")),
+        h4(code("input_oneliners.json"), strong("content")),
         {
-          char_names_CCE_list <- lapply(char_names_CCE, function(x) {
+          char_names_oneliners_list <- lapply(char_names_oneliners, function(x) {
             textInput(
               ns(x),
               gsub("_", "", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-              rv_json_lists$json_CCE_list[[x]]
+              rv_json_lists$json_oneliners_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(char_names_CCE_list) / 2)
+          middle_idx <- ceiling(length(char_names_oneliners_list) / 2)
           div(
             class = "two_column_grid",
             div(
-              char_names_CCE_list[1:middle_idx]
+              char_names_oneliners_list[1:middle_idx]
             ),
             div(
-              if ((middle_idx + 1) <= length(char_names_CCE_list)) {
-                char_names_CCE_list[(middle_idx + 1):length(char_names_CCE_list)]
+              if ((middle_idx + 1) <= length(char_names_oneliners_list)) {
+                char_names_oneliners_list[(middle_idx + 1):length(char_names_oneliners_list)]
               }
             )
           )
         },
         {
-          num_names_CCE_list <- lapply(num_names_CCE, function(x) {
+          num_names_oneliners_list <- lapply(num_names_oneliners, function(x) {
             numericInput(
               ns(x),
               gsub("_", "", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
-              rv_json_lists$json_CCE_list[[x]]
+              rv_json_lists$json_oneliners_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(num_names_CCE_list) / 2)
+          middle_idx <- ceiling(length(num_names_oneliners_list) / 2)
           div(
             class = "two_column_grid",
             div(
-              num_names_CCE_list[1:middle_idx]
+              num_names_oneliners_list[1:middle_idx]
             ),
             div(
-              if ((middle_idx + 1) <= length(num_names_CCE_list)) {
-                num_names_CCE_list[(middle_idx + 1):length(num_names_CCE_list)]
+              if ((middle_idx + 1) <= length(num_names_oneliners_list)) {
+                num_names_oneliners_list[(middle_idx + 1):length(num_names_oneliners_list)]
               }
             )
           )
         },
         {
-          logic_names_CCE_list <- lapply(logic_names_CCE, function(x) {
+          logic_names_oneliners_list <- lapply(logic_names_oneliners, function(x) {
             checkboxInput(
               ns(x),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_CCE_list[[x]]
+              rv_json_lists$json_oneliners_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(logic_names_CCE_list) / 2)
+          middle_idx <- ceiling(length(logic_names_oneliners_list) / 2)
           div(
             class = "two_column_grid",
             div(
-              logic_names_CCE_list[1:middle_idx]
+              logic_names_oneliners_list[1:middle_idx]
             ),
             div(
-              if ((middle_idx + 1) <= length(logic_names_CCE_list)) {
-                logic_names_CCE_list[(middle_idx + 1):length(logic_names_CCE_list)]
+              if ((middle_idx + 1) <= length(logic_names_oneliners_list)) {
+                logic_names_oneliners_list[(middle_idx + 1):length(logic_names_oneliners_list)]
               }
             )
           )
         },
         helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_CCE"),
-          strong("Save", code("input_CCE.json"), "required! after changes"),
-          style = "white-space: normal;
-                           word-wrap: break-word;"
-        )
-      )
-    })
-
-    output$benefits_box <- renderUI({
-      char_names_benefits <- names(which(sapply(rv_json_lists$json_benefits_list, function(x) is.character(x))))
-      num_names_benefits <- names(which(sapply(rv_json_lists$json_benefits_list, function(x) is.numeric(x))))
-      logic_names_benefits <- names(which(sapply(rv_json_lists$json_benefits_list, function(x) is.logical(x))))
-
-      wellPanel(
-        h4(code("input_benefits.json"), strong("content")),
-        {
-          char_names_benefits_list <- lapply(char_names_benefits, function(x) {
-            textInput(
-              ns(x),
-              gsub("_", "", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-              rv_json_lists$json_benefits_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(char_names_benefits_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              char_names_benefits_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(char_names_benefits_list)) {
-                char_names_benefits_list[(middle_idx + 1):length(char_names_benefits_list)]
-              }
-            )
-          )
-        },
-        {
-          num_names_benefits_list <- lapply(num_names_benefits, function(x) {
-            numericInput(
-              ns(x),
-              gsub("_", "", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
-              rv_json_lists$json_benefits_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(num_names_benefits_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              num_names_benefits_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(num_names_benefits_list)) {
-                num_names_benefits_list[(middle_idx + 1):length(num_names_benefits_list)]
-              }
-            )
-          )
-        },
-        {
-          logic_names_benefits_list <- lapply(logic_names_benefits, function(x) {
-            checkboxInput(
-              ns(x),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_benefits_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(logic_names_benefits_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              logic_names_benefits_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(logic_names_benefits_list)) {
-                logic_names_benefits_list[(middle_idx + 1):length(logic_names_benefits_list)]
-              }
-            )
-          )
-        },
-        helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_benefits"),
-          strong("Save", code("input_benefits.json"), "required! after changes"),
+        actionButton(ns("modify_oneliners"),
+          strong("Save", code("input_oneliners.json"), "required! after changes"),
           style = "white-space: normal;
                            word-wrap: break-word;"
         )
@@ -709,6 +613,7 @@ server <- function(id) {
     })
 
     output$sick_box <- renderUI({
+      char_sick <- names(which(sapply(rv_json_lists$json_sick_list, function(x) is.character(x))))
       num_sick <- names(which(sapply(rv_json_lists$json_sick_list, function(x) is.numeric(x))))
       logic_sick <- names(which(sapply(rv_json_lists$json_sick_list, function(x) is.logical(x))))
 
@@ -718,6 +623,12 @@ server <- function(id) {
       tagList(
         wellPanel(
           h4(code("input_sick.json"), strong("content")),
+          lapply(char_sick, function(x) {
+            textInput(
+              ns(x), gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
+              rv_json_lists$json_sick_list[[x]]
+            )
+          }),
           lapply(num_sick, function(x) {
             numericInput(
               ns(x), gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
@@ -763,7 +674,7 @@ server <- function(id) {
               "required! after changes"
             ),
             style = "white-space: normal;
-                           word-wrap: break-word;"
+              word-wrap: break-word;"
           )
         )
       )

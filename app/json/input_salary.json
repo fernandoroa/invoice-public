@@ -4,5 +4,11 @@
   "use_salary": [true],
   "currency_salary": ["USD5"],
   "total_days": [20],
-  "months": [1]
+  "section_title": ["Consultancy Charges2"],
+  "use_period": [false],
+  "number_of_periods": [1],
+  "period_name": ["month1(s)"],
+  "date_connector": ["to"],
+  "delivery_period_text": ["Delivery date:"],
+  "other_days": [""]
 }

@@ -4,8 +4,9 @@
   "groupedCostsValue1": [50],
   "groupedCostsValue2": [100],
   "groupedCostsValue3": [80],
+  "groupedCostsGeneralName": ["Grouped Costs222"],
   "groupedCostsName1": ["Grouped1"],
   "groupedCostsName2": [""],
   "groupedCostsName3": ["grouped3"],
-  "use_grouped": [true]
+  "use_grouped": [false]
 }
