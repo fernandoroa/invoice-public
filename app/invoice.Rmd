@@ -41,7 +41,7 @@ json_CCE_list <- rjson::fromJSON(file = "json/input_CCE.json")
 json_benefits_list <- rjson::fromJSON(file = "json/input_benefits.json")
 
 # multiliners
-json_local_list <- rjson::fromJSON(file = "json/input_local.json")
+json_grouped_list <- rjson::fromJSON(file = "json/input_grouped.json")
 
 # dates
 sm <- month(json_period_list$start, label = TRUE)
@@ -64,14 +64,14 @@ benefits_currency <- json_benefits_list$currency_benefits
 benefits_currency_text <- benefits_currency
 CCE_currency <- json_CCE_list$currency_CCE
 CCE_currency_text <- CCE_currency
-local_currency <- json_local_list$currency_local
-local_currency_text <- local_currency
+grouped_currency <- json_grouped_list$currency_grouped
+grouped_currency_text <- grouped_currency
 
 # currency exchanges comparisons booleans
 final_to_salary_exchange_condition <- final_currency == salary_currency
 final_to_benefits_exchange_condition <- final_currency == benefits_currency
 final_to_CCE_exchange_condition <- final_currency == CCE_currency
-final_to_local_exchange_condition <- final_currency == local_currency
+final_to_grouped_exchange_condition <- final_currency == grouped_currency
 
 if (final_to_salary_exchange_condition) {
   salary_currency_text <- ""
@@ -82,8 +82,8 @@ if (final_to_benefits_exchange_condition) {
 if (final_to_CCE_exchange_condition) {
   CCE_currency_text <- ""
 }
-if (final_to_local_exchange_condition) {
-  local_currency_text <- ""
+if (final_to_grouped_exchange_condition) {
+  grouped_currency_text <- ""
 }
 
 
@@ -93,7 +93,7 @@ use_sick <- json_sick_list$use_sick
 use_nwd <- json_nwd_list$use_nwd
 use_benefits <- json_benefits_list$use_benefits
 use_CCE <- json_CCE_list$use_cce
-use_local <- json_local_list$use_local
+use_grouped <- json_grouped_list$use_grouped
 
 total_days <- json_salary_list$total_days
 
@@ -174,40 +174,41 @@ if (!final_to_CCE_exchange_condition && CCE_final > 0) {
   )
 }
 
-local_final <- 0
-local_items_text <- ""
-exchange_local_text <- ""
-localCosts <- 0
-total_local_finals <- 0
+grouped_final <- 0
+grouped_items_text <- ""
+exchange_grouped_text <- ""
+groupedCosts <- 0
+total_grouped_finals_exchanged <- 0
 
-if (use_local) {
-  localCosts <- unlist(json_local_list[grep("localCostsValue", names(json_local_list), value = T)])
+if (use_grouped) {
+  groupedCosts <- unlist(json_grouped_list[grep("groupedCostsValue", names(json_grouped_list), value = T)])
 
-  local_final <- if (final_to_local_exchange_condition) {
-    localCosts
+  if (final_to_grouped_exchange_condition) {
+    grouped_final <- groupedCosts
   } else {
-    round(localCosts / json_local_list$exchange_Final_Local)
+    grouped_final <- round(groupedCosts / json_grouped_list$exchange_Final_Grouped)
   }
 
-  local_items_text <- unlist(json_local_list[grep("localCostsName", names(json_local_list), value = T)])
-  total_local_finals <- sum(local_final)
+  grouped_items_text <- unlist(json_grouped_list[grep("groupedCostsName", names(json_grouped_list), value = T)])
 
-  if (!final_to_local_exchange_condition) {
-    exchange_local_text <- paste(
-      format(total_local_finals, scientific = FALSE),
-      "/", json_local_list$exchange_Final_Local,
+  total_grouped_finals_exchanged <- sum(grouped_final)
+
+  if (!final_to_grouped_exchange_condition) {
+    exchange_grouped_text <- paste(
+      format(sum(groupedCosts), scientific = FALSE),
+      "/", json_grouped_list$exchange_Final_Grouped,
       "="
     )
   }
 }
 
-total_sum <- salary_days_pay_final + benefits_final + CCE_final + total_local_finals
+total_sum <- salary_days_pay_final + benefits_final + CCE_final + total_grouped_finals_exchanged
 
 total_pay_formatted <- format(total_sum, scientific = FALSE)
 
 salary_days_pay_final <- format(salary_days_pay_final, scientific = FALSE)
 
-local_final_formatted <- format(local_final, scientific = FALSE)
+grouped_final_formatted <- format(grouped_final, scientific = FALSE)
 ```
 
 \pagenumbering{gobble} 
@@ -277,26 +278,26 @@ cat(
       final_currency, "|", "\n"
     )
   },
-  if (use_local) {
-    local_strings <- character()
-    for (local_idx in seq_along(local_final)) {
-      local_strings <- c(
-        local_strings,
+  if (use_grouped) {
+    grouped_strings <- character()
+    for (grouped_idx in seq_along(grouped_final)) {
+      grouped_strings <- c(
+        grouped_strings,
         paste0(
-          "|\\hspace{2mm}", local_items_text[local_idx], "|", "|",
-          " ", local_final_formatted[local_idx], " ", local_currency_text, " ", "| |", "\n"
+          "|\\hspace{2mm}", grouped_items_text[grouped_idx], "|", "|",
+          " ", groupedCosts[grouped_idx], " ", grouped_currency_text, " ", "| |", "\n"
         )
       )
     }
-    local_strings <- c(
+    grouped_strings <- c(
       paste0("| | | | | \n"),
-      local_strings,
+      grouped_strings,
       paste0(
-        "|", json_fields_list$localCosts[lan_idx], "|", local_currency, "|", exchange_local_text, "|", sum(local_final), " ",
+        "|", json_fields_list$groupedCosts[lan_idx], "|", grouped_currency, "|", exchange_grouped_text, "|", total_grouped_finals_exchanged, " ",
         final_currency, "|", "\n"
       )
     )
-    local_strings
+    grouped_strings
   },
   paste0("| | | | | \n"),
   paste0("| **TOTAL**  |  |  |**", total_pay_formatted, "** ", final_currency, "|"),

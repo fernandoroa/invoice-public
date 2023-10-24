@@ -63,7 +63,7 @@ ui <- function(id) {
             3,
             uiOutput(ns("CCE_box")),
             uiOutput(ns("benefits_box")),
-            uiOutput(ns("local_box")),
+            uiOutput(ns("grouped_box")),
             uiOutput(ns("sick_box"))
           ),
           column(
@@ -96,7 +96,7 @@ server <- function(id) {
       json_period_list = rjson::fromJSON(file = "app/json/input_period.json"),
       json_salary_list = rjson::fromJSON(file = "app/json/input_salary.json"),
       json_benefits_list = rjson::fromJSON(file = "app/json/input_benefits.json"),
-      json_local_list = rjson::fromJSON(file = "app/json/input_local.json"),
+      json_grouped_list = rjson::fromJSON(file = "app/json/input_grouped.json"),
       json_sick_list = rjson::fromJSON(file = "app/json/input_sick.json"),
       json_nwd_list = rjson::fromJSON(file = "app/json/input_nwd.json"),
       json_CCE_list = rjson::fromJSON(file = "app/json/input_CCE.json"),
@@ -117,7 +117,7 @@ server <- function(id) {
         rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/input_salary.json")
         rv_json_lists$json_period_list <- rjson::fromJSON(file = "app/json/input_period.json")
         rv_json_lists$json_benefits_list <- rjson::fromJSON(file = "app/json/input_benefits.json")
-        rv_json_lists$json_local_list <- rjson::fromJSON(file = "app/json/input_local.json")
+        rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/input_grouped.json")
         rv_json_lists$json_sick_list <- rjson::fromJSON(file = "app/json/input_sick.json")
         rv_json_lists$json_nwd_list <- rjson::fromJSON(file = "app/json/input_nwd.json")
         rv_json_lists$json_CCE_list <- rjson::fromJSON(file = "app/json/input_CCE.json")
@@ -170,17 +170,17 @@ server <- function(id) {
       ignoreInit = TRUE
     )
 
-    observeEvent(c(input$modify_local, input$modify_all),
+    observeEvent(c(input$modify_grouped, input$modify_all),
       {
         input_list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_local_list), function(x) {
+        input_list <- lapply(names(rv_json_lists$json_grouped_list), function(x) {
           input[[x]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_local_list)
+        names(input_list) <- names(rv_json_lists$json_grouped_list)
         json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_local.json")
+        write(json_data, "app/json/input_grouped.json")
       },
       ignoreInit = TRUE
     )
@@ -629,79 +629,79 @@ server <- function(id) {
       )
     })
 
-    output$local_box <- renderUI({
-      char_names_local <- names(which(sapply(rv_json_lists$json_local_list, function(x) is.character(x))))
-      num_names_local <- names(which(sapply(rv_json_lists$json_local_list, function(x) is.numeric(x))))
-      logic_names_local <- names(which(sapply(rv_json_lists$json_local_list, function(x) is.logical(x))))
+    output$grouped_box <- renderUI({
+      char_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.character(x))))
+      num_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.numeric(x))))
+      logic_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.logical(x))))
 
       wellPanel(
-        h4(code("input_local.json"), strong("content")),
+        h4(code("input_grouped.json"), strong("content")),
         {
-          char_names_local_list <- lapply(char_names_local, function(x) {
+          char_names_grouped_list <- lapply(char_names_grouped, function(x) {
             textInput(
               ns(x),
               gsub("_", "", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-              rv_json_lists$json_local_list[[x]]
+              rv_json_lists$json_grouped_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(char_names_local_list) / 2)
+          middle_idx <- ceiling(length(char_names_grouped_list) / 2)
           div(
             class = "two_column_grid",
             div(
-              char_names_local_list[1:middle_idx]
+              char_names_grouped_list[1:middle_idx]
             ),
             div(
-              if ((middle_idx + 1) <= length(char_names_local_list)) {
-                char_names_local_list[(middle_idx + 1):length(char_names_local_list)]
+              if ((middle_idx + 1) <= length(char_names_grouped_list)) {
+                char_names_grouped_list[(middle_idx + 1):length(char_names_grouped_list)]
               }
             )
           )
         },
         {
-          num_names_local_list <- lapply(num_names_local, function(x) {
+          num_names_grouped_list <- lapply(num_names_grouped, function(x) {
             numericInput(
               ns(x),
               gsub("_", "", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
-              rv_json_lists$json_local_list[[x]]
+              rv_json_lists$json_grouped_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(num_names_local_list) / 2)
+          middle_idx <- ceiling(length(num_names_grouped_list) / 2)
           div(
             class = "two_column_grid",
             div(
-              num_names_local_list[1:middle_idx]
+              num_names_grouped_list[1:middle_idx]
             ),
             div(
-              if ((middle_idx + 1) <= length(num_names_local_list)) {
-                num_names_local_list[(middle_idx + 1):length(num_names_local_list)]
+              if ((middle_idx + 1) <= length(num_names_grouped_list)) {
+                num_names_grouped_list[(middle_idx + 1):length(num_names_grouped_list)]
               }
             )
           )
         },
         {
-          logic_names_local_list <- lapply(logic_names_local, function(x) {
+          logic_names_grouped_list <- lapply(logic_names_grouped, function(x) {
             checkboxInput(
               ns(x),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_local_list[[x]]
+              rv_json_lists$json_grouped_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(logic_names_local_list) / 2)
+          middle_idx <- ceiling(length(logic_names_grouped_list) / 2)
           div(
             class = "two_column_grid",
             div(
-              logic_names_local_list[1:middle_idx]
+              logic_names_grouped_list[1:middle_idx]
             ),
             div(
-              if ((middle_idx + 1) <= length(logic_names_local_list)) {
-                logic_names_local_list[(middle_idx + 1):length(logic_names_local_list)]
+              if ((middle_idx + 1) <= length(logic_names_grouped_list)) {
+                logic_names_grouped_list[(middle_idx + 1):length(logic_names_grouped_list)]
               }
             )
           )
         },
         helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_local"),
-          strong("Save", code("input_local.json"), "required! after changes"),
+        actionButton(ns("modify_grouped"),
+          strong("Save", code("input_grouped.json"), "required! after changes"),
           style = "white-space: normal;
                            word-wrap: break-word;"
         )
@@ -844,44 +844,8 @@ server <- function(id) {
         temp_report <- file.path(getwd(), "app/inv_md_dont_modify.Rmd")
         file.copy("app/invoice.Rmd", temp_report, overwrite = TRUE)
 
-        params <- reactiveValuesToList(input)
-
-        pattern <- paste0(names(rv_json_lists$json_business_to_bill_list), collapse = "|")
-        pattern <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern)
-        pattern2 <- "modify_period|modify_nwd|modify_consultant|modify_account|modify_benefits|modify_CCE|modify_local|modify_salary|modify_billto|increaseDate|decreaseDate|modify_sick|modify_all|modify_main|reload"
-        pattern3 <- paste0(names(rv_json_lists$json_salary_list), collapse = "|")
-        pattern3 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern3)
-        pattern4 <- paste0(names(rv_json_lists$json_local_list), collapse = "|")
-        pattern4 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern4)
-        pattern5 <- paste0(names(rv_json_lists$json_sick_list), collapse = "|")
-        pattern5 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern5)
-        pattern6 <- paste0(names(rv_json_lists$json_main_list), collapse = "|")
-        pattern6 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern6)
-        pattern7 <- paste0(names(rv_json_lists$json_nwd_list), collapse = "|")
-        pattern7 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern7)
-        pattern8 <- paste0(names(rv_json_lists$json_CCE_list), collapse = "|")
-        pattern8 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern8)
-        pattern9 <- paste0(names(rv_json_lists$json_benefits_list), collapse = "|")
-        pattern9 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern9)
-        pattern10 <- paste0(names(rv_json_lists$json_consultant_account_list), collapse = "|")
-        pattern10 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern10)
-        pattern11 <- paste0(names(rv_json_lists$json_consultant_business_list), collapse = "|")
-        pattern11 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern11)
-        pattern12 <- paste0(names(rv_json_lists$json_period_list), collapse = "|")
-        pattern12 <- gsub("\\((.*?)\\)", "\\\\(\\1\\\\)", pattern12)
-
-        params <- params[-grep(pattern, names(params))]
-        params <- params[-grep(pattern2, names(params))]
-        params <- params[-grep(pattern3, names(params))]
-        params <- params[-grep(pattern4, names(params))]
-        params <- params[-grep(pattern5, names(params))]
-        params <- params[-grep(pattern6, names(params))]
-        params <- params[-grep(pattern7, names(params))]
-        params <- params[-grep(pattern8, names(params))]
-        params <- params[-grep(pattern9, names(params))]
-        params <- params[-grep(pattern10, names(params))]
-        params <- params[-grep(pattern11, names(params))]
-        params <- params[-grep(pattern12, names(params))]
+        all_params <- reactiveValuesToList(input)
+        params <- list(invoiceNumber = all_params$invoiceNumber, lang = all_params$lang)
 
         rmarkdown::render(temp_report,
           output_file = file,

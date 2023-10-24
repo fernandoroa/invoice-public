@@ -1,0 +1,11 @@
+{
+  "currency_grouped": ["USD8"],
+  "exchange_Final_Grouped": [50],
+  "groupedCostsValue1": [50],
+  "groupedCostsValue2": [100],
+  "groupedCostsValue3": [80],
+  "groupedCostsName1": ["Grouped1"],
+  "groupedCostsName2": [""],
+  "groupedCostsName3": ["grouped3"],
+  "use_grouped": [true]
+}

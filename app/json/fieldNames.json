@@ -39,8 +39,8 @@
     "Costs related to contract execution",
     "Custos relacionados à execução do contrato"
   ],
-  "localCosts": [
-    "Local Costs:",
+  "groupedCosts": [
+    "Grouped Costs:",
     "Costos locais:"
   ],
   "Signature": [
