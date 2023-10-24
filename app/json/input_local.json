@@ -1,0 +1,11 @@
+{
+  "currency_local": ["USD8"],
+  "exchange_Final_Local": [50],
+  "localCostsValue1": [50],
+  "localCostsValue2": [100],
+  "localCostsValue3": [80],
+  "localCostsName1": ["Local1"],
+  "localCostsName2": [""],
+  "localCostsName3": ["local3"],
+  "use_local": [false]
+}
