@@ -4,7 +4,11 @@ box::use(
   rjson[...],
   jsonlite[...],
   lubridate[...],
-  tinytex[...],
+  tinytex[...]
+)
+
+box::use(
+  logic / exchange[...],
 )
 
 # ubuntu
@@ -194,28 +198,95 @@ server <- function(id) {
 
     mon_span <- c(31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31)
 
+    observeEvent(input$get_exchanges, {
+      if (input$final_currency != input$salary_maincurrency) {
+        date <- as.character(input$exchangeDate)
+        while (TRUE) {
+          exchange_df <- try(get_exchange_rates(input$final_currency, input$salary_maincurrency, date), silent = TRUE)
+          date <- as.character(as.Date(date) - 1)
+          if (!inherits(exchange_df, "try-error")) break
+        }
+        exchange_salary <- signif(exchange_df$Adjusted_Sy, 5)
+        updateNumericInput(session, paste0("salary_main", "currency_exchange_to_Final_Currency"), value = exchange_salary)
+      }
+      inputs <- reactiveValuesToList(input)
+      oneliners_currency_name_strings <- grep("onelinerscurrency", names(inputs), value = TRUE)
+      grouped_currency_name_strings <- grep("groupedcurrency", names(inputs), value = TRUE)
+
+      oneline_currencies_inputs <- inputs[which(names(inputs) %in% oneliners_currency_name_strings)]
+      grouped_currency_inputs <- inputs[which(names(inputs) %in% grouped_currency_name_strings)]
+
+      oneliners_currencies_list <- oneline_currencies_inputs[sapply(oneline_currencies_inputs, is.character)]
+      grouped_currencies_list <- grouped_currency_inputs[sapply(grouped_currency_inputs, is.character)]
+
+      oneliners_currency_exchange_value_list <- oneline_currencies_inputs[sapply(oneline_currencies_inputs, is.numeric)]
+      grouped_currency_exchange_value_list <- grouped_currency_inputs[sapply(grouped_currency_inputs, is.numeric)]
+
+      oneliners_currencies_list_names <- names(oneliners_currency_exchange_value_list)
+      grouped_currencies_list_names <- names(grouped_currency_exchange_value_list)
+
+      for (currency_idx in seq_along(oneliners_currencies_list)) {
+        currency <- oneliners_currencies_list[currency_idx]
+        if (input$final_currency != currency) {
+          date <- as.character(input$exchangeDate)
+          while (TRUE) {
+            exchange_df <- try(get_exchange_rates(input$final_currency, currency, date), silent = TRUE)
+            date <- as.character(as.Date(date) - 1)
+            if (!inherits(exchange_df, "try-error")) break
+          }
+          exchange_oneliners <- signif(exchange_df$Adjusted_Sy, 5)
+          updateNumericInput(session, oneliners_currencies_list_names[currency_idx], value = exchange_oneliners)
+        }
+      }
+      for (currency_idx in seq_along(grouped_currencies_list)) {
+        currency <- grouped_currencies_list[currency_idx]
+        if (input$final_currency != currency) {
+          date <- as.character(input$exchangeDate)
+          while (TRUE) {
+            exchange_df <- try(get_exchange_rates(input$final_currency, currency, date), silent = TRUE)
+            date <- as.character(as.Date(date) - 1)
+            if (!inherits(exchange_df, "try-error")) break
+          }
+          exchange_grouped <- signif(exchange_df$Adjusted_Sy, 5)
+          updateNumericInput(session, grouped_currencies_list_names[currency_idx], value = exchange_grouped)
+        }
+      }
+    })
+
     observeEvent(input$increaseDate, {
-      cdate <- input$invoiceDate
-      sdate <- input$start
-      edate <- input$end
-      cmon <- month(cdate)
+      sdate <- input$datesstart
+      edate <- input$datesend
       smon <- month(sdate)
       emon <- month(edate)
-      updateDateInput(session, "invoiceDate", value = cdate + mon_span[cmon + 2])
-      updateDateInput(session, "start", value = sdate + mon_span[smon + 1])
-      updateDateInput(session, "end", value = edate + mon_span[emon + 2])
+      updateDateInput(session, "datesstart", value = sdate + mon_span[smon + 1])
+      updateDateInput(session, "datesend", value = edate + mon_span[emon + 2])
     })
 
     observeEvent(input$decreaseDate, {
-      cdate <- input$invoiceDate
-      sdate <- input$start
-      edate <- input$end
-      cmon <- month(cdate)
+      sdate <- input$datesstart
+      edate <- input$datesend
       smon <- month(sdate)
       emon <- month(edate)
+      updateDateInput(session, "datesstart", value = sdate - mon_span[smon])
+      updateDateInput(session, "datesend", value = edate - mon_span[emon + 1])
+    })
+
+    observeEvent(input$increaseDate_Final, {
+      cdate <- input$invoiceDate
+      edate <- input$exchangeDate
+      cmon <- month(cdate)
+      emon <- month(edate)
+      updateDateInput(session, "invoiceDate", value = cdate + mon_span[cmon + 2])
+      updateDateInput(session, "exchangeDate", value = edate + mon_span[emon + 2])
+    })
+
+    observeEvent(input$decreaseDate_Final, {
+      cdate <- input$invoiceDate
+      edate <- input$exchangeDate
+      cmon <- month(cdate)
+      emon <- month(edate)
       updateDateInput(session, "invoiceDate", value = cdate - mon_span[cmon + 1])
-      updateDateInput(session, "start", value = sdate - mon_span[cmon])
-      updateDateInput(session, "end", value = edate - mon_span[cmon + 1])
+      updateDateInput(session, "exchangeDate", value = cdate - mon_span[emon + 1])
     })
 
     observeEvent(c(input$modify_salary, input$modify_all),
@@ -387,21 +458,51 @@ server <- function(id) {
     output$first_well_panel <- renderUI({
       wellPanel(
         h4(strong("Currency and Invoice Date")),
-        splitLayout(
+        div(
+          class = "two_column_right_big",
           textInput(
             ns("final_currency"),
             div(
               class = "wrap",
               HTML("<i>Final</i> Currency")
             ),
-            rv_json_lists$json_main_list$final_currency
+            rv_json_lists$json_final_currency_list$final_currency
           ),
-          dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_json_lists$json_main_list$invoiceDate)),
+          div(
+            id = "exchange_container", style = "display:inline-block", title = "Updates exchange values in other tabs",
+            actionButton(
+              ns("get_exchanges"),
+              "Get exchange values"
+            )
+          )
+        ),
+        splitLayout(
+          div(
+            style = "display: flex;
+               flex-direction: column;
+               justify-content: space-between;
+               max-width:150px;
+               align-items:center;",
+            actionButton(ns("decreaseDate_Final"), "decrease"),
+            br(),
+            span("1 Month"),
+            br(),
+            actionButton(ns("increaseDate_Final"), "increase")
+          ),
+          tagList(
+            dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate)),
+            dateInput(ns("exchangeDate"),
+              div(
+                class = "wrap",
+                "Currency Exchange Date: "
+              ),
+              value = as.Date(rv_json_lists$json_final_currency_list$exchangeDate)
+            )
+          )
         ),
         actionButton(ns("modify_main"),
           strong(
-            "Save", code("final_currency_inv_date.json"),
-            "required! after changes"
+            "Save", code("final_currency_inv_date.json")
           ),
           style = "white-space: normal;
                    word-wrap: break-word;"
