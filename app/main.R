@@ -88,7 +88,8 @@ ui <- function(id) {
         fluidRow(
           column(
             3,
-            uiOutput(ns("period_well_panel"))
+            uiOutput(ns("salary_dates_panel")),
+            uiOutput(ns("salary_period_panel"))
           ),
           column(
             3,
@@ -154,16 +155,17 @@ server <- function(id) {
 
 
     rv_json_lists <- reactiveValues(
-      json_main_list = rjson::fromJSON(file = "app/json/main.json"),
-      json_dates_list = rjson::fromJSON(file = "app/json/input_dates.json"),
-      json_salary_list = rjson::fromJSON(file = "app/json/input_salary.json"),
-      json_oneliners_list = rjson::fromJSON(file = "app/json/input_oneliners.json"),
-      json_grouped_list = rjson::fromJSON(file = "app/json/input_grouped.json"),
-      json_sick_list = rjson::fromJSON(file = "app/json/input_sick.json"),
-      json_nwd_list = rjson::fromJSON(file = "app/json/input_nwd.json"),
-      json_business_to_bill_list = rjson::fromJSON(file = "app/json/input_business_to_bill.json"),
-      json_consultant_account_list = rjson::fromJSON(file = "app/json/input_consultant_account.json"),
-      json_consultant_business_list = rjson::fromJSON(file = "app/json/input_consultant_business.json")
+      json_main_list = rjson::fromJSON(file = "app/json/final_currency_inv_date.json"),
+      json_dates_list = rjson::fromJSON(file = "app/json/salary_dates.json"),
+      json_salary_list = rjson::fromJSON(file = "app/json/salary_main.json"),
+      json_period_list = rjson::fromJSON(file = "app/json/salary_period.json"),
+      json_oneliners_list = rjson::fromJSON(file = "app/json/oneline_costs.json"),
+      json_grouped_list = rjson::fromJSON(file = "app/json/grouped_costs.json"),
+      json_sick_list = rjson::fromJSON(file = "app/json/salary_sick_days.json"),
+      json_nwd_list = rjson::fromJSON(file = "app/json/salary_nwdays.json"),
+      json_business_to_bill_list = rjson::fromJSON(file = "app/json/business_to_bill.json"),
+      json_consultant_account_list = rjson::fromJSON(file = "app/json/consultant_account.json"),
+      json_consultant_business_list = rjson::fromJSON(file = "app/json/consultant_contact.json")
     )
 
     observeEvent(input$reload,
@@ -171,16 +173,17 @@ server <- function(id) {
         #
         # read .json
         #
-        rv_json_lists$json_main_list <- rjson::fromJSON(file = "app/json/main.json")
-        rv_json_lists$json_business_to_bill_list <- rjson::fromJSON(file = "app/json/input_business_to_bill.json")
-        rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/input_consultant_account.json")
-        rv_json_lists$json_consultant_business_list <- rjson::fromJSON(file = "app/json/input_consultant_business.json")
-        rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/input_salary.json")
-        rv_json_lists$json_dates_list <- rjson::fromJSON(file = "app/json/input_dates.json")
-        rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/input_oneliners.json")
-        rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/input_grouped.json")
-        rv_json_lists$json_sick_list <- rjson::fromJSON(file = "app/json/input_sick.json")
-        rv_json_lists$json_nwd_list <- rjson::fromJSON(file = "app/json/input_nwd.json")
+        rv_json_lists$json_main_list <- rjson::fromJSON(file = "app/json/final_currency_inv_date.json")
+        rv_json_lists$json_business_to_bill_list <- rjson::fromJSON(file = "app/json/business_to_bill.json")
+        rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/consultant_account.json")
+        rv_json_lists$json_consultant_business_list <- rjson::fromJSON(file = "app/json/consultant_contact.json")
+        rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/salary_main.json")
+        rv_json_lists$json_dates_list <- rjson::fromJSON(file = "app/json/salary_dates.json")
+        rv_json_lists$json_period_list <- rjson::fromJSON(file = "app/json/salary_period.json")
+        rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/oneline_costs.json")
+        rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/grouped_costs.json")
+        rv_json_lists$json_sick_list <- rjson::fromJSON(file = "app/json/salary_sick_days.json")
+        rv_json_lists$json_nwd_list <- rjson::fromJSON(file = "app/json/salary_nwdays.json")
       },
       ignoreInit = TRUE
     )
@@ -217,158 +220,173 @@ server <- function(id) {
 
     observeEvent(c(input$modify_salary, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_salary_list), function(x) {
-          input[[x]]
+        list <- lapply(names(rv_json_lists$json_salary_list), function(x) {
+          input[[paste0("salary_main", x)]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_salary_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_salary.json")
+        names(list) <- names(rv_json_lists$json_salary_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/salary_main.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_grouped, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_grouped_list), function(x) {
-          input[[x]]
+        list <- lapply(names(rv_json_lists$json_grouped_list), function(x) {
+          input[[paste0("grouped",x)]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_grouped_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_grouped.json")
+        names(list) <- names(rv_json_lists$json_grouped_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/grouped_costs.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_oneliners, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_oneliners_list), function(x) {
-          input[[x]]
+        list <- lapply(names(rv_json_lists$json_oneliners_list), function(x) {
+          input[[paste0("oneliners",x)]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_oneliners_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_oneliners.json")
+        names(list) <- names(rv_json_lists$json_oneliners_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/oneline_costs.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_sick, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_sick_list), function(x) {
-          input[[x]]
+        list <- lapply(names(rv_json_lists$json_sick_list), function(x) {
+          input[[paste0("sick", x)]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_sick_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_sick.json")
+        names(list) <- names(rv_json_lists$json_sick_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/salary_sick_days.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_nwd, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_nwd_list), function(x) {
-          input[[x]]
+        list <- lapply(names(rv_json_lists$json_nwd_list), function(x) {
+          input[[paste0("nwd", x)]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_nwd_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_nwd.json")
+        names(list) <- names(rv_json_lists$json_nwd_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/salary_nwdays.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_main, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_main_list), function(x) {
+        list <- lapply(names(rv_json_lists$json_main_list), function(x) {
           input[[x]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_main_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/main.json")
+        names(list) <- names(rv_json_lists$json_main_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/final_currency_inv_date.json")
       },
       ignoreInit = TRUE
     )
 
 
-    observeEvent(c(input$modify_period, input$modify_all),
+    observeEvent(c(input$modify_salary_dates, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_dates_list), function(x) {
-          input[[x]]
+        list <- lapply(names(rv_json_lists$json_dates_list), function(x) {
+          input[[paste0("dates", x)]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_dates_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_dates.json")
+        names(list) <- names(rv_json_lists$json_dates_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/salary_dates.json")
+      },
+      ignoreInit = TRUE
+    )
+
+    observeEvent(c(input$modify_period, input$modify_all),
+      {
+        list <- list()
+
+        list <- lapply(names(rv_json_lists$json_period_list), function(x) {
+          input[[paste0("period", x)]]
+        })
+
+        names(list) <- names(rv_json_lists$json_period_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/salary_period.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_billto, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_business_to_bill_list), function(x) {
+        list <- lapply(names(rv_json_lists$json_business_to_bill_list), function(x) {
           input[[x]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_business_to_bill_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_business_to_bill.json")
+        names(list) <- names(rv_json_lists$json_business_to_bill_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/business_to_bill.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_account, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_consultant_account_list), function(x) {
+        list <- lapply(names(rv_json_lists$json_consultant_account_list), function(x) {
           input[[x]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_consultant_account_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_consultant_account.json")
+        names(list) <- names(rv_json_lists$json_consultant_account_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/consultant_account.json")
       },
       ignoreInit = TRUE
     )
 
     observeEvent(c(input$modify_consultant, input$modify_all),
       {
-        input_list <- list()
+        list <- list()
 
-        input_list <- lapply(names(rv_json_lists$json_consultant_business_list), function(x) {
+        list <- lapply(names(rv_json_lists$json_consultant_business_list), function(x) {
           input[[x]]
         })
 
-        names(input_list) <- names(rv_json_lists$json_consultant_business_list)
-        json_data <- jsonlite::toJSON(x = input_list, pretty = TRUE)
-        write(json_data, "app/json/input_consultant_business.json")
+        names(list) <- names(rv_json_lists$json_consultant_business_list)
+        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
+        write(json_data, "app/json/consultant_contact.json")
       },
       ignoreInit = TRUE
     )
 
     output$first_well_panel <- renderUI({
       wellPanel(
-        h4(code("main.json"), strong("content")),
+        h4(strong("Currency and Invoice Date")),
         splitLayout(
           textInput(
             ns("final_currency"),
@@ -382,7 +400,7 @@ server <- function(id) {
         ),
         actionButton(ns("modify_main"),
           strong(
-            "Save", code("main.json"),
+            "Save", code("final_currency_inv_date.json"),
             "required! after changes"
           ),
           style = "white-space: normal;
@@ -391,9 +409,9 @@ server <- function(id) {
       )
     })
 
-    output$period_well_panel <- renderUI({
+    output$salary_dates_panel <- renderUI({
       wellPanel(
-        h4(code("input_dates.json"), strong("content")),
+        h4(strong("Salary Dates")),
         splitLayout(
           div(
             style = "display: flex;
@@ -409,16 +427,17 @@ server <- function(id) {
             actionButton(ns("increaseDate"), "increase")
           ),
           tagList(
-            textInput(ns("date_connector"), "date connector", rv_json_lists$json_dates_list$date_connector),
-            checkboxInput(ns("use_dates"), "Show Dates", rv_json_lists$json_dates_list$use_dates),
-            dateInput(ns("start"), "Start Date: ", value = as.Date(rv_json_lists$json_dates_list$start)),
-            dateInput(ns("end"), "End Date: ", value = as.Date(rv_json_lists$json_dates_list$end))
+            checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_json_lists$json_dates_list$use),
+            dateInput(ns(paste0("dates", "start")), "Start Date: ", value = as.Date(rv_json_lists$json_dates_list$start)),
+            textInput(ns(paste0("dates", "date_connector")), "date connector", rv_json_lists$json_dates_list$date_connector),
+            dateInput(ns(paste0("dates", "end")), "End Date: ", value = as.Date(rv_json_lists$json_dates_list$end))
           )
         ),
+        textInput(ns(paste0("dates", "delivery_month_text")), "Deliver title", rv_json_lists$json_dates_list$delivery_month_text),
         br(),
-        actionButton(ns("modify_period"),
+        actionButton(ns("modify_salary_dates"),
           strong(
-            "Save", code("input_dates.json"),
+            "Save", code("salary_dates.json"),
             "required! after changes"
           ),
           style = "white-space: normal;
@@ -432,15 +451,53 @@ server <- function(id) {
       num_names <- names(which(sapply(rv_json_lists$json_salary_list, function(x) is.numeric(x))))
       logic_names <- names(which(sapply(rv_json_lists$json_salary_list, function(x) is.logical(x))))
 
+      char_names_currency <- grep("currency", char_names, value = TRUE)
+      num_names_currency <- grep("currency", num_names, value = TRUE)
+
+      char_names_not_currency <- grep("currency", char_names, value = TRUE, invert = TRUE)
+      num_names_not_currency <- grep("currency", num_names, value = TRUE, invert = TRUE)
+
+
       wellPanel(
-        h4(code("input_salary.json"), strong("content")),
+        h4(strong("Salary Details")),
         {
-          char_list <- lapply(char_names, function(x) {
+          char_names_currency_list <- lapply(char_names_currency, function(x) {
             textInput(
-              ns(x),
+              ns(paste0("salary_main", x)),
               div(
                 class = "wrap",
-                sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE)
+                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+              ),
+              rv_json_lists$json_salary_list[[x]]
+            )
+          })
+          num_names_currency_list <- lapply(num_names_currency, function(x) {
+            numericInput(
+              ns(paste0("salary_main", x)),
+              div(
+                class = "wrap",
+                gsub("_", " ", x, perl = TRUE)
+              ),
+              rv_json_lists$json_salary_list[[x]]
+            )
+          })
+          div(
+            class = "two_column_grid",
+            div(
+              char_names_currency_list
+            ),
+            div(
+              num_names_currency_list
+            )
+          )
+        },
+        {
+          char_list <- lapply(char_names_not_currency, function(x) {
+            textInput(
+              ns(paste0("salary_main", x)),
+              div(
+                class = "wrap",
+                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
               ),
               rv_json_lists$json_salary_list[[x]]
             )
@@ -459,9 +516,9 @@ server <- function(id) {
           )
         },
         {
-          num_list <- lapply(num_names, function(x) {
+          num_list <- lapply(num_names_not_currency, function(x) {
             numericInput(
-              ns(x),
+              ns(paste0("salary_main", x)),
               div(
                 class = "wrap",
                 gsub("_", " ", x, perl = TRUE)
@@ -485,7 +542,7 @@ server <- function(id) {
         {
           logic_list <- lapply(logic_names, function(x) {
             checkboxInput(
-              ns(x),
+              ns(paste0("salary_main", x)),
               div(
                 class = "wrap",
                 gsub("_", " ", gsub(pattern_a, pattern_b, x))
@@ -509,7 +566,7 @@ server <- function(id) {
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_salary"),
           strong(
-            "Save", code("input_salary.json"),
+            "Save", code("salary_main.json"),
             "required! after changes"
           ),
           style = "white-space: normal;
@@ -523,46 +580,83 @@ server <- function(id) {
       num_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.numeric(x))))
       logic_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.logical(x))))
 
+      char_names_currency <- grep("currency", char_names_oneliners, value = TRUE)
+      num_names_currency <- grep("currency", num_names_oneliners, value = TRUE)
+
+      char_names_not_currency <- grep("currency", char_names_oneliners, value = TRUE, invert = TRUE)
+      num_names_not_currency <- grep("currency", num_names_oneliners, value = TRUE, invert = TRUE)
+
       wellPanel(
-        h4(code("input_oneliners.json"), strong("content")),
+        h4(strong("One-Line Costs")),
         {
-          char_names_oneliners_list <- lapply(char_names_oneliners, function(x) {
+          char_names_currency_list <- lapply(char_names_currency, function(x) {
             textInput(
-              ns(x),
-              gsub("_", "", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
+              ns(paste0("oneliners", x)),
+              div(
+                class = "wrap",
+                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+              ),
               rv_json_lists$json_oneliners_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(char_names_oneliners_list) / 2)
+          num_names_currency_list <- lapply(num_names_currency, function(x) {
+            numericInput(
+              ns(paste0("oneliners", x)),
+              div(
+                class = "wrap",
+                gsub("_", " ", x, perl = TRUE)
+              ),
+              rv_json_lists$json_oneliners_list[[x]]
+            )
+          })
           div(
             class = "two_column_grid",
             div(
-              char_names_oneliners_list[1:middle_idx]
+              char_names_currency_list
             ),
             div(
-              if ((middle_idx + 1) <= length(char_names_oneliners_list)) {
-                char_names_oneliners_list[(middle_idx + 1):length(char_names_oneliners_list)]
+              num_names_currency_list
+            )
+          )
+        },
+        {
+          char_names_oneliners_not_currency_list <- lapply(char_names_not_currency, function(x) {
+            textInput(
+              ns(paste0("oneliners",x)),
+              gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
+              rv_json_lists$json_oneliners_list[[x]]
+            )
+          })
+          middle_idx <- ceiling(length(char_names_oneliners_not_currency_list) / 2)
+          div(
+            class = "two_column_grid",
+            div(
+              char_names_oneliners_not_currency_list[1:middle_idx]
+            ),
+            div(
+              if ((middle_idx + 1) <= length(char_names_oneliners_not_currency_list)) {
+                char_names_oneliners_not_currency_list[(middle_idx + 1):length(char_names_oneliners_not_currency_list)]
               }
             )
           )
         },
         {
-          num_names_oneliners_list <- lapply(num_names_oneliners, function(x) {
+          num_names_oneliners_not_currency_list <- lapply(num_names_not_currency, function(x) {
             numericInput(
-              ns(x),
-              gsub("_", "", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
+              ns(paste0("oneliners",x)),
+              gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
               rv_json_lists$json_oneliners_list[[x]]
             )
           })
-          middle_idx <- ceiling(length(num_names_oneliners_list) / 2)
+          middle_idx <- ceiling(length(num_names_oneliners_not_currency_list) / 2)
           div(
             class = "two_column_grid",
             div(
-              num_names_oneliners_list[1:middle_idx]
+              num_names_oneliners_not_currency_list[1:middle_idx]
             ),
             div(
-              if ((middle_idx + 1) <= length(num_names_oneliners_list)) {
-                num_names_oneliners_list[(middle_idx + 1):length(num_names_oneliners_list)]
+              if ((middle_idx + 1) <= length(num_names_oneliners_not_currency_list)) {
+                num_names_oneliners_not_currency_list[(middle_idx + 1):length(num_names_oneliners_not_currency_list)]
               }
             )
           )
@@ -570,7 +664,7 @@ server <- function(id) {
         {
           logic_names_oneliners_list <- lapply(logic_names_oneliners, function(x) {
             checkboxInput(
-              ns(x),
+              ns(paste0("oneliners",x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_json_lists$json_oneliners_list[[x]]
             )
@@ -590,7 +684,7 @@ server <- function(id) {
         },
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_oneliners"),
-          strong("Save", code("input_oneliners.json"), "required! after changes"),
+          strong("Save", code("oneline_costs.json"), "required! after changes"),
           style = "white-space: normal;
                            word-wrap: break-word;"
         )
@@ -602,13 +696,50 @@ server <- function(id) {
       num_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.numeric(x))))
       logic_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.logical(x))))
 
+      char_names_currency <- grep("currency", char_names_grouped, value = TRUE)
+      num_names_currency <- grep("currency", num_names_grouped, value = TRUE)
+
+      char_names_not_currency <- grep("currency", char_names_grouped, value = TRUE, invert = TRUE)
+      num_names_not_currency <- grep("currency", num_names_grouped, value = TRUE, invert = TRUE)
+
       wellPanel(
-        h4(code("input_grouped.json"), strong("content")),
-        {
-          char_names_grouped_list <- lapply(char_names_grouped, function(x) {
+        h4(strong("Grouped Costs")),
+         {
+          char_names_currency_list <- lapply(char_names_currency, function(x) {
             textInput(
-              ns(x),
-              gsub("_", "", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
+              ns(paste0("grouped", x)),
+              div(
+                class = "wrap",
+                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+              ),
+              rv_json_lists$json_grouped_list[[x]]
+            )
+          })
+          num_names_currency_list <- lapply(num_names_currency, function(x) {
+            numericInput(
+              ns(paste0("grouped", x)),
+              div(
+                class = "wrap",
+                gsub("_", " ", x, perl = TRUE)
+              ),
+              rv_json_lists$json_grouped_list[[x]]
+            )
+          })
+          div(
+            class = "two_column_grid",
+            div(
+              char_names_currency_list
+            ),
+            div(
+              num_names_currency_list
+            )
+          )
+        },
+        {
+          char_names_grouped_list <- lapply(char_names_not_currency, function(x) {
+            textInput(
+              ns(paste0("grouped", x)),
+              gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
               rv_json_lists$json_grouped_list[[x]]
             )
           })
@@ -626,10 +757,10 @@ server <- function(id) {
           )
         },
         {
-          num_names_grouped_list <- lapply(num_names_grouped, function(x) {
+          num_names_grouped_list <- lapply(num_names_not_currency, function(x) {
             numericInput(
-              ns(x),
-              gsub("_", "", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
+              ns(paste0("grouped", x)),
+              gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
               rv_json_lists$json_grouped_list[[x]]
             )
           })
@@ -649,7 +780,7 @@ server <- function(id) {
         {
           logic_names_grouped_list <- lapply(logic_names_grouped, function(x) {
             checkboxInput(
-              ns(x),
+              ns(paste0("grouped", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_json_lists$json_grouped_list[[x]]
             )
@@ -669,11 +800,53 @@ server <- function(id) {
         },
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_grouped"),
-          strong("Save", code("input_grouped.json"), "required! after changes"),
+          strong("Save", code("grouped_costs.json"), "required! after changes"),
           style = "white-space: normal;
                            word-wrap: break-word;"
         )
       )
+    })
+
+    output$salary_period_panel <- renderUI({
+      char_period <- names(which(sapply(rv_json_lists$json_period_list, function(x) is.character(x))))      
+      num_period <- names(which(sapply(rv_json_lists$json_period_list, function(x) is.numeric(x))))
+      logic_period <- names(which(sapply(rv_json_lists$json_period_list, function(x) is.logical(x))))
+        wellPanel(
+          h4(strong("Salary Period")),
+          splitLayout(
+          lapply(num_period, function(x) {
+            numericInput(
+              ns(paste0("period", x)), 
+              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+              rv_json_lists$json_period_list[[x]]
+            )
+          }),
+          lapply(char_period, function(x) {
+            textInput(
+              ns(paste0("period", x)), 
+              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+              rv_json_lists$json_period_list[[x]]
+            )
+          })
+          ),
+          lapply(logic_period, function(x) {
+            checkboxInput(
+              ns(paste0("period", x)),
+              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+              rv_json_lists$json_period_list[[x]]
+            )
+          }),
+          helpText("this box content must be saved before generating .pdf"),
+          actionButton(ns("modify_period"),
+            strong(
+              "Save", code("salary_period.json"),
+              "required! after changes"
+            ),
+            style = "white-space: normal;
+              word-wrap: break-word;"
+          )
+        
+        )
     })
 
     output$sick_box <- renderUI({
@@ -686,22 +859,38 @@ server <- function(id) {
 
       tagList(
         wellPanel(
-          h4(code("input_sick.json"), strong("content")),
+          h4(strong("Sick Days Pay")),
           lapply(char_sick, function(x) {
             textInput(
-              ns(x), gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
+              ns(paste0("sick", x)), 
+              gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
               rv_json_lists$json_sick_list[[x]]
             )
           }),
-          lapply(num_sick, function(x) {
-            numericInput(
-              ns(x), gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
+          {
+          num_list <- lapply(num_sick, function(x) {
+              numericInput(
+              ns(paste0("sick", x)), 
+              gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
               rv_json_lists$json_sick_list[[x]]
             )
-          }),
+          })
+          middle_idx <- ceiling(length(num_list) / 2)
+          div(
+            class = "two_column_grid",
+            div(
+              num_list[1:middle_idx]
+            ),
+            div(
+              if ((middle_idx + 1) <= length(num_list)) {
+                num_list[(middle_idx + 1):length(num_list)]
+              }
+            )
+          )
+        },
           lapply(logic_sick, function(x) {
             checkboxInput(
-              ns(x),
+              ns(paste0("sick", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_json_lists$json_sick_list[[x]]
             )
@@ -709,7 +898,7 @@ server <- function(id) {
           helpText("this box content must be saved before generating .pdf"),
           actionButton(ns("modify_sick"),
             strong(
-              "Save", code("input_sick.json"),
+              "Save", code("salary_sick_days.json"),
               "required! after changes"
             ),
             style = "white-space: normal;
@@ -717,16 +906,17 @@ server <- function(id) {
           )
         ),
         wellPanel(
-          h4(code("input_nwd.json"), strong("content")),
+          h4(strong("non-working Days")),
           lapply(num_nwd, function(x) {
             numericInput(
-              ns(x), gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
+              ns(paste0("nwd", x)), 
+              "",
               rv_json_lists$json_nwd_list[[x]]
             )
           }),
           lapply(logic_nwd, function(x) {
             checkboxInput(
-              ns(x),
+              ns(paste0("nwd", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_json_lists$json_nwd_list[[x]]
             )
@@ -734,7 +924,7 @@ server <- function(id) {
           helpText("this box content must be saved before generating .pdf"),
           actionButton(ns("modify_nwd"),
             strong(
-              "Save", code("input_nwd.json"),
+              "Save", code("salary_nwdays.json"),
               "required! after changes"
             ),
             style = "white-space: normal;
@@ -746,10 +936,10 @@ server <- function(id) {
 
     output$business_to_bill_box <- renderUI({
       wellPanel(
-        h4(code("input_business_to_bill.json"), strong("content")),
+        h4(strong("Bill To:")),
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_billto"),
-          strong("Save", code("input_business_to_bill.json"), "required! after changes"),
+          strong("Save", code("business_to_bill.json"), "required! after changes"),
           style = "white-space: normal;
                            word-wrap: break-word;"
         ),
@@ -769,10 +959,10 @@ server <- function(id) {
       logic_char_consultant_account <- names(which(sapply(rv_json_lists$json_consultant_account_list, function(x) is.logical(x))))
 
       wellPanel(
-        h4(code("input_consultant_account.json"), strong("content")),
+        h4(strong("Consultant Account")),
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_account"),
-          strong("Save", code("input_consultant_account.json"), "required! after changes"),
+          strong("Save", code("consultant_account.json"), "required! after changes"),
           style = "white-space: normal;
                            word-wrap: break-word;"
         ),
@@ -796,10 +986,10 @@ server <- function(id) {
 
     output$consultant_business_box <- renderUI({
       wellPanel(
-        h4(code("input_consultant_business.json"), strong("content")),
+        h4(strong("Consultant details")),
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_consultant"),
-          strong("Save", code("input_consultant_business.json"), "required! after changes"),
+          strong("Save", code("consultant_contact.json"), "required! after changes"),
           style = "white-space: normal;
                            word-wrap: break-word;"
         ),
@@ -829,10 +1019,16 @@ server <- function(id) {
         )
       }
     )
+    outputOptions(output, "first_well_panel", suspendWhenHidden = FALSE)
+    outputOptions(output, "consultant_business_box", suspendWhenHidden = FALSE)
+    outputOptions(output, "business_to_bill_box", suspendWhenHidden = FALSE)
+    outputOptions(output, "salary_dates_panel", suspendWhenHidden = FALSE)
+    outputOptions(output, "salary_period_panel", suspendWhenHidden = FALSE)
+    outputOptions(output, "salary_box", suspendWhenHidden = FALSE)
+    outputOptions(output, "sick_box", suspendWhenHidden = FALSE)
     outputOptions(output, "oneliners_box", suspendWhenHidden = FALSE)
-
     outputOptions(output, "grouped_box", suspendWhenHidden = FALSE)
-
     outputOptions(output, "consultant_account_box", suspendWhenHidden = FALSE)
+
   })
 }

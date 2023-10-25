@@ -4,7 +4,7 @@
   "final_bank_name": ["BANK NAME"],
   "final_bank_address": ["BANK ADDRESS"],
   "final_bank_country": ["BANK COUNTRY"],
-  "use_intermediary": [true],
+  "use_intermediary": [false],
   "intermediary_bank_swift (for intermediary checkbox TRUE)": ["intermediary_swift"],
   "intermediary_bank_name (for intermediary checkbox TRUE)": ["int_bank"],
   "intermediary_bank_country (for intermediary checkbox TRUE)": ["int_bank_country"],

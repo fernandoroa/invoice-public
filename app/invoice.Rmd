@@ -19,28 +19,29 @@ lan_idx <- as.numeric(params$lang)
 
 # main
 json_fields_list <- rjson::fromJSON(file = "json/fieldNames.json")
-json_main_list <- rjson::fromJSON(file = "json/main.json")
-json_dates_list <- rjson::fromJSON(file = "json/input_dates.json")
+json_main_list <- rjson::fromJSON(file = "json/final_currency_inv_date.json")
+json_dates_list <- rjson::fromJSON(file = "json/salary_dates.json")
+json_period_list <- rjson::fromJSON(file = "json/salary_period.json")
 
 #
 # bank and businesses
 #
-json_business_to_bill_list <- rjson::fromJSON(file = "json/input_business_to_bill.json")
-json_consultant_account_list <- rjson::fromJSON(file = "json/input_consultant_account.json")
-json_consultant_business_list <- rjson::fromJSON(file = "json/input_consultant_business.json")
+json_business_to_bill_list <- rjson::fromJSON(file = "json/business_to_bill.json")
+json_consultant_account_list <- rjson::fromJSON(file = "json/consultant_account.json")
+json_consultant_business_list <- rjson::fromJSON(file = "json/consultant_contact.json")
 
 # special multiline - salary - days
-json_salary_list <- rjson::fromJSON(file = "json/input_salary.json")
+json_salary_list <- rjson::fromJSON(file = "json/salary_main.json")
 
 # period (days) modifiers
-json_sick_list <- rjson::fromJSON(file = "json/input_sick.json")
-json_nwd_list <- rjson::fromJSON(file = "json/input_nwd.json")
+json_sick_list <- rjson::fromJSON(file = "json/salary_sick_days.json")
+json_nwd_list <- rjson::fromJSON(file = "json/salary_nwdays.json")
 
 # oneliners
-json_oneliners_list <- rjson::fromJSON(file = "json/input_oneliners.json")
+json_oneliners_list <- rjson::fromJSON(file = "json/oneline_costs.json")
 
 # multiliners
-json_grouped_list <- rjson::fromJSON(file = "json/input_grouped.json")
+json_grouped_list <- rjson::fromJSON(file = "json/grouped_costs.json")
 
 # dates
 sm <- month(json_dates_list$start, label = TRUE)
@@ -57,23 +58,25 @@ inv_y <- year(json_main_list$invoiceDate)
 
 # currencies
 final_currency <- json_main_list$final_currency
-salary_currency <- json_salary_list$currency_salary
+salary_currency <- json_salary_list$currency
 salary_currency_text <- salary_currency
-# oneliners_currency <- json_oneliners_list$currency_oneliners
-# oneliners_currency_text <- oneliners_currency
 
-use_oneliners <- unlist(json_oneliners_list[grep("use_oneliners", names(json_oneliners_list), value = T)])
-oneliners_currencies <- unlist(json_oneliners_list[grep("currency_oneliners", names(json_oneliners_list), value = T)])
+use_oneliners <- unlist(json_oneliners_list[grep("use", names(json_oneliners_list), value = T)])
+
+oneliners_currencies_mixed <- unlist(json_oneliners_list[grep("currency", names(json_oneliners_list), value = T)])
+oneliners_exchanges <- unlist(json_oneliners_list[grep("currency_exchange_to_Final_Currency",
+  names(json_oneliners_list), value = TRUE)])
+oneliners_currencies <- oneliners_currencies_mixed[which(!names(oneliners_currencies_mixed) %in% names(oneliners_exchanges))]
+
 oneliners_currencies_filtered <- oneliners_currencies[use_oneliners]
-oneliners_values <- unlist(json_oneliners_list[grep("oneliners_value", names(json_oneliners_list), value = T)])
+oneliners_values <- unlist(json_oneliners_list[grep("value", names(json_oneliners_list), value = T)])
 oneliners_values_filtered <- oneliners_values[use_oneliners]
 
 final_to_oneliners_exchange_conditions <- final_currency == oneliners_currencies_filtered
 
-oneliners_texts <- unlist(json_oneliners_list[grep("oneliners_text", names(json_oneliners_list), value = T)])
+oneliners_texts <- unlist(json_oneliners_list[grep("text", names(json_oneliners_list), value = T)])
 oneliners_texts_filtered <- oneliners_texts[use_oneliners]
 
-oneliners_exchanges <- unlist(json_oneliners_list[grep("exchange_Final_Oneliners", names(json_oneliners_list), value = T)])
 oneliners_exchanges_filtered <- oneliners_exchanges[use_oneliners]
 oneliners_exchanges_filtered_needed <- oneliners_exchanges_filtered[!final_to_oneliners_exchange_conditions]
 oneliners_currency_texts <- oneliners_currencies_filtered
@@ -96,11 +99,11 @@ if (final_to_grouped_exchange_condition) {
   grouped_currency_text <- ""
 }
 
-use_dates <- json_dates_list$use_dates
-use_salary <- json_salary_list$use_salary
-use_period <- json_salary_list$use_period
-use_sick <- json_sick_list$use_sick
-use_nwd <- json_nwd_list$use_nwd
+use_dates <- json_dates_list$use
+use_salary_and_related <- json_salary_list$use_salary_and_related
+use_period <- json_period_list$use
+use_sick <- json_sick_list$use
+use_nwd <- json_nwd_list$use
 
 # use_oneliners <- json_oneliners_list$use_oneliners
 
@@ -108,10 +111,10 @@ use_grouped <- json_grouped_list$use_grouped
 
 total_days <- json_salary_list$total_days
 
-salary_periods <- json_salary_list$number_of_periods
+salary_periods <- json_period_list$number_of_periods
 
 periods_string <- ifelse((salary_periods == 0 || salary_periods == "") || !use_period, "",
-  paste0(salary_periods, " ", json_salary_list$period_name, ":")
+  paste0(salary_periods, " ", json_period_list$period_name, ":")
 )
 
 day_pay <- json_salary_list$salary / total_days
@@ -134,19 +137,19 @@ exchange_salary_text <- ifelse(final_to_salary_exchange_condition,
   "|",
   paste(
     common_plus_sick_pay_rounded, "|",
-    "/", json_salary_list$exchange_Final_Salary,
+    "/", json_salary_list$currency_exchange_to_Final_Currency,
     "="
   )
 )
 
 salary_days_pay_final <- ifelse(final_to_salary_exchange_condition,
   common_plus_sick_pay,
-  round(common_plus_sick_pay / json_salary_list$exchange_Final_Salary)
+  round(common_plus_sick_pay / json_salary_list$currency_exchange_to_Final_Currency)
 )
 
 sick_pay_rounded <- round(sick_pay, 1)
 
-salary_days_pay_final <- ifelse(use_salary, salary_days_pay_final, 0)
+salary_days_pay_final <- ifelse(use_salary_and_related, salary_days_pay_final, 0)
 oneliners_final <- 0
 
 if (any(use_oneliners)) {
@@ -172,22 +175,22 @@ groupedCosts <- 0
 total_grouped_finals_exchanged <- 0
 
 if (use_grouped) {
-  groupedCosts <- unlist(json_grouped_list[grep("groupedCostsValue", names(json_grouped_list), value = T)])
+  groupedCosts <- unlist(json_grouped_list[grep("Value", names(json_grouped_list), value = T)])
 
   if (final_to_grouped_exchange_condition) {
     grouped_final <- groupedCosts
   } else {
-    grouped_final <- round(groupedCosts / json_grouped_list$exchange_Final_Grouped)
+    grouped_final <- round(groupedCosts / json_grouped_list$currency_exchange_to_Final_Currency_Grouped)
   }
 
-  grouped_items_text <- unlist(json_grouped_list[grep("groupedCostsName", names(json_grouped_list), value = T)])
+  grouped_items_text <- unlist(json_grouped_list[grep("Name", names(json_grouped_list), value = T)])
 
   total_grouped_finals_exchanged <- sum(grouped_final)
 
   if (!final_to_grouped_exchange_condition) {
     exchange_grouped_text <- paste(
       format(sum(groupedCosts), scientific = FALSE), "|",
-      "/", json_grouped_list$exchange_Final_Grouped,
+      "/", json_grouped_list$currency_exchange_to_Final_Currency_Grouped,
       "="
     )
   }
@@ -235,21 +238,21 @@ cat(
     paste0("|\\hspace{2mm}", "", sdt, " ", sm, " ", sy, " ", json_dates_list$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n")
   },
   if (use_dates) {
-    paste0("|\\hspace{2mm}", json_salary_list$delivery_period_text, " ", smna, " ", sy, "| | |  |   |   |\n")
+    paste0("|\\hspace{2mm}", json_dates_list$delivery_month_text, " ", smna, " ", sy, "| | |  |   |   |\n")
   },
-  if (use_sick && use_salary) {
+  if (use_sick && use_salary_and_related) {
     paste0(
       "|\\hspace{8mm}", json_sick_list$text, ": |", sick_days, "/", total_days, "|",
       "|", sick_pay_rounded, "|", salary_currency_text, "|  |", "\n"
     )
   },
-  if ((use_sick | use_nwd) && use_salary) {
+  if ((use_sick | use_nwd) && use_salary_and_related) {
     paste0(
       "|\\hspace{8mm}", json_salary_list$common_days_text, "|", common_payable_days, "/", total_days, "|",
       "|", common_payable_salary_days_pay_rounded, "|", salary_currency_text, "|  |", "\n"
     )
   },
-  if (use_salary) {
+  if (use_salary_and_related) {
     paste0(
       "|\\hspace{2mm}", periods_string,
       "| |", salary_currency_text, "|", exchange_salary_text, "|", salary_days_pay_final_rounded_formatted, " ",
@@ -298,7 +301,7 @@ cat(
       paste0("| | | | | \n"),
       grouped_strings,
       paste0(
-        "|", json_grouped_list$groupedCostsGeneralName, "| |", grouped_currency_text, "|", exchange_grouped_text, "|", total_grouped_finals_exchanged, " ",
+        "|", json_grouped_list$GeneralName, "| |", grouped_currency_text, "|", exchange_grouped_text, "|", total_grouped_finals_exchanged, " ",
         final_currency, "|", "\n"
       )
     )
