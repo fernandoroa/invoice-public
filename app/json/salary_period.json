@@ -1,0 +1,5 @@
+{
+  "use": [true],
+  "number_of_periods": [1],
+  "period_name": ["month(s)"]
+}

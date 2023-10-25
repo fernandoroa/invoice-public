@@ -1,6 +1,6 @@
 {
   "days": [1],
   "percentage": [45],
-  "use_sick": [true],
+  "use": [true],
   "text": ["Services"]
 }

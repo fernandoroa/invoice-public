@@ -1,6 +1,0 @@
-{
-  "start": ["2022-01-01"],
-  "end": ["2022-01-31"],
-  "use_dates": [true],
-  "date_connector": ["to"]
-}

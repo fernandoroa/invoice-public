@@ -1,0 +1,12 @@
+{
+  "use_1": [false],
+  "currency_exchange_to_Final_Currency_1": [6],
+  "currency_1": ["USD"],
+  "value_1": [60],
+  "text_1": ["Benefits"],
+  "use_2": [true],
+  "currency_exchange_to_Final_Currency_2": [3.5],
+  "currency_2": ["USD"],
+  "value_2": [120],
+  "text_2": ["Costs Related to Contract Execution"]
+}

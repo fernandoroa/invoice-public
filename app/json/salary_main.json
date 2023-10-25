@@ -1,0 +1,9 @@
+{
+  "currency_exchange_to_Final_Currency": [5],
+  "salary": [300],
+  "use_salary_and_related": [true],
+  "currency": ["USD"],
+  "total_days": [21],
+  "section_title": ["Consultancy Charges"],
+  "common_days_text": ["other:"]
+}
