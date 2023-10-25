@@ -22,6 +22,18 @@
   grid-template-columns: 2fr 1fr;
   gap: 15px;
 }
+.two_column_right_big {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 15px;
+}
+.two_column_right_big:nth-child(2) {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  vertical-align: bottom;
+  margin-bottom: 15px;
+}
 
 #app-reload {
   grid-area: reload;
@@ -37,6 +49,7 @@
 button[type="button"] {
   background-color: rgb(250, 225, 156);
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+  margin-bottom: 15px;
 }
 
 #invoice-form-container {

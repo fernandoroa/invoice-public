@@ -1,12 +1,12 @@
 {
-  "currency_grouped": ["USD"],
-  "currency_exchange_to_Final_Currency_Grouped": [5.123],
+  "currency_grouped": ["BRL"],
+  "currency_exchange_to_Final_Currency_Grouped": [5.1219],
   "Value1": [50],
   "Value2": [100],
   "Value3": [80],
   "GeneralName": ["Grouped Costs"],
   "Name1": ["Grouped Cost 1"],
-  "Name2": [""],
+  "Name2": ["Second of group"],
   "Name3": ["Grouped cost 3"],
   "use_grouped": [true]
 }
