@@ -9,11 +9,12 @@ params:
   lang: 1
 ---
 ```{r setup, message = F,echo=F,warning=F}
-library(lubridate)
-library(readr)
-library(dplyr)
-# sudo apt install texlive-latex-base
-library(tinytex)
+box::use(
+  lubridate[...],
+  readr[...],
+  dplyr[filter, bind_rows],
+  purrr[keep]
+)
 
 lan_idx <- as.numeric(params$lang)
 
@@ -56,27 +57,30 @@ final_currency <- json_final_currency_list$final_currency
 salary_currency <- json_salary_list$main$currency
 salary_currency_text <- salary_currency
 
-use_oneliners <- unlist(json_oneliners_list[grep("use", names(json_oneliners_list), value = T)])
+# oneliners
+oneliners_filtered_list <- json_oneliners_list |> keep(~ .$use)
 
-oneliners_currencies_mixed <- unlist(json_oneliners_list[grep("currency", names(json_oneliners_list), value = T)])
-oneliners_exchanges <- unlist(json_oneliners_list[grep("currency_exchange_to_Final_Currency",
-  names(json_oneliners_list),
-  value = TRUE
-)])
-oneliners_currencies <- oneliners_currencies_mixed[which(!names(oneliners_currencies_mixed) %in% names(oneliners_exchanges))]
+oneliners_filtered_df <- bind_rows(oneliners_filtered_list, .id = "name")
 
-oneliners_currencies_filtered <- oneliners_currencies[use_oneliners]
-oneliners_values <- unlist(json_oneliners_list[grep("value", names(json_oneliners_list), value = T)])
-oneliners_values_filtered <- oneliners_values[use_oneliners]
+oneliners_filtered_df$needs_exchange <- ifelse(oneliners_filtered_df$currency != final_currency, T, F)
 
-final_to_oneliners_exchange_conditions <- final_currency == oneliners_currencies_filtered
+oneliners_filtered_df_not_exchanged <- oneliners_filtered_df |> filter(!needs_exchange)
 
-oneliners_texts <- unlist(json_oneliners_list[grep("text", names(json_oneliners_list), value = T)])
-oneliners_texts_filtered <- oneliners_texts[use_oneliners]
+oneliners_filtered_df_not_exchanged$formatted_value <- format(round(oneliners_filtered_df_not_exchanged$value), scientific = FALSE)
 
-oneliners_exchanges_filtered <- oneliners_exchanges[use_oneliners]
-oneliners_exchanges_filtered_needed <- oneliners_exchanges_filtered[!final_to_oneliners_exchange_conditions]
-oneliners_currency_texts <- oneliners_currencies_filtered
+oneliners_filtered_df_exchanged <- oneliners_filtered_df |> filter(needs_exchange)
+oneliners_filtered_df_exchanged$exchanged_value <- round(
+  oneliners_filtered_df_exchanged$value / oneliners_filtered_df_exchanged$currency_exchange_to_Final_Currency
+)
+
+oneliners_filtered_df_exchanged$exchanged_value_formatted <- format(oneliners_filtered_df_exchanged$exchanged_value, scientific = FALSE)
+
+oneliners_exchange_text <- paste(
+  format(oneliners_filtered_df_exchanged$value, scientific = FALSE), "|", "/",
+  oneliners_filtered_df_exchanged$currency_exchange_to_Final_Currency, "="
+)
+
+oneliners_final <- sum(oneliners_filtered_df_not_exchanged$value, oneliners_filtered_df_exchanged$exchanged_value, na.rm = TRUE)
 
 grouped_currency <- json_grouped_list$currency_grouped
 grouped_currency_text <- grouped_currency
@@ -143,23 +147,7 @@ salary_days_pay_final <- ifelse(final_to_salary_exchange_condition,
 modified_pay_rounded <- round(modified_pay, 1)
 
 salary_days_pay_final <- ifelse(use_salary_and_related, salary_days_pay_final, 0)
-oneliners_final <- 0
 
-if (any(use_oneliners)) {
-  oneliners_values_filtered_not_exchanged <- oneliners_values_filtered[final_to_oneliners_exchange_conditions]
-  oneliners_texts_filtered_not_exchanged <- oneliners_texts_filtered[final_to_oneliners_exchange_conditions]
-
-  oneliners_values_filtered_to_exchange <- oneliners_values_filtered[!final_to_oneliners_exchange_conditions]
-  oneliners_currency_texts_needed <- oneliners_currency_texts[!final_to_oneliners_exchange_conditions]
-  oneliners_texts_filtered_exchanged <- oneliners_texts_filtered[!final_to_oneliners_exchange_conditions]
-
-  oneliners_values_filtered_exchanged <- round(oneliners_values_filtered_to_exchange / oneliners_exchanges_filtered_needed)
-  oneliners_exchange_text <- paste(
-    oneliners_values_filtered_to_exchange, "|", "/",
-    oneliners_exchanges_filtered_needed, "="
-  )
-  oneliners_final <- sum(oneliners_values_filtered_not_exchanged, oneliners_values_filtered_exchanged)
-}
 
 grouped_final <- 0
 grouped_items_text <- ""
@@ -189,7 +177,7 @@ if (use_grouped) {
   }
 }
 
-total_sum <- salary_days_pay_final + oneliners_final + total_grouped_finals_exchanged
+total_sum <- sum(salary_days_pay_final, oneliners_final, total_grouped_finals_exchanged, na.rm = TRUE)
 
 total_pay_rounded <- round(total_sum)
 total_pay_formatted_rounded <- format(total_pay_rounded, scientific = FALSE)
@@ -252,27 +240,29 @@ cat(
       final_currency, "|", "\n"
     )
   },
-  if (any(use_oneliners)) {
+  if (length(oneliners_filtered_list)) {
     oneliners_strings <- c()
-    for (idx in seq_along(oneliners_values_filtered_not_exchanged)) {
+    for (idx in seq_len(nrow(oneliners_filtered_df_not_exchanged))) {
       oneliners_strings <- c(
         oneliners_strings,
         paste0("| | | | | \n"),
         paste0(
-          "|", oneliners_texts_filtered_not_exchanged[idx],
-          "| |", "|", "|", " ", "|", oneliners_values_filtered_not_exchanged[idx], " ",
+          "|", oneliners_filtered_df_not_exchanged[idx, "text"],
+          "| |", "|", "|", " ", "|",
+          oneliners_filtered_df_not_exchanged[idx, "formatted_value"], " ",
           final_currency, "|", "\n"
         )
       )
     }
-    for (idx in seq_along(oneliners_values_filtered_exchanged)) {
+    for (idx in seq_len(nrow(oneliners_filtered_df_exchanged))) {
       oneliners_strings <- c(
         oneliners_strings,
         paste0("| | | | | \n"),
         paste0(
-          "|", oneliners_texts_filtered_exchanged[idx], "| |", oneliners_currency_texts_needed[idx], "|",
+          "|", oneliners_filtered_df_exchanged[idx, "text"], "| |",
+          oneliners_filtered_df_exchanged[idx, "currency"], "|",
           oneliners_exchange_text[idx],
-          "|", " ", " ", oneliners_values_filtered_exchanged[idx], " ",
+          "|", " ", " ", oneliners_filtered_df_exchanged[idx, "exchanged_value_formatted"], " ",
           final_currency, "|", "\n"
         )
       )

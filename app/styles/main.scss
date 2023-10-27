@@ -37,12 +37,13 @@
 
 #app-reload {
   grid-area: reload;
-  background-color: rgb(8, 197, 255);
+  background-color: #43beee;
   box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
 }
 
-#app-report {
-  background-color: aquamarine;
+#generate_buttons #app-report,
+#generate_buttons #app-modify_all {
+  background-color: rgb(8, 197, 255);
   box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -69,4 +70,17 @@ button[type="button"] {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+}
+
+.well .six_column_grid {
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 3fr 2fr 1fr;
+  gap: 15px;
+}
+
+.go-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  vertical-align: bottom;
 }

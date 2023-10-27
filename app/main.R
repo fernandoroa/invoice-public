@@ -114,21 +114,30 @@ ui <- function(id) {
       )
     ),
     tabPanel(
-      "Oneliners & Grouped costs",
+      "One-liners costs",
       fluidPage(
         fluidRow(
           column(
-            3,
+            8,
             uiOutput(ns("oneliners_box"))
           ),
+          column(1),
           column(
             3,
             img(src = "static/invoice_oneliners.svg", style = "max-width:25vw")
-          ),
+          )
+        )
+      )
+    ),
+    tabPanel(
+      "Grouped costs",
+      fluidPage(
+        fluidRow(
           column(
-            3,
+            7,
             uiOutput(ns("grouped_box"))
           ),
+          column(2),
           column(
             3,
             img(src = "static/invoice_grouped.svg", style = "max-width:25vw")
@@ -204,8 +213,8 @@ server <- function(id) {
         updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = exchange_salary)
       }
       inputs <- reactiveValuesToList(input)
-      oneliners_currency_name_strings <- grep("onelinerscurrency", names(inputs), value = TRUE)
-      grouped_currency_name_strings <- grep("groupedcurrency", names(inputs), value = TRUE)
+      oneliners_currency_name_strings <- grep("oneliners.*currency", names(inputs), value = TRUE)
+      grouped_currency_name_strings <- grep("grouped.*currency", names(inputs), value = TRUE)
 
       oneline_currencies_inputs <- inputs[which(names(inputs) %in% oneliners_currency_name_strings)]
       grouped_currency_inputs <- inputs[which(names(inputs) %in% grouped_currency_name_strings)]
@@ -317,12 +326,13 @@ server <- function(id) {
     observeEvent(c(input$modify_oneliners, input$modify_all),
       {
         list <- list()
-
-        list <- lapply(names(rv_json_lists$json_oneliners_list), function(x) {
-          input[[paste0("oneliners", x)]]
-        })
-
-        names(list) <- names(rv_json_lists$json_oneliners_list)
+        oneliners_names <- names(rv_json_lists$json_oneliners_list)
+        for (oneliner_name in oneliners_names) {
+          list[[oneliner_name]] <- lapply(names(rv_json_lists$json_oneliners_list[[oneliner_name]]), function(x) {
+            input[[paste0("oneliners", oneliner_name, x)]]
+          })
+          names(list[[oneliner_name]]) <- names(rv_json_lists$json_oneliners_list[[oneliner_name]])
+        }
         json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
         write(json_data, "app/json/oneline_costs.json")
       },
@@ -600,113 +610,92 @@ server <- function(id) {
       )
     })
 
+
     output$oneliners_box <- renderUI({
-      char_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.character(x))))
-      num_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.numeric(x))))
-      logic_names_oneliners <- names(which(sapply(rv_json_lists$json_oneliners_list, function(x) is.logical(x))))
+      oneliners_list <- rv_json_lists$json_oneliners_list
+      oneliners_list_names <- names(oneliners_list)
+      length_oneliners <- length(oneliners_list)
+      div(
+        tagList(
+          lapply(oneliners_list_names, function(name) {
+            num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_oneliners <- list()
+            num_names_oneliners <- char_names_oneliners <- list()
 
-      char_names_currency <- grep("currency", char_names_oneliners, value = TRUE)
-      num_names_currency <- grep("currency", num_names_oneliners, value = TRUE)
+            char_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.character(x))))
+            num_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.numeric(x))))
+            logic_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.logical(x))))
 
-      char_names_not_currency <- grep("currency", char_names_oneliners, value = TRUE, invert = TRUE)
-      num_names_not_currency <- grep("currency", num_names_oneliners, value = TRUE, invert = TRUE)
+            char_names_currency[[name]] <- grep("currency", char_names_oneliners[[name]], value = TRUE)
+            num_names_currency[[name]] <- grep("currency", num_names_oneliners[[name]], value = TRUE)
 
-      wellPanel(
-        h4(strong("One-Line Costs")),
-        {
-          char_names_currency_list <- lapply(char_names_currency, function(x) {
-            textInput(
-              ns(paste0("oneliners", x)),
+            char_names_not_currency[[name]] <- grep("currency", char_names_oneliners[[name]], value = TRUE, invert = TRUE)
+            num_names_not_currency[[name]] <- grep("currency", num_names_oneliners[[name]], value = TRUE, invert = TRUE)
+
+            wellPanel({
+              char_names_currency_list <- lapply(char_names_currency[[name]], function(x) {
+                textInput(
+                  ns(paste0("oneliners", name, x)),
+                  div(
+                    class = "wrap",
+                    sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+                  ),
+                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                )
+              })
+              num_names_currency_list <- lapply(num_names_currency[[name]], function(x) {
+                numericInput(
+                  ns(paste0("oneliners", name, x)),
+                  div(
+                    class = "wrap",
+                    gsub("_", " ", x, perl = TRUE)
+                  ),
+                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                )
+              })
+              char_names_oneliners_not_currency_list <- lapply(char_names_not_currency[[name]], function(x) {
+                textInput(
+                  ns(paste0("oneliners", name, x)),
+                  gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
+                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                )
+              })
+              num_names_oneliners_not_currency_list <- lapply(num_names_not_currency[[name]], function(x) {
+                numericInput(
+                  ns(paste0("oneliners", name, x)),
+                  gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
+                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                )
+              })
               div(
-                class = "wrap",
-                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-              ),
-              rv_json_lists$json_oneliners_list[[x]]
-            )
+                class = "six_column_grid",
+                h4(strong(name)),
+                div(
+                  class = "go-bottom",
+                  char_names_currency_list
+                ),
+                div(
+                  class = "go-bottom",
+                  num_names_currency_list
+                ),
+                div(
+                  class = "go-bottom",
+                  char_names_oneliners_not_currency_list
+                ),
+                div(class = "go-bottom", num_names_oneliners_not_currency_list),
+                div(
+                  class = "go-bottom",
+                  logic_names_oneliners_list <- lapply(logic_names_oneliners[[name]], function(x) {
+                    checkboxInput(
+                      ns(paste0("oneliners", name, x)),
+                      gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+                      rv_json_lists$json_oneliners_list[[name]][[x]]
+                    )
+                  })
+                )
+              )
+            })
           })
-          num_names_currency_list <- lapply(num_names_currency, function(x) {
-            numericInput(
-              ns(paste0("oneliners", x)),
-              div(
-                class = "wrap",
-                gsub("_", " ", x, perl = TRUE)
-              ),
-              rv_json_lists$json_oneliners_list[[x]]
-            )
-          })
-          div(
-            class = "two_column_grid",
-            div(
-              char_names_currency_list
-            ),
-            div(
-              num_names_currency_list
-            )
-          )
-        },
-        {
-          char_names_oneliners_not_currency_list <- lapply(char_names_not_currency, function(x) {
-            textInput(
-              ns(paste0("oneliners", x)),
-              gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-              rv_json_lists$json_oneliners_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(char_names_oneliners_not_currency_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              char_names_oneliners_not_currency_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(char_names_oneliners_not_currency_list)) {
-                char_names_oneliners_not_currency_list[(middle_idx + 1):length(char_names_oneliners_not_currency_list)]
-              }
-            )
-          )
-        },
-        {
-          num_names_oneliners_not_currency_list <- lapply(num_names_not_currency, function(x) {
-            numericInput(
-              ns(paste0("oneliners", x)),
-              gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
-              rv_json_lists$json_oneliners_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(num_names_oneliners_not_currency_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              num_names_oneliners_not_currency_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(num_names_oneliners_not_currency_list)) {
-                num_names_oneliners_not_currency_list[(middle_idx + 1):length(num_names_oneliners_not_currency_list)]
-              }
-            )
-          )
-        },
-        {
-          logic_names_oneliners_list <- lapply(logic_names_oneliners, function(x) {
-            checkboxInput(
-              ns(paste0("oneliners", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_oneliners_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(logic_names_oneliners_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              logic_names_oneliners_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(logic_names_oneliners_list)) {
-                logic_names_oneliners_list[(middle_idx + 1):length(logic_names_oneliners_list)]
-              }
-            )
-          )
-        },
+        ),
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_oneliners"),
           strong("Save", code("oneline_costs.json")),

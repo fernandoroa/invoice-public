@@ -1,12 +1,53 @@
 {
-  "use_1": [true],
-  "currency_exchange_to_Final_Currency_1": [5.1219],
-  "currency_1": ["BRL"],
-  "value_1": [60],
-  "text_1": ["Oneliner Cost 1"],
-  "use_2": [true],
-  "currency_exchange_to_Final_Currency_2": [1],
-  "currency_2": ["USD"],
-  "value_2": [120],
-  "text_2": ["Cost 2 oneliner"]
+  "cost_1": {
+    "use": [
+      true
+    ],
+    "currency_exchange_to_Final_Currency": [
+      5.1594
+    ],
+    "currency": [
+      "BRL"
+    ],
+    "value": [
+      6000
+    ],
+    "text": [
+      "Oneliner Cost 1"
+    ]
+  },
+  "cost_2": {
+    "use": [
+      true
+    ],
+    "currency_exchange_to_Final_Currency": [
+      5.1594
+    ],
+    "currency": [
+      "COP"
+    ],
+    "value": [
+      10000
+    ],
+    "text": [
+      "Cost 2 oneliner"
+    ]
+  },
+  "cost_3": {
+    "use": [
+      true
+    ],
+    "currency_exchange_to_Final_Currency": [
+      5.1594
+    ],
+    "currency": [
+      "BRL"
+    ],
+    "value": [
+      1200
+    ],
+    "text": [
+      "Cost 3 oneliner"
+    ]
+  }
 }
