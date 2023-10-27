@@ -1,7 +1,0 @@
-{
-  "start": ["2022-02-01"],
-  "end": ["2022-02-28"],
-  "use": [true],
-  "date_connector": ["to"],
-  "delivery_month_text": ["Delivery date:"]
-}

@@ -20,8 +20,6 @@ lan_idx <- as.numeric(params$lang)
 # main
 json_fields_list <- rjson::fromJSON(file = "json/fieldNames.json")
 json_final_currency_list <- rjson::fromJSON(file = "json/final_currency_inv_date.json")
-json_dates_list <- rjson::fromJSON(file = "json/salary_dates.json")
-json_period_list <- rjson::fromJSON(file = "json/salary_period.json")
 
 #
 # bank and businesses
@@ -31,11 +29,8 @@ json_consultant_account_list <- rjson::fromJSON(file = "json/consultant_account.
 json_consultant_business_list <- rjson::fromJSON(file = "json/consultant_contact.json")
 
 # special multiline - salary - days
-json_salary_list <- rjson::fromJSON(file = "json/salary_main.json")
+json_salary_list <- rjson::fromJSON(file = "json/salary.json")
 
-# period (days) modifiers
-json_modified_list <- rjson::fromJSON(file = "json/salary_modified_days.json")
-json_nwd_list <- rjson::fromJSON(file = "json/salary_nwdays.json")
 
 # oneliners
 json_oneliners_list <- rjson::fromJSON(file = "json/oneline_costs.json")
@@ -44,13 +39,13 @@ json_oneliners_list <- rjson::fromJSON(file = "json/oneline_costs.json")
 json_grouped_list <- rjson::fromJSON(file = "json/grouped_costs.json")
 
 # dates
-sm <- month(json_dates_list$start, label = TRUE)
-smna <- month(json_dates_list$start, label = TRUE, abbr = FALSE)
-em <- month(json_dates_list$end, label = TRUE)
-sdt <- day(json_dates_list$start)
-edt <- day(json_dates_list$end)
-sy <- year(json_dates_list$start)
-ey <- year(json_dates_list$end)
+sm <- month(json_salary_list$dates$start, label = TRUE)
+smna <- month(json_salary_list$dates$start, label = TRUE, abbr = FALSE)
+em <- month(json_salary_list$dates$end, label = TRUE)
+sdt <- day(json_salary_list$dates$start)
+edt <- day(json_salary_list$dates$end)
+sy <- year(json_salary_list$dates$start)
+ey <- year(json_salary_list$dates$end)
 
 inv_dt <- day(json_final_currency_list$invoiceDate)
 inv_m <- month(json_final_currency_list$invoiceDate, label = TRUE)
@@ -58,14 +53,16 @@ inv_y <- year(json_final_currency_list$invoiceDate)
 
 # currencies
 final_currency <- json_final_currency_list$final_currency
-salary_currency <- json_salary_list$currency
+salary_currency <- json_salary_list$main$currency
 salary_currency_text <- salary_currency
 
 use_oneliners <- unlist(json_oneliners_list[grep("use", names(json_oneliners_list), value = T)])
 
 oneliners_currencies_mixed <- unlist(json_oneliners_list[grep("currency", names(json_oneliners_list), value = T)])
 oneliners_exchanges <- unlist(json_oneliners_list[grep("currency_exchange_to_Final_Currency",
-  names(json_oneliners_list), value = TRUE)])
+  names(json_oneliners_list),
+  value = TRUE
+)])
 oneliners_currencies <- oneliners_currencies_mixed[which(!names(oneliners_currencies_mixed) %in% names(oneliners_exchanges))]
 
 oneliners_currencies_filtered <- oneliners_currencies[use_oneliners]
@@ -97,29 +94,29 @@ if (final_to_grouped_exchange_condition) {
   grouped_currency_text <- ""
 }
 
-use_dates <- json_dates_list$use
-use_salary_and_related <- json_salary_list$use_salary_and_related
-use_period <- json_period_list$use
-use_modified <- json_modified_list$use
-use_nwd <- json_nwd_list$use
+use_dates <- json_salary_list$dates$use
+use_salary_and_related <- json_salary_list$main$use_salary_and_related
+use_period <- json_salary_list$period$use
+use_modified <- json_salary_list$modified_days$use
+use_nwd <- json_salary_list$non_working_days$use
 
 use_grouped <- json_grouped_list$use_grouped
 
-total_days <- json_salary_list$total_days
+total_days <- json_salary_list$main$total_days
 
-salary_periods <- json_period_list$number_of_periods
+salary_periods <- json_salary_list$period$number
 
 periods_string <- ifelse((salary_periods == 0 || salary_periods == "") || !use_period, "",
-  paste0(salary_periods, " ", json_period_list$period_name, ":")
+  paste0(salary_periods, " ", json_salary_list$period$name, ":")
 )
 
-day_pay <- json_salary_list$salary / total_days
+day_pay <- json_salary_list$main$salary / total_days
 
-modified_days <- ifelse(use_modified, json_modified_list$days, 0)
+modified_days <- ifelse(use_modified, json_salary_list$modified_days$days, 0)
 
-non_working_days <- ifelse(use_nwd, json_nwd_list$non_working_days, 0)
+non_working_days <- ifelse(use_nwd, json_salary_list$non_working_days$days, 0)
 
-modified_pay <- modified_days * day_pay * (json_modified_list$percentage / 100)
+modified_pay <- modified_days * day_pay * (json_salary_list$modified_days$percentage / 100)
 
 common_payable_days <- total_days - modified_days - non_working_days
 
@@ -133,14 +130,14 @@ exchange_salary_text <- ifelse(final_to_salary_exchange_condition,
   "|",
   paste(
     common_plus_modified_pay_rounded, "|",
-    "/", json_salary_list$currency_exchange_to_Final_Currency,
+    "/", json_salary_list$main$currency_exchange_to_Final_Currency,
     "="
   )
 )
 
 salary_days_pay_final <- ifelse(final_to_salary_exchange_condition,
   common_plus_modified_pay,
-  round(common_plus_modified_pay / json_salary_list$currency_exchange_to_Final_Currency)
+  round(common_plus_modified_pay / json_salary_list$main$currency_exchange_to_Final_Currency)
 )
 
 modified_pay_rounded <- round(modified_pay, 1)
@@ -227,24 +224,24 @@ grouped_final_formatted <- format(grouped_final, scientific = FALSE)
 
 | `r json_fields_list$Services[lan_idx]`| |  |   |  | `r json_fields_list$amount[lan_idx]` |
 |--------|-------:|----|----:|----|-----------:|
-|`r json_salary_list$section_title`|  |  | | | |
+|`r json_salary_list$main$section_title`|  |  | | | |
 ``` {r table, results="asis", echo=F, eval=T}
 cat(
   if (use_dates) {
-    paste0("|\\hspace{2mm}", "", sdt, " ", sm, " ", sy, " ", json_dates_list$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n")
+    paste0("|\\hspace{2mm}", "", sdt, " ", sm, " ", sy, " ", json_salary_list$dates$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n")
   },
   if (use_dates) {
-    paste0("|\\hspace{2mm}", json_dates_list$delivery_month_text, " ", smna, " ", sy, "| | |  |   |   |\n")
+    paste0("|\\hspace{2mm}", json_salary_list$dates$delivery_month_text, " ", smna, " ", sy, "| | |  |   |   |\n")
   },
   if (use_modified && use_salary_and_related) {
     paste0(
-      "|\\hspace{8mm}", json_modified_list$text, ": |", modified_days, "/", total_days, "|",
+      "|\\hspace{8mm}", json_salary_list$modified_days$text, ": |", modified_days, "/", total_days, "|",
       "|", modified_pay_rounded, "|", salary_currency_text, "|  |", "\n"
     )
   },
   if ((use_modified | use_nwd) && use_salary_and_related) {
     paste0(
-      "|\\hspace{8mm}", json_salary_list$common_days_text, "|", common_payable_days, "/", total_days, "|",
+      "|\\hspace{8mm}", json_salary_list$main$common_days_text, "|", common_payable_days, "/", total_days, "|",
       "|", common_payable_salary_days_pay_rounded, "|", salary_currency_text, "|  |", "\n"
     )
   },
