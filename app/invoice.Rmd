@@ -1,19 +1,21 @@
 ---
 title: "Invoice"
-output: pdf_document
 geometry: "left=3cm,right=2cm,top=0cm,bottom=2cm"
 fontsize: 11pt
 papersize: a4
 params: 
   invoiceNumber: ''
   lang: 1
+output:
+  pdf_document
 ---
 ```{r setup, message = F,echo=F,warning=F}
 box::use(
   lubridate[...],
   readr[...],
   dplyr[filter, bind_rows],
-  purrr[keep]
+  purrr[keep, discard],
+  magrittr[`%>%`]
 )
 
 lan_idx <- as.numeric(params$lang)
@@ -34,7 +36,7 @@ json_salary_list <- rjson::fromJSON(file = "json/salary.json")
 
 
 # oneliners
-json_oneliners_list <- rjson::fromJSON(file = "json/oneline_costs.json")
+json_oneliners_list <- rjson::fromJSON(file = "json/oneliner_costs.json")
 
 # multiliners
 json_grouped_list <- rjson::fromJSON(file = "json/grouped_costs.json")
@@ -82,7 +84,7 @@ oneliners_exchange_text <- paste(
 
 oneliners_final <- sum(oneliners_filtered_df_not_exchanged$value, oneliners_filtered_df_exchanged$exchanged_value, na.rm = TRUE)
 
-grouped_currency <- json_grouped_list$currency_grouped
+grouped_currency <- json_grouped_list$currency
 grouped_currency_text <- grouped_currency
 
 # currency exchanges comparisons booleans
@@ -104,7 +106,7 @@ use_period <- json_salary_list$period$use
 use_modified <- json_salary_list$modified_days$use
 use_nwd <- json_salary_list$non_working_days$use
 
-use_grouped <- json_grouped_list$use_grouped
+use_grouped <- json_grouped_list$use
 
 total_days <- json_salary_list$main$total_days
 
@@ -148,43 +150,48 @@ modified_pay_rounded <- round(modified_pay, 1)
 
 salary_days_pay_final <- ifelse(use_salary_and_related, salary_days_pay_final, 0)
 
-
-grouped_final <- 0
-grouped_items_text <- ""
 exchange_grouped_text <- "|"
-groupedCosts <- 0
-total_grouped_finals_exchanged <- 0
 
 if (use_grouped) {
-  groupedCosts <- unlist(json_grouped_list[grep("Value", names(json_grouped_list), value = T)])
+  grouped_list_root <- json_grouped_list %>% keep(names(.) %in% c(
+    "currency_exchange_to_Final_Currency", "use",
+    "GeneralName", "currency"
+  ))
+  grouped_sublists <- json_grouped_list %>% discard(names(.) %in% c(
+    "currency_exchange_to_Final_Currency", "use",
+    "GeneralName", "currency"
+  ))
 
+  json_sublists_df <- bind_rows(grouped_sublists, .id = "json_name")
+  grouped_root_df <- grouped_list_root |> bind_rows()
+  json_grouped_df <- cbind(grouped_root_df, json_sublists_df)
+  json_grouped_df
+  json_grouped_df$value_formatted <- format(json_grouped_df$value, scientific = FALSE)
+  total_grouped_finals_original <- total_grouped_finals <- sum(json_grouped_df$value)
   if (final_to_grouped_exchange_condition) {
-    grouped_final <- groupedCosts
+    total_grouped_finals <- sum(json_grouped_df$value)
   } else {
-    grouped_final <- round(groupedCosts / json_grouped_list$currency_exchange_to_Final_Currency_Grouped)
+    json_grouped_df$exchanged_value <- json_grouped_df$value / json_grouped_df$currency_exchange_to_Final_Currency
+    total_grouped_finals <- sum(json_grouped_df$exchanged_value)
   }
-
-  grouped_items_text <- unlist(json_grouped_list[grep("^Name", names(json_grouped_list), value = T)])
-
-  total_grouped_finals_exchanged <- sum(grouped_final)
 
   if (!final_to_grouped_exchange_condition) {
     exchange_grouped_text <- paste(
-      format(sum(groupedCosts), scientific = FALSE), "|",
-      "/", json_grouped_list$currency_exchange_to_Final_Currency_Grouped,
+      format(total_grouped_finals_original, scientific = FALSE), "|",
+      "/", grouped_list_root$currency_exchange_to_Final_Currency,
       "="
     )
   }
 }
 
-total_sum <- sum(salary_days_pay_final, oneliners_final, total_grouped_finals_exchanged, na.rm = TRUE)
+total_sum <- sum(salary_days_pay_final, oneliners_final, total_grouped_finals, na.rm = TRUE)
 
 total_pay_rounded <- round(total_sum)
 total_pay_formatted_rounded <- format(total_pay_rounded, scientific = FALSE)
 
 salary_days_pay_final_rounded <- round(salary_days_pay_final)
 salary_days_pay_final_rounded_formatted <- format(salary_days_pay_final_rounded, scientific = FALSE)
-grouped_final_formatted <- format(grouped_final, scientific = FALSE)
+grouped_final_formatted <- format(round(total_grouped_finals), scientific = FALSE)
 ```
 
 \pagenumbering{gobble} 
@@ -241,11 +248,10 @@ cat(
     )
   },
   if (length(oneliners_filtered_list)) {
-    oneliners_strings <- c()
+    oneliners_strings <- paste0("| | | | |  \n")
     for (idx in seq_len(nrow(oneliners_filtered_df_not_exchanged))) {
       oneliners_strings <- c(
         oneliners_strings,
-        paste0("| | | | | \n"),
         paste0(
           "|", oneliners_filtered_df_not_exchanged[idx, "text"],
           "| |", "|", "|", " ", "|",
@@ -254,10 +260,10 @@ cat(
         )
       )
     }
+
     for (idx in seq_len(nrow(oneliners_filtered_df_exchanged))) {
       oneliners_strings <- c(
         oneliners_strings,
-        paste0("| | | | | \n"),
         paste0(
           "|", oneliners_filtered_df_exchanged[idx, "text"], "| |",
           oneliners_filtered_df_exchanged[idx, "currency"], "|",
@@ -271,12 +277,12 @@ cat(
   },
   if (use_grouped) {
     grouped_strings <- character()
-    for (grouped_idx in seq_along(grouped_final)) {
+    for (grouped_idx in seq_len(nrow(json_grouped_df))) {
       grouped_strings <- c(
         grouped_strings,
         paste0(
-          "|\\hspace{2mm}", grouped_items_text[grouped_idx], "| |", "|",
-          " ", groupedCosts[grouped_idx], "|", grouped_currency_text, " ", "| |", "\n"
+          "|\\hspace{2mm}", json_grouped_df[grouped_idx, "name"], "| |", "|",
+          " ", json_grouped_df[grouped_idx, "value"], "|", json_grouped_df[grouped_idx, "currency"], " ", "| |", "\n"
         )
       )
     }
@@ -284,7 +290,7 @@ cat(
       paste0("| | | | | \n"),
       grouped_strings,
       paste0(
-        "|", json_grouped_list$GeneralName, "| |", grouped_currency_text, "|", exchange_grouped_text, "|", total_grouped_finals_exchanged, " ",
+        "|", json_grouped_list$GeneralName, "| |", grouped_currency_text, "|", exchange_grouped_text, "|", grouped_final_formatted, " ",
         final_currency, "|", "\n"
       )
     )

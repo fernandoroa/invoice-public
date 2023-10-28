@@ -4,18 +4,12 @@ box::use(
   rjson[...],
   jsonlite[...],
   lubridate[...],
-  tinytex[...]
+  purrr[discard, keep]
 )
 
 box::use(
   logic / exchange[...],
 )
-
-# ubuntu
-# sudo apt install texlive-latex-base
-
-# Windows
-# https://github.com/rstudio/tinytex-releases # download manually
 
 #' @export
 ui <- function(id) {
@@ -66,7 +60,10 @@ ui <- function(id) {
             wellPanel(
               textInput(ns("invoiceNumber"), "Invoice Number", paste(format(Sys.time(), "%Y-")))
             ),
-            uiOutput(ns("first_well_panel")),
+            div(
+              style = "max-width:600px",
+              uiOutput(ns("business_to_bill_box")),
+            )
           ),
           column(
             3,
@@ -77,10 +74,7 @@ ui <- function(id) {
           ),
           column(
             3,
-            div(
-              style = "max-width:600px",
-              uiOutput(ns("business_to_bill_box")),
-            )
+            uiOutput(ns("first_well_panel"))
           ),
           column(
             3,
@@ -99,12 +93,22 @@ ui <- function(id) {
             uiOutput(ns("salary_period_panel"))
           ),
           column(
-            3,
-            uiOutput(ns("salary_box"))
-          ),
-          column(
-            3,
-            uiOutput(ns("modified_box"))
+            6,
+            div(
+              class = "salary_and_days_container",
+              div(
+                class = "salary",
+                uiOutput(ns("salary_box"))
+              ),
+              div(
+                class = "modified",
+                uiOutput(ns("modified_box"))
+              ),
+              div(
+                class = "non_working_days",
+                uiOutput(ns("non_working_days_box"))
+              )
+            )
           ),
           column(
             3,
@@ -133,11 +137,12 @@ ui <- function(id) {
       "Grouped costs",
       fluidPage(
         fluidRow(
+          column(1),
           column(
             7,
             uiOutput(ns("grouped_box"))
           ),
-          column(2),
+          column(1),
           column(
             3,
             img(src = "static/invoice_grouped.svg", style = "max-width:25vw")
@@ -150,10 +155,10 @@ ui <- function(id) {
       fluidPage(
         fluidRow(
           column(
-            3,
+            5,
             uiOutput(ns("consultant_account_box"))
           ),
-          column(6),
+          column(4),
           column(
             3,
             img(src = "static/invoice_bank.svg", style = "max-width:25vw")
@@ -172,7 +177,7 @@ server <- function(id) {
     rv_json_lists <- reactiveValues(
       json_final_currency_list = rjson::fromJSON(file = "app/json/final_currency_inv_date.json"),
       json_salary_list = rjson::fromJSON(file = "app/json/salary.json"),
-      json_oneliners_list = rjson::fromJSON(file = "app/json/oneline_costs.json"),
+      json_oneliners_list = rjson::fromJSON(file = "app/json/oneliner_costs.json"),
       json_grouped_list = rjson::fromJSON(file = "app/json/grouped_costs.json"),
       json_business_to_bill_list = rjson::fromJSON(file = "app/json/business_to_bill.json"),
       json_consultant_account_list = rjson::fromJSON(file = "app/json/consultant_account.json"),
@@ -189,7 +194,7 @@ server <- function(id) {
         rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/consultant_account.json")
         rv_json_lists$json_consultant_business_list <- rjson::fromJSON(file = "app/json/consultant_contact.json")
         rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/salary.json")
-        rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/oneline_costs.json")
+        rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/oneliner_costs.json")
         rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/grouped_costs.json")
       },
       ignoreInit = TRUE
@@ -312,11 +317,28 @@ server <- function(id) {
       {
         list <- list()
 
-        list <- lapply(names(rv_json_lists$json_grouped_list), function(x) {
+        grouped_names <- names(rv_json_lists$json_grouped_list)
+        grouped_names_root <- intersect(grouped_names, c(
+          "currency_exchange_to_Final_Currency", "use",
+          "GeneralName", "currency"
+        ))
+        grouped_names_sublists <- setdiff(grouped_names, c(
+          "currency_exchange_to_Final_Currency", "use",
+          "GeneralName", "currency"
+        ))
+
+        list <- lapply(grouped_names_root, function(x) {
           input[[paste0("grouped", x)]]
         })
+        names(list) <- grouped_names_root
 
-        names(list) <- names(rv_json_lists$json_grouped_list)
+        for (grouped_name in grouped_names_sublists) {
+          list[[grouped_name]] <- lapply(names(rv_json_lists$json_grouped_list[[grouped_name]]), function(x) {
+            input[[paste0("grouped", grouped_name, x)]]
+          })
+          names(list[[grouped_name]]) <- names(rv_json_lists$json_grouped_list[[grouped_name]])
+        }
+
         json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
         write(json_data, "app/json/grouped_costs.json")
       },
@@ -334,7 +356,7 @@ server <- function(id) {
           names(list[[oneliner_name]]) <- names(rv_json_lists$json_oneliners_list[[oneliner_name]])
         }
         json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/oneline_costs.json")
+        write(json_data, "app/json/oneliner_costs.json")
       },
       ignoreInit = TRUE
     )
@@ -427,21 +449,21 @@ server <- function(id) {
                justify-content: space-between;
                max-width:150px;
                align-items:center;",
-            actionButton(ns("decreaseDate_Final"), "decrease"),
             br(),
+            actionButton(ns("increaseDate_Final"), ""),
             span("1 Month"),
             br(),
-            actionButton(ns("increaseDate_Final"), "increase")
+            actionButton(ns("decreaseDate_Final"), "")
           ),
           tagList(
-            dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate)),
             dateInput(ns("exchangeDate"),
               div(
                 class = "wrap",
                 "Currency Exchange Date: "
               ),
               value = as.Date(rv_json_lists$json_final_currency_list$exchangeDate)
-            )
+            ),
+            dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate))
           )
         ),
         actionButton(ns("modify_main"),
@@ -464,12 +486,11 @@ server <- function(id) {
                justify-content: space-between;
                max-width:150px;
                align-items:center;",
-            br(), br(), br(),
-            actionButton(ns("decreaseDate"), "decrease"),
-            br(),
+            br(), br(),
+            actionButton(ns("increaseDate"), ""),
             span("1 Month"),
             br(),
-            actionButton(ns("increaseDate"), "increase")
+            actionButton(ns("decreaseDate"), "")
           ),
           tagList(
             checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_json_lists$json_salary_list$dates$use),
@@ -517,17 +538,6 @@ server <- function(id) {
               rv_json_lists$json_salary_list$main[[x]]
             )
           })
-          div(
-            class = "two_column_grid",
-            div(
-              char_names_currency_list
-            ),
-            div(
-              num_names_currency_list
-            )
-          )
-        },
-        {
           char_list <- lapply(char_names_not_currency, function(x) {
             textInput(
               ns(paste0("main", x)),
@@ -538,44 +548,19 @@ server <- function(id) {
               rv_json_lists$json_salary_list$main[[x]]
             )
           })
-          middle_idx <- ceiling(length(char_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              char_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(char_list)) {
-                char_list[(middle_idx + 1):length(char_list)]
-              }
-            )
-          )
-        },
-        {
           num_list <- lapply(num_names_not_currency, function(x) {
-            numericInput(
-              ns(paste0("main", x)),
-              div(
-                class = "wrap",
-                gsub("_", " ", x, perl = TRUE)
-              ),
-              rv_json_lists$json_salary_list$main[[x]]
+            div(
+              class = "go-bottom",
+              numericInput(
+                ns(paste0("main", x)),
+                div(
+                  class = "wrap",
+                  gsub("_", " ", x, perl = TRUE)
+                ),
+                rv_json_lists$json_salary_list$main[[x]]
+              )
             )
           })
-          middle_idx <- ceiling(length(num_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              num_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(num_list)) {
-                num_list[(middle_idx + 1):length(num_list)]
-              }
-            )
-          )
-        },
-        {
           logic_list <- lapply(logic_names, function(x) {
             checkboxInput(
               ns(paste0("main", x)),
@@ -586,26 +571,38 @@ server <- function(id) {
               rv_json_lists$json_salary_list$main[[x]]
             )
           })
-          middle_idx <- ceiling(length(logic_list) / 2)
           div(
-            class = "two_column_grid",
             div(
-              logic_list[1:middle_idx]
+              class = "four_column_grid",
+              div(
+                class = "go-bottom",
+                char_names_currency_list
+              ),
+              div(
+                class = "go-bottom",
+                num_names_currency_list
+              ),
+              num_list,
             ),
             div(
-              if ((middle_idx + 1) <= length(logic_list)) {
-                logic_list[(middle_idx + 1):length(logic_list)]
-              }
+              class = "three_column_grid_left_big",
+              char_list
             )
           )
         },
-        helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_salary"),
-          strong(
-            "Save", code("salary.json")
-          ),
-          style = "white-space: normal;
+        div(
+          class = "two_column_grid",
+          logic_list,
+          div(
+            helpText("this box content must be saved before generating .pdf"),
+            actionButton(ns("modify_salary"),
+              strong(
+                "Save", code("salary.json")
+              ),
+              style = "white-space: normal;
                            word-wrap: break-word;"
+            )
+          )
         )
       )
     })
@@ -698,7 +695,7 @@ server <- function(id) {
         ),
         helpText("this box content must be saved before generating .pdf"),
         actionButton(ns("modify_oneliners"),
-          strong("Save", code("oneline_costs.json")),
+          strong("Save", code("oneliner_costs.json")),
           style = "white-space: normal;
                            word-wrap: break-word;"
         )
@@ -706,117 +703,144 @@ server <- function(id) {
     })
 
     output$grouped_box <- renderUI({
-      char_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.character(x))))
-      num_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.numeric(x))))
-      logic_names_grouped <- names(which(sapply(rv_json_lists$json_grouped_list, function(x) is.logical(x))))
+      grouped_list <- rv_json_lists$json_grouped_list
+      grouped_list_root <- grouped_list %>% keep(names(.) %in% c(
+        "currency_exchange_to_Final_Currency", "use",
+        "GeneralName", "currency"
+      ))
+
+      char_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.character(x))))
+      num_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.numeric(x))))
+      logic_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.logical(x))))
 
       char_names_currency <- grep("currency", char_names_grouped, value = TRUE)
       num_names_currency <- grep("currency", num_names_grouped, value = TRUE)
 
       char_names_not_currency <- grep("currency", char_names_grouped, value = TRUE, invert = TRUE)
-      num_names_not_currency <- grep("currency", num_names_grouped, value = TRUE, invert = TRUE)
 
-      wellPanel(
-        h4(strong("Grouped Costs")),
-        {
-          char_names_currency_list <- lapply(char_names_currency, function(x) {
-            textInput(
-              ns(paste0("grouped", x)),
+      grouped_sublists <- grouped_list %>% discard(names(.) %in% c(
+        "currency_exchange_to_Final_Currency", "use",
+        "GeneralName", "currency"
+      ))
+      grouped_list_names <- names(grouped_sublists)
+
+      tagList(
+        wellPanel(
+          {
+            tagList({
+              char_names_currency_list <- lapply(char_names_currency, function(x) {
+                textInput(
+                  ns(paste0("grouped", x)),
+                  div(
+                    class = "wrap",
+                    sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+                  ),
+                  rv_json_lists$json_grouped_list[[x]]
+                )
+              })
+              num_names_currency_list <- lapply(num_names_currency, function(x) {
+                numericInput(
+                  ns(paste0("grouped", x)),
+                  div(
+                    class = "wrap",
+                    gsub("_", " ", x, perl = TRUE)
+                  ),
+                  rv_json_lists$json_grouped_list[[x]]
+                )
+              })
+              char_names_grouped_list <- lapply(char_names_not_currency, function(x) {
+                textInput(
+                  ns(paste0("grouped", x)),
+                  gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
+                  rv_json_lists$json_grouped_list[[x]]
+                )
+              })
+              logic_names_grouped_list <- lapply(logic_names_grouped, function(x) {
+                checkboxInput(
+                  ns(paste0("grouped", x)),
+                  gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+                  rv_json_lists$json_grouped_list[[x]]
+                )
+              })
               div(
-                class = "wrap",
-                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-              ),
-              rv_json_lists$json_grouped_list[[x]]
-            )
-          })
-          num_names_currency_list <- lapply(num_names_currency, function(x) {
-            numericInput(
-              ns(paste0("grouped", x)),
-              div(
-                class = "wrap",
-                gsub("_", " ", x, perl = TRUE)
-              ),
-              rv_json_lists$json_grouped_list[[x]]
-            )
-          })
+                class = "five_column_grid",
+                h4(strong("Grouped Costs")),
+                div(
+                  class = "go-bottom",
+                  char_names_grouped_list
+                ),
+                div(
+                  class = "go-bottom",
+                  char_names_currency_list
+                ),
+                div(
+                  class = "go-bottom",
+                  num_names_currency_list
+                ),
+                div(
+                  class = "go-bottom",
+                  logic_names_grouped_list
+                )
+              )
+            })
+          },
           div(
-            class = "two_column_grid",
+            class = "five_column_grid",
+            div(),
             div(
-              char_names_currency_list
-            ),
-            div(
-              num_names_currency_list
-            )
-          )
-        },
-        {
-          char_names_grouped_list <- lapply(char_names_not_currency, function(x) {
-            textInput(
-              ns(paste0("grouped", x)),
-              gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-              rv_json_lists$json_grouped_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(char_names_grouped_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              char_names_grouped_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(char_names_grouped_list)) {
-                char_names_grouped_list[(middle_idx + 1):length(char_names_grouped_list)]
-              }
-            )
-          )
-        },
-        {
-          num_names_grouped_list <- lapply(num_names_not_currency, function(x) {
-            numericInput(
-              ns(paste0("grouped", x)),
-              gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
-              rv_json_lists$json_grouped_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(num_names_grouped_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              num_names_grouped_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(num_names_grouped_list)) {
-                num_names_grouped_list[(middle_idx + 1):length(num_names_grouped_list)]
-              }
-            )
-          )
-        },
-        {
-          logic_names_grouped_list <- lapply(logic_names_grouped, function(x) {
-            checkboxInput(
-              ns(paste0("grouped", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_grouped_list[[x]]
-            )
-          })
-          middle_idx <- ceiling(length(logic_names_grouped_list) / 2)
-          div(
-            class = "two_column_grid",
-            div(
-              logic_names_grouped_list[1:middle_idx]
-            ),
-            div(
-              if ((middle_idx + 1) <= length(logic_names_grouped_list)) {
-                logic_names_grouped_list[(middle_idx + 1):length(logic_names_grouped_list)]
-              }
-            )
-          )
-        },
-        helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_grouped"),
-          strong("Save", code("grouped_costs.json")),
-          style = "white-space: normal;
+              helpText("this box content must be saved before generating .pdf"),
+              actionButton(ns("modify_grouped"),
+                strong("Save", code("grouped_costs.json")),
+                style = "white-space: normal;
                            word-wrap: break-word;"
+              )
+            )
+          )
+        ),
+        tagList(
+          lapply(grouped_list_names, function(name) {
+            num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_grouped <- list()
+            num_names_grouped <- char_names_grouped <- list()
+
+            char_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.character(x))))
+            num_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.numeric(x))))
+            logic_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.logical(x))))
+
+            wellPanel({
+              char_names_list <- lapply(char_names_grouped[[name]], function(x) {
+                textInput(
+                  ns(paste0("grouped", name, x)),
+                  div(
+                    class = "wrap",
+                    sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+                  ),
+                  rv_json_lists$json_grouped_list[[name]][[x]]
+                )
+              })
+              num_names_list <- lapply(num_names_grouped[[name]], function(x) {
+                numericInput(
+                  ns(paste0("grouped", name, x)),
+                  div(
+                    class = "wrap",
+                    gsub("_", " ", x, perl = TRUE)
+                  ),
+                  rv_json_lists$json_grouped_list[[name]][[x]]
+                )
+              })
+              div(
+                class = "three_column_grid_center",
+                h4(strong(name)),
+                div(
+                  class = "go-bottom",
+                  char_names_list
+                ),
+                div(
+                  class = "go-bottom",
+                  num_names_list
+                )
+              )
+            })
+          })
         )
       )
     })
@@ -858,48 +882,41 @@ server <- function(id) {
       num_modified <- names(which(sapply(rv_json_lists$json_salary_list$modified_days, function(x) is.numeric(x))))
       logic_modified <- names(which(sapply(rv_json_lists$json_salary_list$modified_days, function(x) is.logical(x))))
 
-      num_nwd <- names(which(sapply(rv_json_lists$json_salary_list$non_working_days, function(x) is.numeric(x))))
-      logic_nwd <- names(which(sapply(rv_json_lists$json_salary_list$non_working_days, function(x) is.logical(x))))
-
       tagList(
         wellPanel(
           h4(strong("Modified Pay Days")),
-          lapply(char_modified, function(x) {
-            textInput(
-              ns(paste0("modified_days", x)),
-              gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
-              rv_json_lists$json_salary_list$modified_days[[x]]
-            )
-          }),
-          {
-            num_list <- lapply(num_modified, function(x) {
+          div(
+            class = "three_column_grid_left_big",
+            lapply(char_modified, function(x) {
+              textInput(
+                ns(paste0("modified_days", x)),
+                gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
+                rv_json_lists$json_salary_list$modified_days[[x]]
+              )
+            }),
+            lapply(num_modified, function(x) {
               numericInput(
                 ns(paste0("modified_days", x)),
                 gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
                 rv_json_lists$json_salary_list$modified_days[[x]]
               )
-            })
-            middle_idx <- ceiling(length(num_list) / 2)
-            div(
-              class = "two_column_grid",
-              div(
-                num_list[1:middle_idx]
-              ),
-              div(
-                if ((middle_idx + 1) <= length(num_list)) {
-                  num_list[(middle_idx + 1):length(num_list)]
-                }
+            }),
+            lapply(logic_modified, function(x) {
+              checkboxInput(
+                ns(paste0("modified_days", x)),
+                gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+                rv_json_lists$json_salary_list$modified_days[[x]]
               )
-            )
-          },
-          lapply(logic_modified, function(x) {
-            checkboxInput(
-              ns(paste0("modified_days", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_salary_list$modified_days[[x]]
-            )
-          })
-        ),
+            })
+          )
+        )
+      )
+    })
+
+    output$non_working_days_box <- renderUI({
+      num_nwd <- names(which(sapply(rv_json_lists$json_salary_list$non_working_days, function(x) is.numeric(x))))
+      logic_nwd <- names(which(sapply(rv_json_lists$json_salary_list$non_working_days, function(x) is.logical(x))))
+      tagList(
         wellPanel(
           h4(strong("non-working Days")),
           lapply(num_nwd, function(x) {
@@ -927,7 +944,7 @@ server <- function(id) {
         actionButton(ns("modify_billto"),
           strong("Save", code("business_to_bill.json")),
           style = "white-space: normal;
-                           word-wrap: break-word;"
+          word-wrap: break-word;"
         ),
         br(),
         br(),
@@ -1015,5 +1032,6 @@ server <- function(id) {
     outputOptions(output, "oneliners_box", suspendWhenHidden = FALSE)
     outputOptions(output, "grouped_box", suspendWhenHidden = FALSE)
     outputOptions(output, "consultant_account_box", suspendWhenHidden = FALSE)
+    outputOptions(output, "non_working_days_box", suspendWhenHidden = FALSE)
   })
 }

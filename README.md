@@ -1,31 +1,43 @@
 # invoice creation with Shiny and RMarkdown
 
-This repository was copied from https://github.com/shubham-maurya/shiny-invoice-generator/
+This repository modifies https://github.com/shubham-maurya/shiny-invoice-generator/
 by Fernando Roa
 
-It has several modifications, and now it is for single person use.
+It has a lot of modifications, and now it is for single person use.
 
 ### Files
 
-1. The `app.R` file is the Shiny interface to the invoice generator, which has inputs (boxes) corresponding to
-`.json` information.
+1. The `app/main.R` module file is the Shiny interface to the invoice generator, which has inputs (boxes) corresponding to
+   `.json` information.
 
-2. The `invoice.Rmd` file is the RMarkdown file, which you can modify to suit your own particular invoice. 
+2. The `invoice.Rmd` file is the RMarkdown file, which you can modify to suit your own particular invoice.
 
 3. each `.json` file can be updated in the app. It is mandatory
-to save them after modifications done in the app, using buttons, before creating the `.pdf`
+   to save them after modifications done in the app, using buttons, before creating the `.pdf`
 
 ### Inner logic
 
-- The first box is manually built, and passes its values to the `.Rmd` via `params` in `yaml` header. 
-- The second box is manually built and is related to the `main.json`file 
-- The other boxes are based on the other `.json` files, one on one. A form field for each json field is built in the app.  
+- A couple of inputs are passed to the `.Rmd` via `params` in `yaml` header.
+- Other inputs/boxes are held in `.json` files
 - The `.Rmd` reads the `.json` files directly, that is why it is necessary to save them.
-- If you modify the `.json` outside the app, during app use, reload the app.
-- Includes benefits, sick options, FEDEX options
+- If you modify the `.json` outside the app, during app use, there is a reload button to use.
+- Includes oneliners and grouped costs
 - Includes bilingual option
 - Names of 'field' names in `.Rmd` depend on the `fieldNames.json` for bilingual management
 
-# Link
-https://ferapps.shinyapps.io/open-invoice/
+### Exchanges
 
+- Salary values, one-liner and grouped costs can be in a different currency.
+- It is possible to get a exchange rate for a defined date, for those.
+- Package `quantmod` and function `getSymbol` is used for the exchange.
+
+### `use` inputs
+
+- The table consists of 3 big blocks:
+
+  - Salary
+  - Oneliners
+  - Grouped costs
+
+- Not only those parts can be selectively used with checkBoxes but also
+  parts of them

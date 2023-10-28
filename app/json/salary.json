@@ -26,7 +26,7 @@
     "use": [true]
   },
   "period": {
-    "use": [true],
+    "use": [false],
     "number": [1],
     "name": ["month(s)"]
   }
