@@ -7,7 +7,7 @@
   background-color: antiquewhite;
 }
 
-#generate_buttons {
+.generate_buttons {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,8 +41,8 @@
   box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
 }
 
-#generate_buttons #app-report,
-#generate_buttons #app-modify_all {
+.generate_buttons #app-report,
+.generate_buttons #app-modify_all {
   background-color: rgb(8, 197, 255);
   box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
 }
@@ -70,6 +70,12 @@ button[type="button"] {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.well .two_column_grid_gap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
 }
 
 .well .six_column_grid {

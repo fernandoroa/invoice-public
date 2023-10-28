@@ -6,6 +6,7 @@ papersize: a4
 params: 
   invoiceNumber: ''
   lang: 1
+  app_path: 'app'
 output:
   pdf_document
 ---
@@ -21,25 +22,25 @@ box::use(
 lan_idx <- as.numeric(params$lang)
 
 # main
-json_fields_list <- rjson::fromJSON(file = "json/fieldNames.json")
-json_final_currency_list <- rjson::fromJSON(file = "json/final_currency_inv_date.json")
+json_fields_list <- rjson::fromJSON(file = file.path(params$app_path, "json/fieldNames.json"))
+json_final_currency_list <- rjson::fromJSON(file = file.path(params$app_path, "json/final_currency_inv_date.json"))
 
 #
 # bank and businesses
 #
-json_business_to_bill_list <- rjson::fromJSON(file = "json/business_to_bill.json")
-json_consultant_account_list <- rjson::fromJSON(file = "json/consultant_account.json")
-json_consultant_business_list <- rjson::fromJSON(file = "json/consultant_contact.json")
+json_business_to_bill_list <- rjson::fromJSON(file = file.path(params$app_path, "json/business_to_bill.json"))
+json_consultant_account_list <- rjson::fromJSON(file = file.path(params$app_path, "json/consultant_account.json"))
+json_consultant_business_list <- rjson::fromJSON(file = file.path(params$app_path, "json/consultant_contact.json"))
 
 # special multiline - salary - days
-json_salary_list <- rjson::fromJSON(file = "json/salary.json")
+json_salary_list <- rjson::fromJSON(file = file.path(params$app_path, "json/salary.json"))
 
 
 # oneliners
-json_oneliners_list <- rjson::fromJSON(file = "json/oneliner_costs.json")
+json_oneliners_list <- rjson::fromJSON(file = file.path(params$app_path, "json/oneliner_costs.json"))
 
 # multiliners
-json_grouped_list <- rjson::fromJSON(file = "json/grouped_costs.json")
+json_grouped_list <- rjson::fromJSON(file = file.path(params$app_path, "json/grouped_costs.json"))
 
 # dates
 sm <- month(json_salary_list$dates$start, label = TRUE)

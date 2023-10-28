@@ -4,11 +4,13 @@ box::use(
   rjson[...],
   jsonlite[...],
   lubridate[...],
-  purrr[discard, keep]
+  purrr[discard, keep],
+  utils[zip]
 )
 
 box::use(
   logic / exchange[...],
+  logic / json_save[...]
 )
 
 #' @export
@@ -18,33 +20,38 @@ ui <- function(id) {
     selected = "Invoice, businesses and date",
     "Invoice Generator",
     tabPanel(
-      "Save and Generate",
+      "Main",
       fluidPage(
         fluidRow(
           column(
             3,
             wellPanel(
+              h4(strong("Invoice rendering")),
               div(
                 class = "two_column",
-                actionButton(ns("reload"), "Reload Json files"),
+                actionButton(ns("reload"), "Discard unsaved changes"),
                 radioButtons(ns("lang"), "Language", c("english" = 1, "other" = 2))
               ),
               div(
-                id = "generate_buttons",
-                actionButton(
-                  ns("modify_all"),
-                  strong(
-                    "Save All",
-                    code("*.json"),
-                    "required!"
-                  )
-                ),
-                helpText("saving .json changes is mandatory"),
+                class = "generate_buttons",
                 br(),
+                helpText("Save changes and generates .pdf"),
                 div(
-                  title = "save .json first",
-                  downloadButton(ns("report"), "Generate invoice in .pdf")
+                  downloadButton(ns("report"), "Render Document")
                 )
+              )
+            )
+          ),
+          column(
+            3,
+            wellPanel(
+              div(
+                class = "generate_buttons",
+                h4("Download Source files"),
+                helpText("and save changes"),
+                span(code(".zip"), "contains source", code(".json"), "files"),
+                br(),
+                downloadButton(ns("downloadPresets"), "Download .zip", class = "btn-success"),
               )
             )
           )
@@ -155,10 +162,10 @@ ui <- function(id) {
       fluidPage(
         fluidRow(
           column(
-            5,
+            7,
             uiOutput(ns("consultant_account_box"))
           ),
-          column(4),
+          column(2),
           column(
             3,
             img(src = "static/invoice_bank.svg", style = "max-width:25vw")
@@ -186,9 +193,6 @@ server <- function(id) {
 
     observeEvent(input$reload,
       {
-        #
-        # read .json
-        #
         rv_json_lists$json_final_currency_list <- rjson::fromJSON(file = "app/json/final_currency_inv_date.json")
         rv_json_lists$json_business_to_bill_list <- rjson::fromJSON(file = "app/json/business_to_bill.json")
         rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/consultant_account.json")
@@ -297,128 +301,215 @@ server <- function(id) {
       updateDateInput(session, "exchangeDate", value = cdate - mon_span[emon + 1])
     })
 
-    observeEvent(c(input$modify_salary, input$modify_all),
-      {
-        list <- list()
-        salary_names <- names(rv_json_lists$json_salary_list)
-        for (salary_name in salary_names) {
-          list[[salary_name]] <- lapply(names(rv_json_lists$json_salary_list[[salary_name]]), function(x) {
-            input[[paste0(salary_name, x)]]
-          })
-          names(list[[salary_name]]) <- names(rv_json_lists$json_salary_list[[salary_name]])
+    output$modify_salary <- downloadHandler(
+      filename = function() {
+        "salary.json"
+      },
+      content = function(file) {
+        file_name <- "salary.json"
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          nested_json_save(
+            input,
+            nested_list = rv_json_lists$json_salary_list,
+            prefix = "",
+            folders = c(folder, "app/json"),
+            file_name
+          )
         }
-        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/salary.json")
+        json_path <- file.path(folder, file_name)
+        file.copy(json_path, file)
       },
-      ignoreInit = TRUE
+      contentType = "json"
     )
 
-    observeEvent(c(input$modify_grouped, input$modify_all),
-      {
-        list <- list()
-
-        grouped_names <- names(rv_json_lists$json_grouped_list)
-        grouped_names_root <- intersect(grouped_names, c(
-          "currency_exchange_to_Final_Currency", "use",
-          "GeneralName", "currency"
-        ))
-        grouped_names_sublists <- setdiff(grouped_names, c(
-          "currency_exchange_to_Final_Currency", "use",
-          "GeneralName", "currency"
-        ))
-
-        list <- lapply(grouped_names_root, function(x) {
-          input[[paste0("grouped", x)]]
-        })
-        names(list) <- grouped_names_root
-
-        for (grouped_name in grouped_names_sublists) {
-          list[[grouped_name]] <- lapply(names(rv_json_lists$json_grouped_list[[grouped_name]]), function(x) {
-            input[[paste0("grouped", grouped_name, x)]]
-          })
-          names(list[[grouped_name]]) <- names(rv_json_lists$json_grouped_list[[grouped_name]])
+    output$modify_grouped <- downloadHandler(
+      filename = function() {
+        "grouped_costs.json"
+      },
+      content = function(file) {
+        file_name <- "grouped_costs.json"
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          nested_and_root_save(input,
+            nested_list = rv_json_lists$json_grouped_list,
+            prefix = "grouped",
+            folders = c(folder, "app/json"),
+            file_name
+          )
         }
-
-        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/grouped_costs.json")
+        json_path <- file.path(folder, file_name)
+        file.copy(json_path, file)
       },
-      ignoreInit = TRUE
+      contentType = "json"
     )
 
-    observeEvent(c(input$modify_oneliners, input$modify_all),
-      {
-        list <- list()
-        oneliners_names <- names(rv_json_lists$json_oneliners_list)
-        for (oneliner_name in oneliners_names) {
-          list[[oneliner_name]] <- lapply(names(rv_json_lists$json_oneliners_list[[oneliner_name]]), function(x) {
-            input[[paste0("oneliners", oneliner_name, x)]]
-          })
-          names(list[[oneliner_name]]) <- names(rv_json_lists$json_oneliners_list[[oneliner_name]])
+    output$modify_oneliners <- downloadHandler(
+      filename = function() {
+        "oneliner_costs.json"
+      },
+      content = function(file) {
+        file_name <- "oneliner_costs.json"
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          nested_json_save(input,
+            nested_list = rv_json_lists$json_oneliners_list,
+            prefix = "oneliners",
+            folders = c(folder, "app/json"),
+            file_name
+          )
         }
-        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/oneliner_costs.json")
+        json_path <- file.path(folder, file_name)
+        file.copy(json_path, file)
       },
-      ignoreInit = TRUE
+      contentType = "json"
     )
 
-    observeEvent(c(input$modify_main, input$modify_all),
-      {
-        list <- list()
-
-        list <- lapply(names(rv_json_lists$json_final_currency_list), function(x) {
-          input[[x]]
-        })
-
-        names(list) <- names(rv_json_lists$json_final_currency_list)
-        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/final_currency_inv_date.json")
+    output$modify_main <- downloadHandler(
+      filename = function() {
+        "final_currency_inv_date.json"
       },
-      ignoreInit = TRUE
+      content = function(file) {
+        file_name <- "final_currency_inv_date.json"
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_final_currency_list,
+            folders = c(folder, "app/json"),
+            file_name
+          )
+        }
+        json_path <- file.path(folder, file_name)
+        file.copy(json_path, file)
+      },
+      contentType = "json"
     )
 
-    observeEvent(c(input$modify_billto, input$modify_all),
-      {
-        list <- list()
-
-        list <- lapply(names(rv_json_lists$json_business_to_bill_list), function(x) {
-          input[[x]]
-        })
-
-        names(list) <- names(rv_json_lists$json_business_to_bill_list)
-        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/business_to_bill.json")
+    output$modify_billto <- downloadHandler(
+      filename = function() {
+        "business_to_bill.json"
       },
-      ignoreInit = TRUE
+      content = function(file) {
+        file_name <- "business_to_bill.json"
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_business_to_bill_list,
+            folders = c(folder, "app/json"),
+            file_name
+          )
+        }
+        json_path <- file.path(folder, file_name)
+        file.copy(json_path, file)
+      },
+      contentType = "json"
     )
 
-    observeEvent(c(input$modify_account, input$modify_all),
-      {
-        list <- list()
-
-        list <- lapply(names(rv_json_lists$json_consultant_account_list), function(x) {
-          input[[x]]
-        })
-
-        names(list) <- names(rv_json_lists$json_consultant_account_list)
-        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/consultant_account.json")
+    output$modify_account <- downloadHandler(
+      filename = function() {
+        "consultant_account.json"
       },
-      ignoreInit = TRUE
+      content = function(file) {
+        file_name <- "consultant_account.json"
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_consultant_account_list,
+            folders = c(folder, "app/json"),
+            file_name
+          )
+        }
+        json_path <- file.path(folder, file_name)
+        file.copy(json_path, file)
+      },
+      contentType = "json"
     )
 
-    observeEvent(c(input$modify_consultant, input$modify_all),
-      {
-        list <- list()
-
-        list <- lapply(names(rv_json_lists$json_consultant_business_list), function(x) {
-          input[[x]]
-        })
-
-        names(list) <- names(rv_json_lists$json_consultant_business_list)
-        json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
-        write(json_data, "app/json/consultant_contact.json")
+    output$modify_consultant <- downloadHandler(
+      filename = function() {
+        "consultant_contact.json"
       },
-      ignoreInit = TRUE
+      content = function(file) {
+        file_name <- "consultant_contact.json"
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_consultant_business_list,
+            folders = c(folder, "app/json"), file_name
+          )
+        }
+        json_path <- file.path(folder, file_name)
+        file.copy(json_path, file)
+      },
+      contentType = "json"
+    )
+
+    output$downloadPresets <- downloadHandler(
+      filename = function() {
+        "all_json.zip"
+      },
+      content = function(file) {
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        {
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_consultant_business_list,
+            folders = c(folder, "app/json"), file_name = "consultant_contact.json"
+          )
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_consultant_account_list,
+            folders = c(folder, "app/json"), file_name = "consultant_account.json"
+          )
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_business_to_bill_list,
+            folders = c(folder, "app/json"), file_name = "business_to_bill.json"
+          )
+          nested_json_save(
+            input,
+            nested_list = rv_json_lists$json_salary_list,
+            prefix = "",
+            folders = c(folder, "app/json"),
+            file_name = "salary.json"
+          )
+          nested_and_root_save(input,
+            nested_list = rv_json_lists$json_grouped_list,
+            prefix = "grouped",
+            folders = c(folder, "app/json"),
+            file_name = "grouped_costs.json"
+          )
+          nested_json_save(input,
+            nested_list = rv_json_lists$json_oneliners_list,
+            prefix = "oneliners",
+            folders = c(folder, "app/json"),
+            file_name = "oneliner_costs.json"
+          )
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_final_currency_list,
+            folders = c(folder, "app/json"),
+            file_name = "final_currency_inv_date.json"
+          )
+        }
+        zip_path <- file.path(folder, "all_json.zip")
+        files2zip <- dir(folder, full.names = T)
+        zip(zipfile = zip_path, files = files2zip, flags = "-0jrm")
+        file.copy(zip_path, file)
+      },
+      contentType = "zip"
     )
 
     output$first_well_panel <- renderUI({
@@ -466,9 +557,10 @@ server <- function(id) {
             dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate))
           )
         ),
-        actionButton(ns("modify_main"),
+        downloadButton(ns("modify_main"),
+          class = "button",
           strong(
-            "Save", code("final_currency_inv_date.json")
+            "Save and Download", code("final_currency_inv_date.json")
           ),
           style = "white-space: normal;
                    word-wrap: break-word;"
@@ -486,14 +578,14 @@ server <- function(id) {
                justify-content: space-between;
                max-width:150px;
                align-items:center;",
-            br(), br(),
+            br(),
+            checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_json_lists$json_salary_list$dates$use),
             actionButton(ns("increaseDate"), ""),
             span("1 Month"),
             br(),
             actionButton(ns("decreaseDate"), "")
           ),
           tagList(
-            checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_json_lists$json_salary_list$dates$use),
             dateInput(ns(paste0("dates", "start")), "Start Date: ", value = as.Date(rv_json_lists$json_salary_list$dates$start)),
             textInput(ns(paste0("dates", "date_connector")), "date connector", rv_json_lists$json_salary_list$dates$date_connector),
             dateInput(ns(paste0("dates", "end")), "End Date: ", value = as.Date(rv_json_lists$json_salary_list$dates$end))
@@ -594,10 +686,10 @@ server <- function(id) {
           class = "two_column_grid",
           logic_list,
           div(
-            helpText("this box content must be saved before generating .pdf"),
-            actionButton(ns("modify_salary"),
+            helpText("Go to Main tab to save all"),
+            downloadButton(ns("modify_salary"),
               strong(
-                "Save", code("salary.json")
+                "Save and Download", code("salary.json")
               ),
               style = "white-space: normal;
                            word-wrap: break-word;"
@@ -606,7 +698,6 @@ server <- function(id) {
         )
       )
     })
-
 
     output$oneliners_box <- renderUI({
       oneliners_list <- rv_json_lists$json_oneliners_list
@@ -693,9 +784,9 @@ server <- function(id) {
             })
           })
         ),
-        helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_oneliners"),
-          strong("Save", code("oneliner_costs.json")),
+        helpText("Go to Main tab to save all"),
+        downloadButton(ns("modify_oneliners"),
+          strong("Save and Download", code("oneliner_costs.json")),
           style = "white-space: normal;
                            word-wrap: break-word;"
         )
@@ -788,9 +879,9 @@ server <- function(id) {
             class = "five_column_grid",
             div(),
             div(
-              helpText("this box content must be saved before generating .pdf"),
-              actionButton(ns("modify_grouped"),
-                strong("Save", code("grouped_costs.json")),
+              helpText("Go to Main tab to save all"),
+              downloadButton(ns("modify_grouped"),
+                strong("Save and Download", code("grouped_costs.json")),
                 style = "white-space: normal;
                            word-wrap: break-word;"
               )
@@ -852,6 +943,7 @@ server <- function(id) {
       wellPanel(
         h4(strong("Salary Period(s)")),
         splitLayout(
+          cellWidths = c("30%", "30%", "10%", "20%"),
           lapply(num_period, function(x) {
             numericInput(
               ns(paste0("period", x)),
@@ -865,15 +957,16 @@ server <- function(id) {
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_json_lists$json_salary_list$period[[x]]
             )
+          }),
+          div(),
+          lapply(logic_period, function(x) {
+            checkboxInput(
+              ns(paste0("period", x)),
+              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+              rv_json_lists$json_salary_list$period[[x]]
+            )
           })
-        ),
-        lapply(logic_period, function(x) {
-          checkboxInput(
-            ns(paste0("period", x)),
-            gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-            rv_json_lists$json_salary_list$period[[x]]
-          )
-        })
+        )
       )
     })
 
@@ -919,20 +1012,24 @@ server <- function(id) {
       tagList(
         wellPanel(
           h4(strong("non-working Days")),
-          lapply(num_nwd, function(x) {
-            numericInput(
-              ns(paste0("non_working_days", x)),
-              "",
-              rv_json_lists$json_salary_list$non_working_days[[x]]
-            )
-          }),
-          lapply(logic_nwd, function(x) {
-            checkboxInput(
-              ns(paste0("non_working_days", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_salary_list$non_working_days[[x]]
-            )
-          })
+          splitLayout(
+            cellWidths = c("50%", "10%", "30%"),
+            lapply(num_nwd, function(x) {
+              numericInput(
+                ns(paste0("non_working_days", x)),
+                "",
+                rv_json_lists$json_salary_list$non_working_days[[x]]
+              )
+            }),
+            div(),
+            lapply(logic_nwd, function(x) {
+              checkboxInput(
+                ns(paste0("non_working_days", x)),
+                gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+                rv_json_lists$json_salary_list$non_working_days[[x]]
+              )
+            })
+          )
         )
       )
     })
@@ -940,13 +1037,6 @@ server <- function(id) {
     output$business_to_bill_box <- renderUI({
       wellPanel(
         h4(strong("Bill To:")),
-        helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_billto"),
-          strong("Save", code("business_to_bill.json")),
-          style = "white-space: normal;
-          word-wrap: break-word;"
-        ),
-        br(),
         br(),
         lapply(seq_along(rv_json_lists$json_business_to_bill_list), function(x) {
           textInput(ns(names(rv_json_lists$json_business_to_bill_list[x])),
@@ -954,6 +1044,13 @@ server <- function(id) {
             value = rv_json_lists$json_business_to_bill_list[[x]]
           )
         }),
+        br(),
+        helpText("Go to Main tab to save all"),
+        downloadButton(ns("modify_billto"),
+          strong("Save and Download", code("business_to_bill.json")),
+          style = "white-space: normal;
+          word-wrap: break-word;"
+        )
       )
     })
 
@@ -963,20 +1060,6 @@ server <- function(id) {
 
       wellPanel(
         h4(strong("Consultant Account")),
-        helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_account"),
-          strong("Save", code("consultant_account.json")),
-          style = "white-space: normal;
-                           word-wrap: break-word;"
-        ),
-        br(),
-        br(),
-        lapply(char_consultant_account, function(x) {
-          textInput(ns(x),
-            gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-            value = rv_json_lists$json_consultant_account_list[[x]]
-          )
-        }),
         lapply(logic_char_consultant_account, function(x) {
           checkboxInput(
             ns(x),
@@ -984,19 +1067,33 @@ server <- function(id) {
             rv_json_lists$json_consultant_account_list[[x]]
           )
         }),
+        {
+          char_inputs <- lapply(char_consultant_account, function(x) {
+            textInput(ns(x),
+              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+              value = rv_json_lists$json_consultant_account_list[[x]]
+            )
+          })
+          char_inputs_len <- length(char_inputs)
+          half <- ceiling(char_inputs_len / 2)
+          div(
+            class = "two_column_grid_gap",
+            div(char_inputs[1:half]),
+            div(char_inputs[(half + 1):char_inputs_len]),
+          )
+        },
+        helpText("Go to Main tab to save all"),
+        downloadButton(ns("modify_account"),
+          strong("Save and Download", code("consultant_account.json")),
+          style = "white-space: normal;
+                           word-wrap: break-word;"
+        )
       )
     })
 
     output$consultant_business_box <- renderUI({
       wellPanel(
         h4(strong("Consultant details")),
-        helpText("this box content must be saved before generating .pdf"),
-        actionButton(ns("modify_consultant"),
-          strong("Save", code("consultant_contact.json")),
-          style = "white-space: normal;
-                           word-wrap: break-word;"
-        ),
-        br(),
         br(),
         lapply(seq_along(rv_json_lists$json_consultant_business_list), function(x) {
           textInput(ns(names(rv_json_lists$json_consultant_business_list[x])),
@@ -1004,16 +1101,68 @@ server <- function(id) {
             value = rv_json_lists$json_consultant_business_list[[x]]
           )
         }),
+        br(),
+        helpText("Go to Main tab to save all"),
+        downloadButton(ns("modify_consultant"),
+          strong("Save and Download", code("consultant_contact.json")),
+          style = "white-space: normal;
+                           word-wrap: break-word;"
+        )
       )
     })
     output$report <- downloadHandler(
       filename = "invoice.pdf",
       content = function(file) {
-        temp_report <- file.path(getwd(), "app/inv_md_dont_modify.Rmd")
-        file.copy("app/invoice.Rmd", temp_report, overwrite = TRUE)
+        {
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_consultant_business_list,
+            folders = "app/json", file_name = "consultant_contact.json"
+          )
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_consultant_account_list,
+            folders = "app/json", file_name = "consultant_account.json"
+          )
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_business_to_bill_list,
+            folders = "app/json", file_name = "business_to_bill.json"
+          )
+          nested_json_save(
+            input,
+            nested_list = rv_json_lists$json_salary_list,
+            prefix = "",
+            folders = "app/json",
+            file_name = "salary.json"
+          )
+          nested_and_root_save(input,
+            nested_list = rv_json_lists$json_grouped_list,
+            prefix = "grouped",
+            folders = "app/json",
+            file_name = "grouped_costs.json"
+          )
+          nested_json_save(input,
+            nested_list = rv_json_lists$json_oneliners_list,
+            prefix = "oneliners",
+            folders = "app/json",
+            file_name = "oneliner_costs.json"
+          )
+          plain_json_save(
+            input,
+            plain_list = rv_json_lists$json_final_currency_list,
+            folders = "app/json",
+            file_name = "final_currency_inv_date.json"
+          )
+        }
 
+        folder <- paste0(gsub("file", "folder_", tempfile()))
+        dir.create(folder)
+        temp_report <- file.path(folder, "inv_md_dont_modify.Rmd")
+        file.copy("app/invoice.Rmd", temp_report, overwrite = TRUE)
+        app_path <- file.path(getwd(), "app")
         all_params <- reactiveValuesToList(input)
-        params <- list(invoiceNumber = all_params$invoiceNumber, lang = all_params$lang)
+        params <- list(invoiceNumber = all_params$invoiceNumber, lang = all_params$lang, app_path = app_path)
 
         rmarkdown::render(temp_report,
           output_file = file,

@@ -1,17 +1,7 @@
 {
-  "billTo1": [
-    "bill business name line1"
-  ],
-  "billTo2": [
-    "bill address line2"
-  ],
-  "billTo3": [
-    "bill address line3"
-  ],
-  "billTo4": [
-    "bill busi line4"
-  ],
-  "billTo5": [
-    "bill busi line5"
-  ]
+  "billTo1": ["bill business name line 1"],
+  "billTo2": ["bill address line 2"],
+  "billTo3": ["bill address line 3"],
+  "billTo4": ["bill busi line 4"],
+  "billTo5": ["bill busi line 5"]
 }
