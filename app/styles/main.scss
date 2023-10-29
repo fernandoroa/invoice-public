@@ -72,7 +72,7 @@ button[type="button"] {
   gap: 10px;
 }
 
-.well .two_column_grid_gap {
+.well > .two_column_grid_gap {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 30px;
@@ -116,6 +116,7 @@ button[type="button"] {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   gap: 5px;
+  margin-top: 15px;
 }
 
 .go-bottom {
@@ -123,6 +124,30 @@ button[type="button"] {
   align-items: flex-end;
   justify-content: normal;
   vertical-align: bottom;
+}
+
+.go-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.go-bottom > .form-group {
+  margin-bottom: 0;
+}
+
+.go-center > .form-group {
+  margin-bottom: 0;
+}
+
+.form-group-container > .form-group {
+  margin-bottom: 0;
+}
+
+.form-group > #app-invoiceNumber-label,
+.form-group > #app-datesdelivery_month_text-label {
+  display: none;
 }
 
 .salary_and_days_container {

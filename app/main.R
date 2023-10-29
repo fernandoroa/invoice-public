@@ -73,7 +73,17 @@ ui <- function(id) {
           column(
             3,
             wellPanel(
-              textInput(ns("invoiceNumber"), "Invoice Number", paste(format(Sys.time(), "%Y-")))
+              div(
+                class = "two_column_grid",
+                div(
+                  class = "go-center",
+                  span(strong("Invoice Number"))
+                ),
+                div(
+                  class = "go-center",
+                  textInput(ns("invoiceNumber"), "", paste(format(Sys.time(), "%Y-")))
+                )
+              )
             ),
             div(
               style = "max-width:600px",
@@ -913,7 +923,17 @@ server <- function(id) { # nolint
             dateInput(ns(paste0("dates", "end")), "End Date: ", value = as.Date(rv_json_lists$json_salary_list$dates$end))
           )
         ),
-        textInput(ns(paste0("dates", "delivery_month_text")), "Deliver title", rv_json_lists$json_salary_list$dates$delivery_month_text)
+        div(
+          class = "two_column_grid",
+          div(
+            class = "go-center",
+            span(strong("Deliver title"))
+          ),
+          div(
+            class = "go-center",
+            textInput(ns(paste0("dates", "delivery_month_text")), "", rv_json_lists$json_salary_list$dates$delivery_month_text)
+          )
+        )
       )
     })
 
@@ -1025,9 +1045,10 @@ server <- function(id) { # nolint
       oneliners_list <- rv_json_lists$json_oneliners_list %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
 
-      div(
+      wellPanel(
         tagList(
-          lapply(oneliners_list_names, function(name) {
+          lapply(seq_along(oneliners_list_names), function(idx) {
+            name <- oneliners_list_names[[idx]]
             num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- list()
             logic_names_oneliners <- num_names_oneliners <- char_names_oneliners <- list()
 
@@ -1041,69 +1062,86 @@ server <- function(id) { # nolint
             char_names_not_currency[[name]] <- grep("currency", char_names_oneliners[[name]], value = TRUE, invert = TRUE)
             num_names_not_currency[[name]] <- grep("currency", num_names_oneliners[[name]], value = TRUE, invert = TRUE)
 
-            wellPanel({
-              char_names_currency_list <- lapply(char_names_currency[[name]], function(x) {
-                textInput(
-                  ns(paste0("oneliners", name, x)),
+            char_names_currency_list <- lapply(char_names_currency[[name]], function(x) {
+              textInput(
+                ns(paste0("oneliners", name, x)),
+                if (idx == 1) {
                   div(
                     class = "wrap",
                     sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-                  ),
-                  oneliners_list[[name]][[x]]
-                )
-              })
-              num_names_currency_list <- lapply(num_names_currency[[name]], function(x) {
-                numericInput(
-                  ns(paste0("oneliners", name, x)),
+                  )
+                } else {
+                  ""
+                },
+                oneliners_list[[name]][[x]]
+              )
+            })
+            num_names_currency_list <- lapply(num_names_currency[[name]], function(x) {
+              numericInput(
+                ns(paste0("oneliners", name, x)),
+                if (idx == 1) {
                   div(
                     class = "wrap",
                     gsub("_", " ", x, perl = TRUE)
-                  ),
-                  oneliners_list[[name]][[x]]
-                )
-              })
-              char_names_oneliners_not_currency_list <- lapply(char_names_not_currency[[name]], function(x) {
-                textInput(
-                  ns(paste0("oneliners", name, x)),
-                  gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-                  oneliners_list[[name]][[x]]
-                )
-              })
-              num_names_oneliners_not_currency_list <- lapply(num_names_not_currency[[name]], function(x) {
-                numericInput(
-                  ns(paste0("oneliners", name, x)),
-                  gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
-                  oneliners_list[[name]][[x]]
-                )
-              })
-              div(
-                class = "six_column_grid",
-                h4(strong(name)),
-                div(
-                  class = "go-bottom",
-                  char_names_currency_list
-                ),
-                div(
-                  class = "go-bottom",
-                  num_names_currency_list
-                ),
-                div(
-                  class = "go-bottom",
-                  char_names_oneliners_not_currency_list
-                ),
-                div(class = "go-bottom", num_names_oneliners_not_currency_list),
-                div(
-                  class = "go-bottom",
-                  lapply(logic_names_oneliners[[name]], function(x) {
-                    checkboxInput(
-                      ns(paste0("oneliners", name, x)),
-                      gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                      oneliners_list[[name]][[x]]
-                    )
-                  })
-                )
+                  )
+                } else {
+                  ""
+                },
+                oneliners_list[[name]][[x]]
               )
             })
+            char_names_oneliners_not_currency_list <- lapply(char_names_not_currency[[name]], function(x) {
+              textInput(
+                ns(paste0("oneliners", name, x)),
+                if (idx == 1) {
+                  gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x))
+                } else {
+                  ""
+                },
+                oneliners_list[[name]][[x]]
+              )
+            })
+            num_names_oneliners_not_currency_list <- lapply(num_names_not_currency[[name]], function(x) {
+              numericInput(
+                ns(paste0("oneliners", name, x)),
+                if (idx == 1) {
+                  gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE))
+                } else {
+                  ""
+                },
+                oneliners_list[[name]][[x]]
+              )
+            })
+            div(
+              class = "six_column_grid",
+              div(
+                class = "go-bottom",
+                h4(strong(name))
+              ),
+              div(
+                class = "go-bottom",
+                char_names_currency_list
+              ),
+              div(
+                class = "go-bottom",
+                num_names_currency_list
+              ),
+              div(
+                class = "go-bottom",
+                char_names_oneliners_not_currency_list
+              ),
+              div(class = "go-bottom", num_names_oneliners_not_currency_list),
+              div(
+                class = "go-bottom",
+                lapply(logic_names_oneliners[[name]], function(x) {
+                  checkboxInput(
+                    ns(paste0("oneliners", name, x)),
+                    gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+                    oneliners_list[[name]][[x]]
+                  )
+                })
+              )
+            )
           })
         ),
         helpText("Go to Main tab to save all"),
@@ -1210,39 +1248,51 @@ server <- function(id) { # nolint
             )
           )
         ),
-        tagList(
-          lapply(grouped_list_names, function(name) {
-            num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_grouped <- list()
-            num_names_grouped <- char_names_grouped <- list()
+        wellPanel(
+          tagList(
+            lapply(seq_along(grouped_list_names), function(idx) {
+              name <- grouped_list_names[idx]
+              num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_grouped <- list()
+              num_names_grouped <- char_names_grouped <- list()
 
-            char_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.character(x))))
-            num_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.numeric(x))))
-            logic_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.logical(x))))
+              char_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.character(x))))
+              num_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.numeric(x))))
+              logic_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.logical(x))))
 
-            wellPanel({
               char_names_list <- lapply(char_names_grouped[[name]], function(x) {
                 textInput(
                   ns(paste0("grouped", name, x)),
-                  div(
-                    class = "wrap",
-                    sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-                  ),
+                  if (idx == 1) {
+                    div(
+                      class = "wrap",
+                      sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+                    )
+                  } else {
+                    ""
+                  },
                   grouped_list[[name]][[x]]
                 )
               })
               num_names_list <- lapply(num_names_grouped[[name]], function(x) {
                 numericInput(
                   ns(paste0("grouped", name, x)),
-                  div(
-                    class = "wrap",
-                    gsub("_", " ", x, perl = TRUE)
-                  ),
+                  if (idx == 1) {
+                    div(
+                      class = "wrap",
+                      gsub("_", " ", x, perl = TRUE)
+                    )
+                  } else {
+                    ""
+                  },
                   grouped_list[[name]][[x]]
                 )
               })
               div(
                 class = "three_column_grid_center",
-                h4(strong(name)),
+                div(
+                  class = "go-bottom",
+                  h4(strong(name))
+                ),
                 div(
                   class = "go-bottom",
                   char_names_list
@@ -1253,7 +1303,7 @@ server <- function(id) { # nolint
                 )
               )
             })
-          })
+          )
         )
       )
     })
@@ -1402,9 +1452,12 @@ server <- function(id) { # nolint
         {
           bill_to_fields <- rv_json_lists$json_business_to_bill_list %>% discard(names(.) %in% "file_identifier")
           lapply(seq_along(bill_to_fields), function(x) {
-            textInput(ns(names(bill_to_fields[x])),
-              gsub("_", " ", gsub(pattern_a, pattern_b, names(bill_to_fields[x]))),
-              value = bill_to_fields[[x]]
+            div(
+              class = "form-group-container",
+              textInput(ns(names(bill_to_fields[x])),
+                "",
+                value = bill_to_fields[[x]]
+              )
             )
           })
         },
