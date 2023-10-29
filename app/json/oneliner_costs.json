@@ -1,4 +1,5 @@
 {
+  "file_identifier": ["oneliner_costs"],
   "cost_1": {
     "use": [true],
     "currency_exchange_to_Final_Currency": [5.1594],

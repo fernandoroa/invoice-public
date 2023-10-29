@@ -1,4 +1,5 @@
 {
+  "file_identifier": ["business_to_bill"],
   "billTo1": ["bill business name line 1"],
   "billTo2": ["bill address line 2"],
   "billTo3": ["bill address line 3"],

@@ -35,12 +35,13 @@ json_consultant_business_list <- rjson::fromJSON(file = file.path(params$app_pat
 # special multiline - salary - days
 json_salary_list <- rjson::fromJSON(file = file.path(params$app_path, "json/salary.json"))
 
-
 # oneliners
 json_oneliners_list <- rjson::fromJSON(file = file.path(params$app_path, "json/oneliner_costs.json"))
+json_oneliners_list <- json_oneliners_list %>% discard(names(.) %in% "file_identifier")
 
 # multiliners
 json_grouped_list <- rjson::fromJSON(file = file.path(params$app_path, "json/grouped_costs.json"))
+json_grouped_list <- json_grouped_list %>% discard(names(.) %in% "file_identifier")
 
 # dates
 sm <- month(json_salary_list$dates$start, label = TRUE)
@@ -65,7 +66,7 @@ oneliners_filtered_list <- json_oneliners_list |> keep(~ .$use)
 
 oneliners_filtered_df <- bind_rows(oneliners_filtered_list, .id = "name")
 
-oneliners_filtered_df$needs_exchange <- ifelse(oneliners_filtered_df$currency != final_currency, T, F)
+oneliners_filtered_df$needs_exchange <- ifelse(oneliners_filtered_df$currency != final_currency, TRUE, FALSE)
 
 oneliners_filtered_df_not_exchanged <- oneliners_filtered_df |> filter(!needs_exchange)
 
@@ -222,9 +223,10 @@ grouped_final_formatted <- format(round(total_grouped_finals), scientific = FALS
 |--------|-------:|----|----:|----|-----------:|
 |`r json_salary_list$main$section_title`|  |  | | | |
 ``` {r table, results="asis", echo=F, eval=T}
-cat(
+cat( # nolint
   if (use_dates) {
-    paste0("|\\hspace{2mm}", "", sdt, " ", sm, " ", sy, " ", json_salary_list$dates$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n")
+    paste0("|\\hspace{2mm}", "", sdt, " ", sm, " ", sy, " ",
+           json_salary_list$dates$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n")
   },
   if (use_dates) {
     paste0("|\\hspace{2mm}", json_salary_list$dates$delivery_month_text, " ", smna, " ", sy, "| | |  |   |   |\n")

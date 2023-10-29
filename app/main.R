@@ -5,7 +5,7 @@ box::use(
   jsonlite[...],
   lubridate[...],
   purrr[discard, keep],
-  utils[zip]
+  utils[zip, unzip],
 )
 
 box::use(
@@ -47,12 +47,20 @@ ui <- function(id) {
             wellPanel(
               div(
                 class = "generate_buttons",
-                h4("Download Source files"),
-                helpText("and save changes"),
-                span(code(".zip"), "contains source", code(".json"), "files"),
-                br(),
-                downloadButton(ns("downloadPresets"), "Download .zip", class = "btn-success"),
+                h4("Download Source files as .zip"),
+                helpText("with current changes"),
+                span(code(".zip"), "contains", code(".json"), "files"),
+                downloadButton(ns("downloadPresets"), "Download .zip", class = "btn-success")
               )
+            )
+          ),
+          column(
+            3,
+            uiOutput(
+              ns("zip_upload_ui")
+            ),
+            uiOutput(
+              ns("json_upload_ui")
             )
           )
         )
@@ -177,7 +185,7 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function(id) {
+server <- function(id) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -204,6 +212,319 @@ server <- function(id) {
       ignoreInit = TRUE
     )
 
+    observeEvent(file_reac(),
+      {
+        input_file <- file_reac()
+
+        if (isTruthy(grepl("zip$", input_file$datapath))) {
+          unzip(input_file$datapath, exdir = "app/json", junkpaths = TRUE)
+        }
+        if (isTruthy(grepl("json$", input_file$datapath))) {
+          lapply(seq_along(input_file$name), function(x) {
+            file.copy(input_file$datapath[x], file.path(getwd(), "app", "json", input_file$name[x]), overwrite = TRUE)
+          })
+        }
+
+        rv_json_lists$json_final_currency_list <- rjson::fromJSON(file = "app/json/final_currency_inv_date.json")
+        rv_json_lists$json_business_to_bill_list <- rjson::fromJSON(file = "app/json/business_to_bill.json")
+        rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/consultant_account.json")
+        rv_json_lists$json_consultant_business_list <- rjson::fromJSON(file = "app/json/consultant_contact.json")
+        rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/salary.json")
+        rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/oneliner_costs.json")
+        rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/grouped_costs.json")
+
+
+        updateTextInput(
+          session,
+          "final_currency",
+          value = rv_json_lists$json_final_currency_list$final_currency
+        )
+        updateDateInput(
+          session,
+          "exchangeDate",
+          value = as.Date(rv_json_lists$json_final_currency_list$exchangeDate)
+        )
+        updateDateInput(
+          session,
+          "invoiceDate",
+          value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate)
+        )
+        bill_to_fields <- rv_json_lists$json_business_to_bill_list %>% discard(names(.) %in% "file_identifier")
+        lapply(seq_along(bill_to_fields), function(x) {
+          updateTextInput(session,
+            names(bill_to_fields[x]),
+            value = bill_to_fields[[x]]
+          )
+        })
+        consultant_account_list <- rv_json_lists$json_consultant_account_list %>% discard(names(.) %in% "file_identifier")
+        char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
+        logic_char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.logical(x))))
+
+        lapply(logic_char_consultant_account, function(x) {
+          updateCheckboxInput(
+            session,
+            x,
+            value = consultant_account_list[[x]]
+          )
+        })
+
+        lapply(char_consultant_account, function(x) {
+          updateTextInput(
+            session,
+            x,
+            value = consultant_account_list[[x]]
+          )
+        })
+        consultant_business_list <- rv_json_lists$json_consultant_business_list %>% discard(names(.) %in% "file_identifier")
+        lapply(seq_along(consultant_business_list), function(x) {
+          updateTextInput(
+            session,
+            names(consultant_business_list[x]),
+            value = consultant_business_list[[x]]
+          )
+        })
+        updateCheckboxInput(
+          session,
+          paste0("dates", "use"),
+          value = rv_json_lists$json_salary_list$dates$use
+        )
+
+        updateDateInput(session,
+          paste0("dates", "start"),
+          value = as.Date(rv_json_lists$json_salary_list$dates$start)
+        )
+
+        updateTextInput(
+          session, paste0("dates", "date_connector"),
+          value = rv_json_lists$json_salary_list$dates$date_connector
+        )
+
+        updateDateInput(session, paste0("dates", "end"),
+          value = as.Date(rv_json_lists$json_salary_list$dates$end)
+        )
+
+        updateTextInput(
+          session, paste0("dates", "delivery_month_text"),
+          value = rv_json_lists$json_salary_list$dates$delivery_month_text
+        )
+        json_salary_list_main <- rv_json_lists$json_salary_list$main
+        char_names <- names(which(sapply(json_salary_list_main, function(x) is.character(x))))
+        num_names <- names(which(sapply(json_salary_list_main, function(x) is.numeric(x))))
+        logic_names <- names(which(sapply(json_salary_list_main, function(x) is.logical(x))))
+
+        char_names_currency <- grep("currency", char_names, value = TRUE)
+        num_names_currency <- grep("currency", num_names, value = TRUE)
+
+        char_names_not_currency <- grep("currency", char_names, value = TRUE, invert = TRUE)
+        num_names_not_currency <- grep("currency", num_names, value = TRUE, invert = TRUE)
+
+        lapply(char_names_currency, function(x) {
+          updateTextInput(
+            session,
+            paste0("main", x),
+            value = json_salary_list_main[[x]]
+          )
+        })
+        lapply(num_names_currency, function(x) {
+          updateNumericInput(
+            session,
+            paste0("main", x),
+            value = json_salary_list_main[[x]]
+          )
+        })
+        lapply(char_names_not_currency, function(x) {
+          updateTextInput(
+            session,
+            paste0("main", x),
+            value = json_salary_list_main[[x]]
+          )
+        })
+        lapply(num_names_not_currency, function(x) {
+          updateNumericInput(
+            session,
+            paste0("main", x),
+            value = json_salary_list_main[[x]]
+          )
+        })
+        lapply(logic_names, function(x) {
+          updateCheckboxInput(
+            session,
+            paste0("main", x),
+            value = json_salary_list_main[[x]]
+          )
+        })
+        salary_list_period <- rv_json_lists$json_salary_list$period
+        char_period <- names(which(sapply(salary_list_period, function(x) is.character(x))))
+        num_period <- names(which(sapply(salary_list_period, function(x) is.numeric(x))))
+        logic_period <- names(which(sapply(salary_list_period, function(x) is.logical(x))))
+
+        lapply(num_period, function(x) {
+          updateNumericInput(
+            session,
+            paste0("period", x),
+            value = salary_list_period[[x]]
+          )
+        })
+
+        lapply(char_period, function(x) {
+          updateTextInput(
+            session,
+            paste0("period", x),
+            value = salary_list_period[[x]]
+          )
+        })
+
+        lapply(logic_period, function(x) {
+          updateCheckboxInput(
+            session,
+            paste0("period", x),
+            value = salary_list_period[[x]]
+          )
+        })
+
+        oneliners_list <- rv_json_lists$json_oneliners_list %>% discard(names(.) %in% "file_identifier")
+        oneliners_list_names <- names(oneliners_list)
+        lapply(oneliners_list_names, function(name) {
+          num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_oneliners <- list()
+          num_names_oneliners <- char_names_oneliners <- list()
+
+          char_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.character(x))))
+          num_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.numeric(x))))
+          logic_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.logical(x))))
+
+          char_names_currency[[name]] <- grep("currency", char_names_oneliners[[name]], value = TRUE)
+          num_names_currency[[name]] <- grep("currency", num_names_oneliners[[name]], value = TRUE)
+
+          char_names_not_currency[[name]] <- grep("currency", char_names_oneliners[[name]], value = TRUE, invert = TRUE)
+          num_names_not_currency[[name]] <- grep("currency", num_names_oneliners[[name]], value = TRUE, invert = TRUE)
+
+          lapply(char_names_currency[[name]], function(x) {
+            updateTextInput(session,
+              paste0("oneliners", name, x),
+              value = oneliners_list[[name]][[x]]
+            )
+          })
+          lapply(num_names_currency[[name]], function(x) {
+            updateNumericInput(session,
+              paste0("oneliners", name, x),
+              value = oneliners_list[[name]][[x]]
+            )
+          })
+          lapply(char_names_not_currency[[name]], function(x) {
+            updateTextInput(session,
+              paste0("oneliners", name, x),
+              value = oneliners_list[[name]][[x]]
+            )
+          })
+          lapply(num_names_not_currency[[name]], function(x) {
+            updateNumericInput(session,
+              paste0("oneliners", name, x),
+              value = oneliners_list[[name]][[x]]
+            )
+          })
+          lapply(logic_names_oneliners[[name]], function(x) {
+            updateCheckboxInput(
+              session,
+              paste0("oneliners", name, x),
+              value = oneliners_list[[name]][[x]]
+            )
+          })
+        })
+        grouped_list <- rv_json_lists$json_grouped_list %>% discard(names(.) %in% "file_identifier")
+
+        root_names <- c(
+          "currency_exchange_to_Final_Currency", "use",
+          "GeneralName", "currency"
+        )
+
+        grouped_list_root <- grouped_list %>% keep(names(.) %in% root_names)
+
+        char_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.character(x))))
+        num_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.numeric(x))))
+        logic_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.logical(x))))
+
+        char_names_currency <- grep("currency", char_names_grouped, value = TRUE)
+        num_names_currency <- grep("currency", num_names_grouped, value = TRUE)
+
+        char_names_not_currency <- grep("currency", char_names_grouped, value = TRUE, invert = TRUE)
+
+        grouped_sublists <- grouped_list %>% discard(names(.) %in% root_names)
+
+        grouped_list_names <- names(grouped_sublists)
+
+        lapply(char_names_currency, function(x) {
+          updateTextInput(
+            session,
+            paste0("grouped", x),
+            value = grouped_list[[x]]
+          )
+        })
+        lapply(num_names_currency, function(x) {
+          updateNumericInput(
+            session,
+            paste0("grouped", x),
+            value = grouped_list[[x]]
+          )
+        })
+        lapply(char_names_not_currency, function(x) {
+          updateTextInput(
+            session,
+            paste0("grouped", x),
+            value = grouped_list[[x]]
+          )
+        })
+        lapply(logic_names_grouped, function(x) {
+          updateCheckboxInput(
+            session,
+            paste0("grouped", x),
+            value = grouped_list[[x]]
+          )
+        })
+
+        lapply(grouped_list_names, function(name) {
+          num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_grouped <- list()
+          num_names_grouped <- char_names_grouped <- list()
+
+          char_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.character(x))))
+          num_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.numeric(x))))
+          logic_names_grouped[[name]] <- names(which(sapply(grouped_sublists[[name]], function(x) is.logical(x))))
+
+          lapply(char_names_grouped[[name]], function(x) {
+            updateTextInput(
+              session,
+              paste0("grouped", name, x),
+              value = grouped_list[[name]][[x]]
+            )
+          })
+          lapply(num_names_grouped[[name]], function(x) {
+            updateNumericInput(
+              session,
+              paste0("grouped", name, x),
+              value = grouped_list[[name]][[x]]
+            )
+          })
+        })
+      },
+      ignoreInit = TRUE
+    )
+
+    file_reac <- reactiveVal()
+
+    observeEvent(input$zip_upload,
+      {
+        req(input$zip_upload)
+        file_reac(input$zip_upload)
+      },
+      ignoreInit = TRUE
+    )
+
+    observeEvent(input$json_upload,
+      {
+        req(input$json_upload)
+        file_reac(input$json_upload)
+      },
+      ignoreInit = TRUE
+    )
 
     pattern_a <- "([[:lower:]]+)([[:upper:]])([[:alpha:]]+)([[:digit:]]?)"
     pattern_b <- "\\1 \\2\\3 \\4"
@@ -309,15 +630,15 @@ server <- function(id) {
         file_name <- "salary.json"
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          nested_json_save(
-            input,
-            nested_list = rv_json_lists$json_salary_list,
-            prefix = "",
-            folders = c(folder, "app/json"),
-            file_name
-          )
-        }
+
+        nested_json_save(
+          input,
+          nested_list = rv_json_lists$json_salary_list,
+          prefix = "",
+          folders = c(folder, "app/json"),
+          file_name
+        )
+
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
@@ -332,14 +653,14 @@ server <- function(id) {
         file_name <- "grouped_costs.json"
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          nested_and_root_save(input,
-            nested_list = rv_json_lists$json_grouped_list,
-            prefix = "grouped",
-            folders = c(folder, "app/json"),
-            file_name
-          )
-        }
+
+        nested_and_root_save(input,
+          nested_list = rv_json_lists$json_grouped_list,
+          prefix = "grouped",
+          folders = c(folder, "app/json"),
+          file_name
+        )
+
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
@@ -354,14 +675,14 @@ server <- function(id) {
         file_name <- "oneliner_costs.json"
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          nested_json_save(input,
-            nested_list = rv_json_lists$json_oneliners_list,
-            prefix = "oneliners",
-            folders = c(folder, "app/json"),
-            file_name
-          )
-        }
+
+        nested_json_save(input,
+          nested_list = rv_json_lists$json_oneliners_list,
+          prefix = "oneliners",
+          folders = c(folder, "app/json"),
+          file_name
+        )
+
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
@@ -376,14 +697,14 @@ server <- function(id) {
         file_name <- "final_currency_inv_date.json"
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_final_currency_list,
-            folders = c(folder, "app/json"),
-            file_name
-          )
-        }
+
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_final_currency_list,
+          folders = c(folder, "app/json"),
+          file_name
+        )
+
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
@@ -398,14 +719,14 @@ server <- function(id) {
         file_name <- "business_to_bill.json"
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_business_to_bill_list,
-            folders = c(folder, "app/json"),
-            file_name
-          )
-        }
+
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_business_to_bill_list,
+          folders = c(folder, "app/json"),
+          file_name
+        )
+
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
@@ -420,14 +741,14 @@ server <- function(id) {
         file_name <- "consultant_account.json"
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_consultant_account_list,
-            folders = c(folder, "app/json"),
-            file_name
-          )
-        }
+
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_consultant_account_list,
+          folders = c(folder, "app/json"),
+          file_name
+        )
+
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
@@ -442,13 +763,13 @@ server <- function(id) {
         file_name <- "consultant_contact.json"
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_consultant_business_list,
-            folders = c(folder, "app/json"), file_name
-          )
-        }
+
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_consultant_business_list,
+          folders = c(folder, "app/json"), file_name
+        )
+
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
@@ -457,56 +778,57 @@ server <- function(id) {
 
     output$downloadPresets <- downloadHandler(
       filename = function() {
-        "all_json.zip"
+        "json.zip"
       },
       content = function(file) {
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
-        {
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_consultant_business_list,
-            folders = c(folder, "app/json"), file_name = "consultant_contact.json"
-          )
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_consultant_account_list,
-            folders = c(folder, "app/json"), file_name = "consultant_account.json"
-          )
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_business_to_bill_list,
-            folders = c(folder, "app/json"), file_name = "business_to_bill.json"
-          )
-          nested_json_save(
-            input,
-            nested_list = rv_json_lists$json_salary_list,
-            prefix = "",
-            folders = c(folder, "app/json"),
-            file_name = "salary.json"
-          )
-          nested_and_root_save(input,
-            nested_list = rv_json_lists$json_grouped_list,
-            prefix = "grouped",
-            folders = c(folder, "app/json"),
-            file_name = "grouped_costs.json"
-          )
-          nested_json_save(input,
-            nested_list = rv_json_lists$json_oneliners_list,
-            prefix = "oneliners",
-            folders = c(folder, "app/json"),
-            file_name = "oneliner_costs.json"
-          )
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_final_currency_list,
-            folders = c(folder, "app/json"),
-            file_name = "final_currency_inv_date.json"
-          )
-        }
-        zip_path <- file.path(folder, "all_json.zip")
-        files2zip <- dir(folder, full.names = T)
-        zip(zipfile = zip_path, files = files2zip, flags = "-0jrm")
+
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_consultant_business_list,
+          folders = c(folder, "app/json"), file_name = "consultant_contact.json"
+        )
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_consultant_account_list,
+          folders = c(folder, "app/json"), file_name = "consultant_account.json"
+        )
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_business_to_bill_list,
+          folders = c(folder, "app/json"), file_name = "business_to_bill.json"
+        )
+        nested_json_save(
+          input,
+          nested_list = rv_json_lists$json_salary_list,
+          prefix = "",
+          folders = c(folder, "app/json"),
+          file_name = "salary.json"
+        )
+        nested_and_root_save(input,
+          nested_list = rv_json_lists$json_grouped_list,
+          prefix = "grouped",
+          folders = c(folder, "app/json"),
+          file_name = "grouped_costs.json"
+        )
+        nested_json_save(input,
+          nested_list = rv_json_lists$json_oneliners_list,
+          prefix = "oneliners",
+          folders = c(folder, "app/json"),
+          file_name = "oneliner_costs.json"
+        )
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_final_currency_list,
+          folders = c(folder, "app/json"),
+          file_name = "final_currency_inv_date.json"
+        )
+        file.copy("app/json/fieldNames.json", folder)
+
+        zip_path <- file.path(folder, "json.zip")
+        files_to_zip <- dir(folder, full.names = TRUE)
+        zip(zipfile = zip_path, files = files_to_zip, flags = "-0jrm")
         file.copy(zip_path, file)
       },
       contentType = "zip"
@@ -700,14 +1022,14 @@ server <- function(id) {
     })
 
     output$oneliners_box <- renderUI({
-      oneliners_list <- rv_json_lists$json_oneliners_list
+      oneliners_list <- rv_json_lists$json_oneliners_list %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
-      length_oneliners <- length(oneliners_list)
+
       div(
         tagList(
           lapply(oneliners_list_names, function(name) {
-            num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_oneliners <- list()
-            num_names_oneliners <- char_names_oneliners <- list()
+            num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- list()
+            logic_names_oneliners <- num_names_oneliners <- char_names_oneliners <- list()
 
             char_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.character(x))))
             num_names_oneliners[[name]] <- names(which(sapply(oneliners_list[[name]], function(x) is.numeric(x))))
@@ -727,7 +1049,7 @@ server <- function(id) {
                     class = "wrap",
                     sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
                   ),
-                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                  oneliners_list[[name]][[x]]
                 )
               })
               num_names_currency_list <- lapply(num_names_currency[[name]], function(x) {
@@ -737,21 +1059,21 @@ server <- function(id) {
                     class = "wrap",
                     gsub("_", " ", x, perl = TRUE)
                   ),
-                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                  oneliners_list[[name]][[x]]
                 )
               })
               char_names_oneliners_not_currency_list <- lapply(char_names_not_currency[[name]], function(x) {
                 textInput(
                   ns(paste0("oneliners", name, x)),
                   gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                  oneliners_list[[name]][[x]]
                 )
               })
               num_names_oneliners_not_currency_list <- lapply(num_names_not_currency[[name]], function(x) {
                 numericInput(
                   ns(paste0("oneliners", name, x)),
                   gsub("_", " ", gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE)),
-                  rv_json_lists$json_oneliners_list[[name]][[x]]
+                  oneliners_list[[name]][[x]]
                 )
               })
               div(
@@ -772,11 +1094,11 @@ server <- function(id) {
                 div(class = "go-bottom", num_names_oneliners_not_currency_list),
                 div(
                   class = "go-bottom",
-                  logic_names_oneliners_list <- lapply(logic_names_oneliners[[name]], function(x) {
+                  lapply(logic_names_oneliners[[name]], function(x) {
                     checkboxInput(
                       ns(paste0("oneliners", name, x)),
                       gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                      rv_json_lists$json_oneliners_list[[name]][[x]]
+                      oneliners_list[[name]][[x]]
                     )
                   })
                 )
@@ -794,11 +1116,14 @@ server <- function(id) {
     })
 
     output$grouped_box <- renderUI({
-      grouped_list <- rv_json_lists$json_grouped_list
-      grouped_list_root <- grouped_list %>% keep(names(.) %in% c(
+      grouped_list <- rv_json_lists$json_grouped_list %>% discard(names(.) %in% "file_identifier")
+
+      root_names <- c(
         "currency_exchange_to_Final_Currency", "use",
         "GeneralName", "currency"
-      ))
+      )
+
+      grouped_list_root <- grouped_list %>% keep(names(.) %in% root_names)
 
       char_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.character(x))))
       num_names_grouped <- names(which(sapply(grouped_list_root, function(x) is.numeric(x))))
@@ -809,10 +1134,7 @@ server <- function(id) {
 
       char_names_not_currency <- grep("currency", char_names_grouped, value = TRUE, invert = TRUE)
 
-      grouped_sublists <- grouped_list %>% discard(names(.) %in% c(
-        "currency_exchange_to_Final_Currency", "use",
-        "GeneralName", "currency"
-      ))
+      grouped_sublists <- grouped_list %>% discard(names(.) %in% root_names)
       grouped_list_names <- names(grouped_sublists)
 
       tagList(
@@ -826,7 +1148,7 @@ server <- function(id) {
                     class = "wrap",
                     sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
                   ),
-                  rv_json_lists$json_grouped_list[[x]]
+                  grouped_list[[x]]
                 )
               })
               num_names_currency_list <- lapply(num_names_currency, function(x) {
@@ -836,21 +1158,21 @@ server <- function(id) {
                     class = "wrap",
                     gsub("_", " ", x, perl = TRUE)
                   ),
-                  rv_json_lists$json_grouped_list[[x]]
+                  grouped_list[[x]]
                 )
               })
               char_names_grouped_list <- lapply(char_names_not_currency, function(x) {
                 textInput(
                   ns(paste0("grouped", x)),
                   gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-                  rv_json_lists$json_grouped_list[[x]]
+                  grouped_list[[x]]
                 )
               })
               logic_names_grouped_list <- lapply(logic_names_grouped, function(x) {
                 checkboxInput(
                   ns(paste0("grouped", x)),
                   gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                  rv_json_lists$json_grouped_list[[x]]
+                  grouped_list[[x]]
                 )
               })
               div(
@@ -905,7 +1227,7 @@ server <- function(id) {
                     class = "wrap",
                     sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
                   ),
-                  rv_json_lists$json_grouped_list[[name]][[x]]
+                  grouped_list[[name]][[x]]
                 )
               })
               num_names_list <- lapply(num_names_grouped[[name]], function(x) {
@@ -915,7 +1237,7 @@ server <- function(id) {
                     class = "wrap",
                     gsub("_", " ", x, perl = TRUE)
                   ),
-                  rv_json_lists$json_grouped_list[[name]][[x]]
+                  grouped_list[[name]][[x]]
                 )
               })
               div(
@@ -932,6 +1254,45 @@ server <- function(id) {
               )
             })
           })
+        )
+      )
+    })
+
+    output$zip_upload_ui <- renderUI({
+      input[["json_upload"]]
+
+      tagList(
+        wellPanel(
+          div(
+            class = "generate_buttons",
+            h4("Upload .zip"),
+            span("with", code(".json"), "files"),
+            fileInput(ns("zip_upload"),
+              "",
+              accept = c(
+                ".zip"
+              )
+            )
+          )
+        )
+      )
+    })
+    output$json_upload_ui <- renderUI({
+      input[["zip_upload"]]
+
+      tagList(
+        wellPanel(
+          div(
+            class = "generate_buttons",
+            h4("Upload .json files"),
+            fileInput(ns("json_upload"),
+              "",
+              multiple = TRUE,
+              accept = c(
+                ".json"
+              )
+            )
+          )
         )
       )
     })
@@ -1038,12 +1399,15 @@ server <- function(id) {
       wellPanel(
         h4(strong("Bill To:")),
         br(),
-        lapply(seq_along(rv_json_lists$json_business_to_bill_list), function(x) {
-          textInput(ns(names(rv_json_lists$json_business_to_bill_list[x])),
-            gsub("_", " ", gsub(pattern_a, pattern_b, names(rv_json_lists$json_business_to_bill_list[x]))),
-            value = rv_json_lists$json_business_to_bill_list[[x]]
-          )
-        }),
+        {
+          bill_to_fields <- rv_json_lists$json_business_to_bill_list %>% discard(names(.) %in% "file_identifier")
+          lapply(seq_along(bill_to_fields), function(x) {
+            textInput(ns(names(bill_to_fields[x])),
+              gsub("_", " ", gsub(pattern_a, pattern_b, names(bill_to_fields[x]))),
+              value = bill_to_fields[[x]]
+            )
+          })
+        },
         br(),
         helpText("Go to Main tab to save all"),
         downloadButton(ns("modify_billto"),
@@ -1055,8 +1419,9 @@ server <- function(id) {
     })
 
     output$consultant_account_box <- renderUI({
-      char_consultant_account <- names(which(sapply(rv_json_lists$json_consultant_account_list, function(x) is.character(x))))
-      logic_char_consultant_account <- names(which(sapply(rv_json_lists$json_consultant_account_list, function(x) is.logical(x))))
+      consultant_account_list <- rv_json_lists$json_consultant_account_list %>% discard(names(.) %in% "file_identifier")
+      char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
+      logic_char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.logical(x))))
 
       wellPanel(
         h4(strong("Consultant Account")),
@@ -1064,14 +1429,14 @@ server <- function(id) {
           checkboxInput(
             ns(x),
             gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-            rv_json_lists$json_consultant_account_list[[x]]
+            consultant_account_list[[x]]
           )
         }),
         {
           char_inputs <- lapply(char_consultant_account, function(x) {
             textInput(ns(x),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              value = rv_json_lists$json_consultant_account_list[[x]]
+              value = consultant_account_list[[x]]
             )
           })
           char_inputs_len <- length(char_inputs)
@@ -1095,12 +1460,15 @@ server <- function(id) {
       wellPanel(
         h4(strong("Consultant details")),
         br(),
-        lapply(seq_along(rv_json_lists$json_consultant_business_list), function(x) {
-          textInput(ns(names(rv_json_lists$json_consultant_business_list[x])),
-            gsub("_", " ", gsub(pattern_a, pattern_b, names(rv_json_lists$json_consultant_business_list[x]))),
-            value = rv_json_lists$json_consultant_business_list[[x]]
-          )
-        }),
+        {
+          consultant_business_list <- rv_json_lists$json_consultant_business_list %>% discard(names(.) %in% "file_identifier")
+          lapply(seq_along(consultant_business_list), function(x) {
+            textInput(ns(names(consultant_business_list[x])),
+              gsub("_", " ", gsub(pattern_a, pattern_b, names(consultant_business_list[x]))),
+              value = consultant_business_list[[x]]
+            )
+          })
+        },
         br(),
         helpText("Go to Main tab to save all"),
         downloadButton(ns("modify_consultant"),
@@ -1113,48 +1481,46 @@ server <- function(id) {
     output$report <- downloadHandler(
       filename = "invoice.pdf",
       content = function(file) {
-        {
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_consultant_business_list,
-            folders = "app/json", file_name = "consultant_contact.json"
-          )
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_consultant_account_list,
-            folders = "app/json", file_name = "consultant_account.json"
-          )
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_business_to_bill_list,
-            folders = "app/json", file_name = "business_to_bill.json"
-          )
-          nested_json_save(
-            input,
-            nested_list = rv_json_lists$json_salary_list,
-            prefix = "",
-            folders = "app/json",
-            file_name = "salary.json"
-          )
-          nested_and_root_save(input,
-            nested_list = rv_json_lists$json_grouped_list,
-            prefix = "grouped",
-            folders = "app/json",
-            file_name = "grouped_costs.json"
-          )
-          nested_json_save(input,
-            nested_list = rv_json_lists$json_oneliners_list,
-            prefix = "oneliners",
-            folders = "app/json",
-            file_name = "oneliner_costs.json"
-          )
-          plain_json_save(
-            input,
-            plain_list = rv_json_lists$json_final_currency_list,
-            folders = "app/json",
-            file_name = "final_currency_inv_date.json"
-          )
-        }
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_consultant_business_list,
+          folders = "app/json", file_name = "consultant_contact.json"
+        )
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_consultant_account_list,
+          folders = "app/json", file_name = "consultant_account.json"
+        )
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_business_to_bill_list,
+          folders = "app/json", file_name = "business_to_bill.json"
+        )
+        nested_json_save(
+          input,
+          nested_list = rv_json_lists$json_salary_list,
+          prefix = "",
+          folders = "app/json",
+          file_name = "salary.json"
+        )
+        nested_and_root_save(input,
+          nested_list = rv_json_lists$json_grouped_list,
+          prefix = "grouped",
+          folders = "app/json",
+          file_name = "grouped_costs.json"
+        )
+        nested_json_save(input,
+          nested_list = rv_json_lists$json_oneliners_list,
+          prefix = "oneliners",
+          folders = "app/json",
+          file_name = "oneliner_costs.json"
+        )
+        plain_json_save(
+          input,
+          plain_list = rv_json_lists$json_final_currency_list,
+          folders = "app/json",
+          file_name = "final_currency_inv_date.json"
+        )
 
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)

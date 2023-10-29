@@ -10,6 +10,7 @@ plain_json_save <- function(input, plain_list, folders, file_name) {
   })
 
   names(list) <- names(plain_list)
+  list$file_identifier <- sub(".json$", "", file_name)
   json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
   for (folder in folders) {
     file_path <- file.path(folder, file_name)
@@ -27,6 +28,7 @@ nested_json_save <- function(input, nested_list, prefix, folders, file_name) {
     })
     names(list[[name]]) <- names(nested_list[[name]])
   }
+  list$file_identifier <- sub(".json$", "", file_name)
   json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
 
   for (folder in folders) {
@@ -59,7 +61,7 @@ nested_and_root_save <- function(input, nested_list, prefix, folders, file_name)
     })
     names(list[[sublist_name]]) <- names(nested_list[[sublist_name]])
   }
-
+  list$file_identifier <- sub(".json$", "", file_name)
   json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
 
   for (folder in folders) {

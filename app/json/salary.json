@@ -1,7 +1,8 @@
 {
+  "file_identifier": ["salary"],
   "main": {
     "currency_exchange_to_Final_Currency": [5.1594],
-    "salary": [400],
+    "salary": [4000],
     "use_salary_and_related": [true],
     "currency": ["BRL"],
     "total_days": [21],
@@ -9,8 +10,8 @@
     "common_days_text": ["other:"]
   },
   "dates": {
-    "start": ["2022-02-01"],
-    "end": ["2022-02-28"],
+    "start": ["2022-03-01"],
+    "end": ["2022-03-31"],
     "use": [true],
     "date_connector": ["to"],
     "delivery_month_text": ["Delivery date:"]
