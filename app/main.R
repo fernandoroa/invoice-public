@@ -10,7 +10,8 @@ box::use(
 
 box::use(
   logic / exchange[...],
-  logic / json_save[...]
+  logic / json_save[...],
+  modules / upload
 )
 
 #' @export
@@ -59,9 +60,7 @@ ui <- function(id) {
             uiOutput(
               ns("zip_upload_ui")
             ),
-            uiOutput(
-              ns("json_upload_ui")
-            )
+            upload$ui(ns("json_upload_ns"))
           )
         )
       )
@@ -221,6 +220,12 @@ server <- function(id) { # nolint
       },
       ignoreInit = TRUE
     )
+
+    input_zip_upload <- reactive({
+      input$zip_upload
+    })
+
+    json_upload_var <- upload$server("json_upload_ns", input_zip_upload, ".json")
 
     observeEvent(file_reac(),
       {
@@ -528,10 +533,10 @@ server <- function(id) { # nolint
       ignoreInit = TRUE
     )
 
-    observeEvent(input$json_upload,
+    observeEvent(json_upload_var(),
       {
-        req(input$json_upload)
-        file_reac(input$json_upload)
+        req(json_upload_var())
+        file_reac(json_upload_var())
       },
       ignoreInit = TRUE
     )
@@ -1309,7 +1314,8 @@ server <- function(id) { # nolint
     })
 
     output$zip_upload_ui <- renderUI({
-      input[["json_upload"]]
+      # input[["json_upload"]]
+      json_upload_var()
 
       tagList(
         wellPanel(
@@ -1327,25 +1333,7 @@ server <- function(id) { # nolint
         )
       )
     })
-    output$json_upload_ui <- renderUI({
-      input[["zip_upload"]]
 
-      tagList(
-        wellPanel(
-          div(
-            class = "generate_buttons",
-            h4("Upload .json files"),
-            fileInput(ns("json_upload"),
-              "",
-              multiple = TRUE,
-              accept = c(
-                ".json"
-              )
-            )
-          )
-        )
-      )
-    })
 
     output$salary_period_panel <- renderUI({
       char_period <- names(which(sapply(rv_json_lists$json_salary_list$period, function(x) is.character(x))))
