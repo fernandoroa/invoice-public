@@ -11,7 +11,9 @@ box::use(
 box::use(
   logic / exchange[...],
   logic / json_save[...],
-  modules / upload
+  utils / constants[...],
+  modules / upload,
+  modules / currency_date
 )
 
 #' @export
@@ -96,7 +98,7 @@ ui <- function(id) {
           ),
           column(
             3,
-            uiOutput(ns("first_well_panel"))
+            currency_date$ui(ns("currency_date_ns"))
           ),
           column(
             3,
@@ -222,6 +224,16 @@ server <- function(id) { # nolint
 
     json_upload_var <- upload$server("json_upload_ns", zip_upload_var, ".json")
     zip_upload_var <- upload$server("zip_upload_ns", json_upload_var, ".zip")
+
+    input_maincurrency <- reactive({
+      input$maincurrency
+    })
+
+    currency_date_vars <- currency_date$server("currency_date_ns", rv_json_lists, input_maincurrency)
+
+    observeEvent(currency_date_vars$exchange_salary(), {
+      updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = currency_date_vars$exchange_salary())
+    })
 
     observeEvent(file_reac(),
       {
@@ -540,63 +552,6 @@ server <- function(id) { # nolint
     pattern_a <- "([[:lower:]]+)([[:upper:]])([[:alpha:]]+)([[:digit:]]?)"
     pattern_b <- "\\1 \\2\\3 \\4"
 
-    mon_span <- c(31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31)
-
-    observeEvent(input$get_exchanges, {
-      if (input$final_currency != input$maincurrency) {
-        date <- as.character(input$exchangeDate)
-        while (TRUE) {
-          exchange_df <- try(get_exchange_rates(input$final_currency, input$maincurrency, date), silent = TRUE)
-          date <- as.character(as.Date(date) - 1)
-          if (!inherits(exchange_df, "try-error")) break
-        }
-        exchange_salary <- signif(exchange_df$Adjusted_Sy, 5)
-        updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = exchange_salary)
-      }
-      inputs <- reactiveValuesToList(input)
-      oneliners_currency_name_strings <- grep("oneliners.*currency", names(inputs), value = TRUE)
-      grouped_currency_name_strings <- grep("grouped.*currency", names(inputs), value = TRUE)
-
-      oneline_currencies_inputs <- inputs[which(names(inputs) %in% oneliners_currency_name_strings)]
-      grouped_currency_inputs <- inputs[which(names(inputs) %in% grouped_currency_name_strings)]
-
-      oneliners_currencies_list <- oneline_currencies_inputs[sapply(oneline_currencies_inputs, is.character)]
-      grouped_currencies_list <- grouped_currency_inputs[sapply(grouped_currency_inputs, is.character)]
-
-      oneliners_currency_exchange_value_list <- oneline_currencies_inputs[sapply(oneline_currencies_inputs, is.numeric)]
-      grouped_currency_exchange_value_list <- grouped_currency_inputs[sapply(grouped_currency_inputs, is.numeric)]
-
-      oneliners_currencies_list_names <- names(oneliners_currency_exchange_value_list)
-      grouped_currencies_list_names <- names(grouped_currency_exchange_value_list)
-
-      for (currency_idx in seq_along(oneliners_currencies_list)) {
-        currency <- oneliners_currencies_list[currency_idx]
-        if (input$final_currency != currency) {
-          date <- as.character(input$exchangeDate)
-          while (TRUE) {
-            exchange_df <- try(get_exchange_rates(input$final_currency, currency, date), silent = TRUE)
-            date <- as.character(as.Date(date) - 1)
-            if (!inherits(exchange_df, "try-error")) break
-          }
-          exchange_oneliners <- signif(exchange_df$Adjusted_Sy, 5)
-          updateNumericInput(session, oneliners_currencies_list_names[currency_idx], value = exchange_oneliners)
-        }
-      }
-      for (currency_idx in seq_along(grouped_currencies_list)) {
-        currency <- grouped_currencies_list[currency_idx]
-        if (input$final_currency != currency) {
-          date <- as.character(input$exchangeDate)
-          while (TRUE) {
-            exchange_df <- try(get_exchange_rates(input$final_currency, currency, date), silent = TRUE)
-            date <- as.character(as.Date(date) - 1)
-            if (!inherits(exchange_df, "try-error")) break
-          }
-          exchange_grouped <- signif(exchange_df$Adjusted_Sy, 5)
-          updateNumericInput(session, grouped_currencies_list_names[currency_idx], value = exchange_grouped)
-        }
-      }
-    })
-
     observeEvent(input$increaseDate, {
       sdate <- input$datesstart
       edate <- input$datesend
@@ -613,24 +568,6 @@ server <- function(id) { # nolint
       emon <- month(edate)
       updateDateInput(session, "datesstart", value = sdate - mon_span[smon])
       updateDateInput(session, "datesend", value = edate - mon_span[emon + 1])
-    })
-
-    observeEvent(input$increaseDate_Final, {
-      cdate <- input$invoiceDate
-      edate <- input$exchangeDate
-      cmon <- month(cdate)
-      emon <- month(edate)
-      updateDateInput(session, "invoiceDate", value = cdate + mon_span[cmon + 2])
-      updateDateInput(session, "exchangeDate", value = edate + mon_span[emon + 2])
-    })
-
-    observeEvent(input$decreaseDate_Final, {
-      cdate <- input$invoiceDate
-      edate <- input$exchangeDate
-      cmon <- month(cdate)
-      emon <- month(edate)
-      updateDateInput(session, "invoiceDate", value = cdate - mon_span[cmon + 1])
-      updateDateInput(session, "exchangeDate", value = cdate - mon_span[emon + 1])
     })
 
     output$modify_salary <- downloadHandler(
@@ -690,28 +627,6 @@ server <- function(id) { # nolint
         nested_json_save(input,
           nested_list = rv_json_lists$json_oneliners_list,
           prefix = "oneliners",
-          folders = c(folder, "app/json"),
-          file_name
-        )
-
-        json_path <- file.path(folder, file_name)
-        file.copy(json_path, file)
-      },
-      contentType = "json"
-    )
-
-    output$modify_main <- downloadHandler(
-      filename = function() {
-        "final_currency_inv_date.json"
-      },
-      content = function(file) {
-        file_name <- "final_currency_inv_date.json"
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
-
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_final_currency_list,
           folders = c(folder, "app/json"),
           file_name
         )
@@ -844,62 +759,6 @@ server <- function(id) { # nolint
       },
       contentType = "zip"
     )
-
-    output$first_well_panel <- renderUI({
-      wellPanel(
-        h4(strong("Currency and Invoice Date")),
-        div(
-          class = "two_column_right_big",
-          textInput(
-            ns("final_currency"),
-            div(
-              class = "wrap",
-              HTML("<i>Final</i> Currency")
-            ),
-            rv_json_lists$json_final_currency_list$final_currency
-          ),
-          div(
-            id = "exchange_container", style = "display:inline-block", title = "Updates exchange values in other tabs",
-            actionButton(
-              ns("get_exchanges"),
-              "Get exchange values"
-            )
-          )
-        ),
-        splitLayout(
-          div(
-            style = "display: flex;
-               flex-direction: column;
-               justify-content: space-between;
-               max-width:150px;
-               align-items:center;",
-            br(),
-            actionButton(ns("increaseDate_Final"), ""),
-            span("1 Month"),
-            br(),
-            actionButton(ns("decreaseDate_Final"), "")
-          ),
-          tagList(
-            dateInput(ns("exchangeDate"),
-              div(
-                class = "wrap",
-                "Currency Exchange Date: "
-              ),
-              value = as.Date(rv_json_lists$json_final_currency_list$exchangeDate)
-            ),
-            dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate))
-          )
-        ),
-        downloadButton(ns("modify_main"),
-          class = "button",
-          strong(
-            "Save and Download", code("final_currency_inv_date.json")
-          ),
-          style = "white-space: normal;
-                   word-wrap: break-word;"
-        )
-      )
-    })
 
     output$salary_dates_panel <- renderUI({
       wellPanel(
@@ -1552,7 +1411,6 @@ server <- function(id) { # nolint
         )
       }
     )
-    outputOptions(output, "first_well_panel", suspendWhenHidden = FALSE)
     outputOptions(output, "consultant_business_box", suspendWhenHidden = FALSE)
     outputOptions(output, "business_to_bill_box", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_dates_panel", suspendWhenHidden = FALSE)
