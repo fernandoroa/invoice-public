@@ -9,24 +9,35 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, input_zip_upload, file_type) {
+server <- function(id, other_input_upload, file_type) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     file_reac <- reactiveVal()
 
     output$upload_ui <- renderUI({
-      input_zip_upload()
+      other_input_upload()
+
+      if (file_type == ".json") {
+        title <- h4(
+          paste("Upload", file_type, "file(s)")
+        )
+        multiple <- TRUE
+      } else {
+        title <- tagList(
+          h4(paste("Upload", file_type)),
+          span("with", code(".json"), "files")
+        )
+        multiple <- FALSE
+      }
 
       wellPanel(
         div(
           class = "generate_buttons",
-          h4(
-            paste("Upload", file_type, "file(s)")
-          ),
+          title,
           fileInput(ns("file_input_id"),
             "",
-            multiple = TRUE,
+            multiple = multiple,
             accept = c(
               file_type
             )
