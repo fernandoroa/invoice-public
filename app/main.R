@@ -15,7 +15,8 @@ box::use(
   modules / upload,
   modules / currency_date,
   modules / bill_to,
-  modules / consultant_business
+  modules / consultant_business,
+  modules / download_zip
 )
 
 #' @export
@@ -49,15 +50,7 @@ ui <- function(id) {
           ),
           column(
             3,
-            wellPanel(
-              div(
-                class = "generate_buttons",
-                h4("Download Source files as .zip"),
-                helpText("with current changes"),
-                span(code(".zip"), "contains", code(".json"), "files"),
-                downloadButton(ns("downloadPresets"), "Download .zip", class = "btn-success")
-              )
-            )
+            download_zip$ui(ns("download_zip_ns"))
           ),
           column(
             3,
@@ -236,6 +229,8 @@ server <- function(id) { # nolint
     bill_to$server("bill_to_ns", rv_json_lists$json_business_to_bill_list, file_reac)
 
     consultant_business$server("consultant_business_ns", rv_json_lists$json_consultant_business_list, file_reac)
+
+    download_zip$server("download_zip_ns", rv_json_lists, input)
 
     observeEvent(currency_date_vars$exchange_salary(), {
       updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = currency_date_vars$exchange_salary())
@@ -648,63 +643,6 @@ server <- function(id) { # nolint
       contentType = "json"
     )
 
-    output$downloadPresets <- downloadHandler(
-      filename = function() {
-        "json.zip"
-      },
-      content = function(file) {
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
-
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_consultant_business_list,
-          folders = c(folder, "app/json"), file_name = "consultant_contact.json"
-        )
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_consultant_account_list,
-          folders = c(folder, "app/json"), file_name = "consultant_account.json"
-        )
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_business_to_bill_list,
-          folders = c(folder, "app/json"), file_name = "business_to_bill.json"
-        )
-        nested_json_save(
-          input,
-          nested_list = rv_json_lists$json_salary_list,
-          prefix = "",
-          folders = c(folder, "app/json"),
-          file_name = "salary.json"
-        )
-        nested_and_root_save(input,
-          nested_list = rv_json_lists$json_grouped_list,
-          prefix = "grouped",
-          folders = c(folder, "app/json"),
-          file_name = "grouped_costs.json"
-        )
-        nested_json_save(input,
-          nested_list = rv_json_lists$json_oneliners_list,
-          prefix = "oneliners",
-          folders = c(folder, "app/json"),
-          file_name = "oneliner_costs.json"
-        )
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_final_currency_list,
-          folders = c(folder, "app/json"),
-          file_name = "final_currency_inv_date.json"
-        )
-        file.copy("app/json/fieldNames.json", folder)
-
-        zip_path <- file.path(folder, "json.zip")
-        files_to_zip <- dir(folder, full.names = TRUE)
-        zip(zipfile = zip_path, files = files_to_zip, flags = "-0jrm")
-        file.copy(zip_path, file)
-      },
-      contentType = "zip"
-    )
 
     output$salary_dates_panel <- renderUI({
       wellPanel(

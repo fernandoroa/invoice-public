@@ -1,12 +1,16 @@
 box::use(
-  purrr[map, discard, keep]
+  purrr[map, discard, keep],
+  shiny[reactiveValuesToList]
 )
 #' @export
-plain_json_save <- function(input, plain_list, folders, file_name) {
+plain_json_save <- function(input, plain_list, folders, file_name, useNS = FALSE, namespace = "") {
   list <- list()
+  if (useNS) {
+    namespace <- paste0(namespace, "-")
+  }
 
   list <- lapply(names(plain_list), function(x) {
-    input[[x]]
+    input[[paste0(namespace, x)]]
   })
 
   names(list) <- names(plain_list)
