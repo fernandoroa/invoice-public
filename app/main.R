@@ -13,7 +13,8 @@ box::use(
   logic / json_save[...],
   utils / constants[...],
   modules / upload,
-  modules / currency_date
+  modules / currency_date,
+  modules / bill_to
 )
 
 #' @export
@@ -86,7 +87,7 @@ ui <- function(id) {
             ),
             div(
               style = "max-width:600px",
-              uiOutput(ns("business_to_bill_box")),
+              bill_to$ui(ns("bill_to_ns"))
             )
           ),
           column(
@@ -230,6 +231,7 @@ server <- function(id) { # nolint
     })
 
     currency_date_vars <- currency_date$server("currency_date_ns", rv_json_lists, input_maincurrency)
+    bill_to$server("bill_to_ns", rv_json_lists$json_business_to_bill_list, file_reac)
 
     observeEvent(currency_date_vars$exchange_salary(), {
       updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = currency_date_vars$exchange_salary())
@@ -256,7 +258,6 @@ server <- function(id) { # nolint
         rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/oneliner_costs.json")
         rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/grouped_costs.json")
 
-
         updateTextInput(
           session,
           "final_currency",
@@ -272,13 +273,7 @@ server <- function(id) { # nolint
           "invoiceDate",
           value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate)
         )
-        bill_to_fields <- rv_json_lists$json_business_to_bill_list %>% discard(names(.) %in% "file_identifier")
-        lapply(seq_along(bill_to_fields), function(x) {
-          updateTextInput(session,
-            names(bill_to_fields[x]),
-            value = bill_to_fields[[x]]
-          )
-        })
+
         consultant_account_list <- rv_json_lists$json_consultant_account_list %>% discard(names(.) %in% "file_identifier")
         char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
         logic_char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.logical(x))))
@@ -627,28 +622,6 @@ server <- function(id) { # nolint
         nested_json_save(input,
           nested_list = rv_json_lists$json_oneliners_list,
           prefix = "oneliners",
-          folders = c(folder, "app/json"),
-          file_name
-        )
-
-        json_path <- file.path(folder, file_name)
-        file.copy(json_path, file)
-      },
-      contentType = "json"
-    )
-
-    output$modify_billto <- downloadHandler(
-      filename = function() {
-        "business_to_bill.json"
-      },
-      content = function(file) {
-        file_name <- "business_to_bill.json"
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
-
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_business_to_bill_list,
           folders = c(folder, "app/json"),
           file_name
         )
@@ -1266,32 +1239,6 @@ server <- function(id) { # nolint
       )
     })
 
-    output$business_to_bill_box <- renderUI({
-      wellPanel(
-        h4(strong("Bill To:")),
-        br(),
-        {
-          bill_to_fields <- rv_json_lists$json_business_to_bill_list %>% discard(names(.) %in% "file_identifier")
-          lapply(seq_along(bill_to_fields), function(x) {
-            div(
-              class = "form-group-container",
-              textInput(ns(names(bill_to_fields[x])),
-                "",
-                value = bill_to_fields[[x]]
-              )
-            )
-          })
-        },
-        br(),
-        helpText("Go to Main tab to save all"),
-        downloadButton(ns("modify_billto"),
-          strong("Save and Download", code("business_to_bill.json")),
-          style = "white-space: normal;
-          word-wrap: break-word;"
-        )
-      )
-    })
-
     output$consultant_account_box <- renderUI({
       consultant_account_list <- rv_json_lists$json_consultant_account_list %>% discard(names(.) %in% "file_identifier")
       char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
@@ -1412,7 +1359,6 @@ server <- function(id) { # nolint
       }
     )
     outputOptions(output, "consultant_business_box", suspendWhenHidden = FALSE)
-    outputOptions(output, "business_to_bill_box", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_dates_panel", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_period_panel", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_box", suspendWhenHidden = FALSE)
