@@ -14,11 +14,11 @@ ui <- function(id) {
   uiOutput(ns("oneliners_box"))
 }
 
-server <- function(id, rv_sublist, file_reac, exchange_rates) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$oneliners_box <- renderUI({
-      oneliners_list <- rv_sublist %>% discard(names(.) %in% "file_identifier")
+      oneliners_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
 
       wellPanel(
@@ -139,7 +139,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rates) {
         dir.create(folder)
 
         nested_json_save(input,
-          nested_list = rv_sublist,
+          nested_list = rv_jsons[[sublist]],
           prefix = "",
           folders = c(folder, "app/json"),
           file_name
@@ -152,7 +152,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rates) {
     )
 
     observeEvent(file_reac(), {
-      oneliners_list <- rv_sublist %>% discard(names(.) %in% "file_identifier")
+      oneliners_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
       lapply(oneliners_list_names, function(name) {
         num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_oneliners <- list()

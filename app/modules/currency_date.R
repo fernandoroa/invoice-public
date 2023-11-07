@@ -15,7 +15,7 @@ ui <- function(id) {
   uiOutput(ns("currency_date"))
 }
 
-server <- function(id, rv_sublist, salary_currency, inputs, file_reac) {
+server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$currency_date <- renderUI({
@@ -29,7 +29,7 @@ server <- function(id, rv_sublist, salary_currency, inputs, file_reac) {
               class = "wrap",
               HTML("<i>Final</i> Currency")
             ),
-            rv_sublist$final_currency
+            rv_jsons[[sublist]]$final_currency
           ),
           div(
             id = "exchange_container", style = "display:inline-block", title = "Updates exchange values in other tabs",
@@ -58,9 +58,9 @@ server <- function(id, rv_sublist, salary_currency, inputs, file_reac) {
                 class = "wrap",
                 "Currency Exchange Date: "
               ),
-              value = as.Date(rv_sublist$exchangeDate)
+              value = as.Date(rv_jsons[[sublist]]$exchangeDate)
             ),
-            dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_sublist$invoiceDate))
+            dateInput(ns("invoiceDate"), "Invoice Date: ", value = as.Date(rv_jsons[[sublist]]$invoiceDate))
           )
         ),
         downloadButton(ns("button_id"),
@@ -85,7 +85,7 @@ server <- function(id, rv_sublist, salary_currency, inputs, file_reac) {
 
         plain_json_save(
           input,
-          plain_list = rv_sublist,
+          plain_list = rv_jsons[[sublist]],
           folders = c(folder, "app/json"),
           file_name
         )
@@ -117,17 +117,17 @@ server <- function(id, rv_sublist, salary_currency, inputs, file_reac) {
       updateTextInput(
         session,
         "final_currency",
-        value = rv_sublist$final_currency
+        value = rv_jsons[[sublist]]$final_currency
       )
       updateDateInput(
         session,
         "exchangeDate",
-        value = as.Date(rv_sublist$exchangeDate)
+        value = as.Date(rv_jsons[[sublist]]$exchangeDate)
       )
       updateDateInput(
         session,
         "invoiceDate",
-        value = as.Date(rv_sublist$invoiceDate)
+        value = as.Date(rv_jsons[[sublist]]$invoiceDate)
       )
     })
 
@@ -136,7 +136,7 @@ server <- function(id, rv_sublist, salary_currency, inputs, file_reac) {
     observeEvent(input$get_exchanges, {
       showModal(modalDialog(
         title = "Getting all exchange rates",
-        "Shows alert if currency is not found. Please check!"
+        "An alert will pop-up if currency is not found!"
       ))
       if (toupper(input$final_currency) != toupper(salary_currency())) {
         exchange_df <- try_exchange_rates(input$exchangeDate, input$final_currency, salary_currency())

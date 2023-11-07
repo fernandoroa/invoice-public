@@ -14,11 +14,11 @@ ui <- function(id) {
   uiOutput(ns("grouped_box"))
 }
 
-server <- function(id, rv_sublist, file_reac, exchange_rate) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$grouped_box <- renderUI({
-      grouped_list <- rv_sublist %>% discard(names(.) %in% "file_identifier")
+      grouped_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
 
       root_names <- c(
         "currency_exchange_to_Final_Currency", "use",
@@ -182,7 +182,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
         dir.create(folder)
 
         nested_and_root_save(input,
-          nested_list = rv_sublist,
+          nested_list = rv_jsons[[sublist]],
           prefix = "",
           folders = c(folder, "app/json"),
           file_name
@@ -201,7 +201,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
     })
 
     observeEvent(file_reac(), {
-      grouped_list <- rv_sublist %>% discard(names(.) %in% "file_identifier")
+      grouped_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
 
       root_names <- c(
         "currency_exchange_to_Final_Currency", "use",

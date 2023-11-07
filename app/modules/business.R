@@ -15,16 +15,18 @@ ui <- function(id, output_id) {
   uiOutput(ns(output_id))
 }
 
-server <- function(id, rv_sublist, file_reac, useLabel = TRUE, basename, output_id, box_title) {
+server <- function(id, rv_jsons, file_reac, useLabel = TRUE, basename, box_title) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    output_id <- paste0(basename, "_box")
+    sublist <- paste0(basename, "_list")
+    filename <- paste0(basename, ".json")
     output[[output_id]] <- renderUI({
       wellPanel(
         h4(strong(box_title)),
         br(),
         {
-          filtered_sublist <- rv_sublist %>%
+          filtered_sublist <- rv_jsons[[sublist]] %>%
             discard(names(.) %in% "file_identifier")
           className <- ifelse(useLabel, "", "form-group-container")
           lapply(seq_along(filtered_sublist), function(x) {
@@ -46,7 +48,7 @@ server <- function(id, rv_sublist, file_reac, useLabel = TRUE, basename, output_
         br(),
         helpText("Go to Main tab to save all"),
         downloadButton(ns("save_download"),
-          strong("Save and Download", code(basename)),
+          strong("Save and Download", code(filename)),
           style = "white-space: normal;
                            word-wrap: break-word;"
         )
@@ -55,7 +57,7 @@ server <- function(id, rv_sublist, file_reac, useLabel = TRUE, basename, output_
 
     output$save_download <- downloadHandler(
       filename = function() {
-        basename
+        filename
       },
       content = function(file) {
         folder <- paste0(gsub("file", "folder_", tempfile()))
@@ -63,19 +65,19 @@ server <- function(id, rv_sublist, file_reac, useLabel = TRUE, basename, output_
 
         plain_json_save(
           input,
-          plain_list = rv_sublist,
+          plain_list = rv_jsons[[sublist]],
           folders = c(folder, "app/json"),
-          basename
+          filename
         )
 
-        json_path <- file.path(folder, basename)
+        json_path <- file.path(folder, filename)
         file.copy(json_path, file)
       },
       contentType = "json"
     )
 
     observeEvent(file_reac(), {
-      filtered_sublist <- rv_sublist %>%
+      filtered_sublist <- rv_jsons[[sublist]] %>%
         discard(names(.) %in% "file_identifier")
 
       lapply(seq_along(filtered_sublist), function(x) {

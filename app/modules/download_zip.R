@@ -33,26 +33,28 @@ server <- function(id, rv_json_lists, inputs) {
 
         plain_json_save(
           inputs,
-          plain_list = rv_json_lists$json_consultant_business_list,
-          folders = c(folder, "app/json"), file_name = "consultant_contact.json",
+          plain_list = rv_json_lists$consultant_business_list,
+          folders = c(folder, "app/json"), file_name = "consultant_business.json",
           useNS = TRUE,
           namespace = "consultant_business_ns"
         )
         plain_json_save(
           inputs,
-          plain_list = rv_json_lists$json_consultant_account_list,
-          folders = c(folder, "app/json"), file_name = "consultant_account.json"
+          plain_list = rv_json_lists$consultant_account_list,
+          folders = c(folder, "app/json"), file_name = "consultant_account.json",
+          useNS = TRUE,
+          namespace = "account_ns"
         )
         plain_json_save(
           inputs,
-          plain_list = rv_json_lists$json_business_to_bill_list,
+          plain_list = rv_json_lists$business_to_bill_list,
           folders = c(folder, "app/json"), file_name = "business_to_bill.json",
           useNS = TRUE,
           namespace = "bill_to_ns"
         )
         plain_json_save(
           inputs,
-          plain_list = rv_json_lists$json_final_currency_list,
+          plain_list = rv_json_lists$final_currency_list,
           folders = c(folder, "app/json"),
           file_name = "final_currency_inv_date.json",
           useNS = TRUE,
@@ -60,7 +62,7 @@ server <- function(id, rv_json_lists, inputs) {
         )
         nested_json_save(
           inputs,
-          nested_list = rv_json_lists$json_salary_list,
+          nested_list = rv_json_lists$salary_list,
           prefix = "",
           folders = c(folder, "app/json"),
           file_name = "salary.json",
@@ -69,7 +71,7 @@ server <- function(id, rv_json_lists, inputs) {
         )
         nested_json_save(
           inputs,
-          nested_list = rv_json_lists$json_oneliners_list,
+          nested_list = rv_json_lists$oneliners_list,
           prefix = "",
           folders = c(folder, "app/json"),
           file_name = "oneliner_costs.json",
@@ -78,7 +80,7 @@ server <- function(id, rv_json_lists, inputs) {
         )
         nested_and_root_save(
           inputs,
-          nested_list = rv_json_lists$json_grouped_list,
+          nested_list = rv_json_lists$grouped_list,
           prefix = "",
           folders = c(folder, "app/json"),
           file_name = "grouped_costs.json",

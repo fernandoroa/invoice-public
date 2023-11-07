@@ -37,12 +37,12 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_sublist, file_reac, exchange_rate) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$non_working_days_box <- renderUI({
-      num_nwd <- names(which(sapply(rv_sublist$non_working_days, function(x) is.numeric(x))))
-      logic_nwd <- names(which(sapply(rv_sublist$non_working_days, function(x) is.logical(x))))
+      num_nwd <- names(which(sapply(rv_jsons[[sublist]]$non_working_days, function(x) is.numeric(x))))
+      logic_nwd <- names(which(sapply(rv_jsons[[sublist]]$non_working_days, function(x) is.logical(x))))
       tagList(
         wellPanel(
           h4(strong("non-working Days")),
@@ -52,7 +52,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
               numericInput(
                 ns(paste0("non_working_days", x)),
                 "",
-                rv_sublist$non_working_days[[x]]
+                rv_jsons[[sublist]]$non_working_days[[x]]
               )
             }),
             div(),
@@ -60,7 +60,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
               checkboxInput(
                 ns(paste0("non_working_days", x)),
                 gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                rv_sublist$non_working_days[[x]]
+                rv_jsons[[sublist]]$non_working_days[[x]]
               )
             })
           )
@@ -69,9 +69,9 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
     })
 
     output$modified_days_box <- renderUI({
-      char_modified <- names(which(sapply(rv_sublist$modified_days, function(x) is.character(x))))
-      num_modified <- names(which(sapply(rv_sublist$modified_days, function(x) is.numeric(x))))
-      logic_modified <- names(which(sapply(rv_sublist$modified_days, function(x) is.logical(x))))
+      char_modified <- names(which(sapply(rv_jsons[[sublist]]$modified_days, function(x) is.character(x))))
+      num_modified <- names(which(sapply(rv_jsons[[sublist]]$modified_days, function(x) is.numeric(x))))
+      logic_modified <- names(which(sapply(rv_jsons[[sublist]]$modified_days, function(x) is.logical(x))))
 
       tagList(
         wellPanel(
@@ -82,21 +82,21 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
               textInput(
                 ns(paste0("modified_days", x)),
                 gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
-                rv_sublist$modified_days[[x]]
+                rv_jsons[[sublist]]$modified_days[[x]]
               )
             }),
             lapply(num_modified, function(x) {
               numericInput(
                 ns(paste0("modified_days", x)),
                 gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
-                rv_sublist$modified_days[[x]]
+                rv_jsons[[sublist]]$modified_days[[x]]
               )
             }),
             lapply(logic_modified, function(x) {
               checkboxInput(
                 ns(paste0("modified_days", x)),
                 gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                rv_sublist$modified_days[[x]]
+                rv_jsons[[sublist]]$modified_days[[x]]
               )
             })
           )
@@ -105,9 +105,9 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
     })
 
     output$salary_box <- renderUI({
-      char_names <- names(which(sapply(rv_sublist$main, function(x) is.character(x))))
-      num_names <- names(which(sapply(rv_sublist$main, function(x) is.numeric(x))))
-      logic_names <- names(which(sapply(rv_sublist$main, function(x) is.logical(x))))
+      char_names <- names(which(sapply(rv_jsons[[sublist]]$main, function(x) is.character(x))))
+      num_names <- names(which(sapply(rv_jsons[[sublist]]$main, function(x) is.numeric(x))))
+      logic_names <- names(which(sapply(rv_jsons[[sublist]]$main, function(x) is.logical(x))))
 
       char_names_currency <- grep("currency", char_names, value = TRUE)
       num_names_currency <- grep("currency", num_names, value = TRUE)
@@ -126,7 +126,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
                 class = "wrap",
                 sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
               ),
-              rv_sublist$main[[x]]
+              rv_jsons[[sublist]]$main[[x]]
             )
           })
           num_names_currency_list <- lapply(num_names_currency, function(x) {
@@ -136,7 +136,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
                 class = "wrap",
                 gsub("_", " ", x, perl = TRUE)
               ),
-              rv_sublist$main[[x]]
+              rv_jsons[[sublist]]$main[[x]]
             )
           })
           char_list <- lapply(char_names_not_currency, function(x) {
@@ -146,7 +146,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
                 class = "wrap",
                 sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
               ),
-              rv_sublist$main[[x]]
+              rv_jsons[[sublist]]$main[[x]]
             )
           })
           num_list <- lapply(num_names_not_currency, function(x) {
@@ -158,7 +158,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
                   class = "wrap",
                   gsub("_", " ", x, perl = TRUE)
                 ),
-                rv_sublist$main[[x]]
+                rv_jsons[[sublist]]$main[[x]]
               )
             )
           })
@@ -169,7 +169,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
                 class = "wrap",
                 gsub("_", " ", gsub(pattern_a, pattern_b, x))
               ),
-              rv_sublist$main[[x]]
+              rv_jsons[[sublist]]$main[[x]]
             )
           })
           div(
@@ -209,9 +209,9 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
     })
 
     output$salary_period_panel <- renderUI({
-      char_period <- names(which(sapply(rv_sublist$period, function(x) is.character(x))))
-      num_period <- names(which(sapply(rv_sublist$period, function(x) is.numeric(x))))
-      logic_period <- names(which(sapply(rv_sublist$period, function(x) is.logical(x))))
+      char_period <- names(which(sapply(rv_jsons[[sublist]]$period, function(x) is.character(x))))
+      num_period <- names(which(sapply(rv_jsons[[sublist]]$period, function(x) is.numeric(x))))
+      logic_period <- names(which(sapply(rv_jsons[[sublist]]$period, function(x) is.logical(x))))
       wellPanel(
         h4(strong("Salary Period(s)")),
         splitLayout(
@@ -220,14 +220,14 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
             numericInput(
               ns(paste0("period", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_sublist$period[[x]]
+              rv_jsons[[sublist]]$period[[x]]
             )
           }),
           lapply(char_period, function(x) {
             textInput(
               ns(paste0("period", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_sublist$period[[x]]
+              rv_jsons[[sublist]]$period[[x]]
             )
           }),
           div(),
@@ -235,7 +235,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
             checkboxInput(
               ns(paste0("period", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_sublist$period[[x]]
+              rv_jsons[[sublist]]$period[[x]]
             )
           })
         )
@@ -253,16 +253,16 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
                max-width:150px;
                align-items:center;",
             br(),
-            checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_sublist$dates$use),
+            checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_jsons[[sublist]]$dates$use),
             actionButton(ns("increaseDate"), ""),
             span("1 Month"),
             br(),
             actionButton(ns("decreaseDate"), "")
           ),
           tagList(
-            dateInput(ns(paste0("dates", "start")), "Start Date: ", value = as.Date(rv_sublist$dates$start)),
-            textInput(ns(paste0("dates", "date_connector")), "date connector", rv_sublist$dates$date_connector),
-            dateInput(ns(paste0("dates", "end")), "End Date: ", value = as.Date(rv_sublist$dates$end))
+            dateInput(ns(paste0("dates", "start")), "Start Date: ", value = as.Date(rv_jsons[[sublist]]$dates$start)),
+            textInput(ns(paste0("dates", "date_connector")), "date connector", rv_jsons[[sublist]]$dates$date_connector),
+            dateInput(ns(paste0("dates", "end")), "End Date: ", value = as.Date(rv_jsons[[sublist]]$dates$end))
           )
         ),
         div(
@@ -273,7 +273,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
           ),
           div(
             class = "go-center",
-            textInput(ns(paste0("dates", "delivery_month_text")), "", rv_sublist$dates$delivery_month_text)
+            textInput(ns(paste0("dates", "delivery_month_text")), "", rv_jsons[[sublist]]$dates$delivery_month_text)
           )
         )
       )
@@ -308,7 +308,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
 
         nested_json_save(
           input,
-          nested_list = rv_sublist,
+          nested_list = rv_jsons[[sublist]],
           prefix = "",
           folders = c(folder, "app/json"),
           file_name
@@ -324,28 +324,28 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
       updateCheckboxInput(
         session,
         paste0("dates", "use"),
-        value = rv_sublist$dates$use
+        value = rv_jsons[[sublist]]$dates$use
       )
 
       updateDateInput(session,
         paste0("dates", "start"),
-        value = as.Date(rv_sublist$dates$start)
+        value = as.Date(rv_jsons[[sublist]]$dates$start)
       )
 
       updateTextInput(
         session, paste0("dates", "date_connector"),
-        value = rv_sublist$dates$date_connector
+        value = rv_jsons[[sublist]]$dates$date_connector
       )
 
       updateDateInput(session, paste0("dates", "end"),
-        value = as.Date(rv_sublist$dates$end)
+        value = as.Date(rv_jsons[[sublist]]$dates$end)
       )
 
       updateTextInput(
         session, paste0("dates", "delivery_month_text"),
-        value = rv_sublist$dates$delivery_month_text
+        value = rv_jsons[[sublist]]$dates$delivery_month_text
       )
-      json_salary_list_main <- rv_sublist$main
+      json_salary_list_main <- rv_jsons[[sublist]]$main
       char_names <- names(which(sapply(json_salary_list_main, function(x) is.character(x))))
       num_names <- names(which(sapply(json_salary_list_main, function(x) is.numeric(x))))
       logic_names <- names(which(sapply(json_salary_list_main, function(x) is.logical(x))))
@@ -391,7 +391,7 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
           value = json_salary_list_main[[x]]
         )
       })
-      salary_list_period <- rv_sublist$period
+      salary_list_period <- rv_jsons[[sublist]]$period
       char_period <- names(which(sapply(salary_list_period, function(x) is.character(x))))
       num_period <- names(which(sapply(salary_list_period, function(x) is.numeric(x))))
       logic_period <- names(which(sapply(salary_list_period, function(x) is.logical(x))))
