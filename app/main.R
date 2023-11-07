@@ -14,8 +14,7 @@ box::use(
   utils / constants[...],
   modules / upload,
   modules / currency_date,
-  modules / bill_to,
-  modules / consultant_business,
+  modules / business,
   modules / download_zip
 )
 
@@ -81,14 +80,14 @@ ui <- function(id) {
             ),
             div(
               style = "max-width:600px",
-              bill_to$ui(ns("bill_to_ns"))
+              business$ui(ns("bill_to_ns"), "business_to_bill_box")
             )
           ),
           column(
             3,
             div(
               style = "max-width:600px",
-              consultant_business$ui(ns("consultant_business_ns"))
+              business$ui(ns("consultant_business_ns"), "consultant_business_box")
             )
           ),
           column(
@@ -226,9 +225,17 @@ server <- function(id) { # nolint
 
     currency_date_vars <- currency_date$server("currency_date_ns", rv_json_lists, input_maincurrency)
 
-    bill_to$server("bill_to_ns", rv_json_lists$json_business_to_bill_list, file_reac)
+    business$server("bill_to_ns", rv_json_lists$json_business_to_bill_list, file_reac,
+      useLabel = FALSE,
+      basename = "business_to_bill.json", output_id = "business_to_bill_box",
+      box_title = "Business to bill"
+    )
 
-    consultant_business$server("consultant_business_ns", rv_json_lists$json_consultant_business_list, file_reac)
+    business$server("consultant_business_ns", rv_json_lists$json_consultant_business_list,
+      file_reac,
+      basename = "consultant_contact.json", output_id = "consultant_business_box",
+      box_title = "Consultant details"
+    )
 
     download_zip$server("download_zip_ns", rv_json_lists, input)
 
@@ -554,7 +561,7 @@ server <- function(id) { # nolint
       updateDateInput(session, "datesend", value = edate - mon_span[emon + 1])
     })
 
-    output$modify_salary <- downloadHandler(
+    output$save_download_salary <- downloadHandler(
       filename = function() {
         "salary.json"
       },
@@ -577,7 +584,7 @@ server <- function(id) { # nolint
       contentType = "json"
     )
 
-    output$modify_grouped <- downloadHandler(
+    output$save_download_grouped <- downloadHandler(
       filename = function() {
         "grouped_costs.json"
       },
@@ -599,7 +606,7 @@ server <- function(id) { # nolint
       contentType = "json"
     )
 
-    output$modify_oneliners <- downloadHandler(
+    output$save_download_oneliners <- downloadHandler(
       filename = function() {
         "oneliner_costs.json"
       },
@@ -621,7 +628,7 @@ server <- function(id) { # nolint
       contentType = "json"
     )
 
-    output$modify_account <- downloadHandler(
+    output$save_download_account <- downloadHandler(
       filename = function() {
         "consultant_account.json"
       },
@@ -773,7 +780,7 @@ server <- function(id) { # nolint
           logic_list,
           div(
             helpText("Go to Main tab to save all"),
-            downloadButton(ns("modify_salary"),
+            downloadButton(ns("save_download_salary"),
               strong(
                 "Save and Download", code("salary.json")
               ),
@@ -889,7 +896,7 @@ server <- function(id) { # nolint
           })
         ),
         helpText("Go to Main tab to save all"),
-        downloadButton(ns("modify_oneliners"),
+        downloadButton(ns("save_download_oneliners"),
           strong("Save and Download", code("oneliner_costs.json")),
           style = "white-space: normal;
                            word-wrap: break-word;"
@@ -984,7 +991,7 @@ server <- function(id) { # nolint
             div(),
             div(
               helpText("Go to Main tab to save all"),
-              downloadButton(ns("modify_grouped"),
+              downloadButton(ns("save_download_grouped"),
                 strong("Save and Download", code("grouped_costs.json")),
                 style = "white-space: normal;
                            word-wrap: break-word;"
@@ -1180,7 +1187,7 @@ server <- function(id) { # nolint
           )
         },
         helpText("Go to Main tab to save all"),
-        downloadButton(ns("modify_account"),
+        downloadButton(ns("save_download_account"),
           strong("Save and Download", code("consultant_account.json")),
           style = "white-space: normal;
                            word-wrap: break-word;"
