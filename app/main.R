@@ -187,7 +187,7 @@ server <- function(id) { # nolint
     json_upload_var <- upload$server("json_upload_ns", zip_upload_var, ".json")
     zip_upload_var <- upload$server("zip_upload_ns", json_upload_var, ".zip")
 
-    currency_date_vars <- currency_date$server("currency_date_ns", rv_json_lists, salary_currency, input)
+    currency_date_vars <- currency_date$server("currency_date_ns", rv_json_lists$json_final_currency_list, salary_currency, input, file_reac)
 
     business$server("bill_to_ns", rv_json_lists$json_business_to_bill_list, file_reac,
       useLabel = FALSE,
@@ -217,22 +217,6 @@ server <- function(id) { # nolint
         rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/salary.json")
         rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/oneliner_costs.json")
         rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/grouped_costs.json")
-
-        updateTextInput(
-          session,
-          "final_currency",
-          value = rv_json_lists$json_final_currency_list$final_currency
-        )
-        updateDateInput(
-          session,
-          "exchangeDate",
-          value = as.Date(rv_json_lists$json_final_currency_list$exchangeDate)
-        )
-        updateDateInput(
-          session,
-          "invoiceDate",
-          value = as.Date(rv_json_lists$json_final_currency_list$invoiceDate)
-        )
 
         consultant_account_list <- rv_json_lists$json_consultant_account_list %>% discard(names(.) %in% "file_identifier")
         char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
