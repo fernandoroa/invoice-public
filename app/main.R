@@ -6,6 +6,7 @@ box::use(
   lubridate[...],
   purrr[discard, keep],
   utils[zip, unzip],
+  stats[runif]
 )
 
 box::use(
@@ -198,13 +199,7 @@ server <- function(id) { # nolint
 
     observeEvent(input$reload,
       {
-        rv_json_lists$json_final_currency_list <- rjson::fromJSON(file = "app/json/final_currency_inv_date.json")
-        rv_json_lists$json_business_to_bill_list <- rjson::fromJSON(file = "app/json/business_to_bill.json")
-        rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/consultant_account.json")
-        rv_json_lists$json_consultant_business_list <- rjson::fromJSON(file = "app/json/consultant_contact.json")
-        rv_json_lists$json_salary_list <- rjson::fromJSON(file = "app/json/salary.json")
-        rv_json_lists$json_oneliners_list <- rjson::fromJSON(file = "app/json/oneliner_costs.json")
-        rv_json_lists$json_grouped_list <- rjson::fromJSON(file = "app/json/grouped_costs.json")
+        file_reac(runif(1))
       },
       ignoreInit = TRUE
     )
@@ -240,16 +235,6 @@ server <- function(id) { # nolint
 
     observeEvent(file_reac(),
       {
-        input_file <- file_reac()
-
-        if (isTruthy(grepl("zip$", input_file$datapath))) {
-          unzip(input_file$datapath, exdir = "app/json", junkpaths = TRUE)
-        }
-        if (isTruthy(grepl("json$", input_file$datapath))) {
-          lapply(seq_along(input_file$name), function(x) {
-            file.copy(input_file$datapath[x], file.path(getwd(), "app", "json", input_file$name[x]), overwrite = TRUE)
-          })
-        }
 
         rv_json_lists$json_final_currency_list <- rjson::fromJSON(file = "app/json/final_currency_inv_date.json")
         rv_json_lists$json_business_to_bill_list <- rjson::fromJSON(file = "app/json/business_to_bill.json")
@@ -525,7 +510,9 @@ server <- function(id) { # nolint
     observeEvent(zip_upload_var(),
       {
         req(zip_upload_var())
-        file_reac(zip_upload_var())
+        input_file <- zip_upload_var()
+        unzip(input_file$datapath, exdir = "app/json", junkpaths = TRUE)
+        file_reac(runif(1))
       },
       ignoreInit = TRUE
     )
@@ -533,50 +520,13 @@ server <- function(id) { # nolint
     observeEvent(json_upload_var(),
       {
         req(json_upload_var())
-        file_reac(json_upload_var())
+        input_file <- json_upload_var()
+        lapply(seq_along(input_file$name), function(x) {
+          file.copy(input_file$datapath[x], file.path(getwd(), "app", "json", input_file$name[x]), overwrite = TRUE)
+        })
+        file_reac(runif(1))
       },
       ignoreInit = TRUE
-    )
-
-    observeEvent(input$increaseDate, {
-      sdate <- input$datesstart
-      edate <- input$datesend
-      smon <- month(sdate)
-      emon <- month(edate)
-      updateDateInput(session, "datesstart", value = sdate + mon_span[smon + 1])
-      updateDateInput(session, "datesend", value = edate + mon_span[emon + 2])
-    })
-
-    observeEvent(input$decreaseDate, {
-      sdate <- input$datesstart
-      edate <- input$datesend
-      smon <- month(sdate)
-      emon <- month(edate)
-      updateDateInput(session, "datesstart", value = sdate - mon_span[smon])
-      updateDateInput(session, "datesend", value = edate - mon_span[emon + 1])
-    })
-
-    output$save_download_salary <- downloadHandler(
-      filename = function() {
-        "salary.json"
-      },
-      content = function(file) {
-        file_name <- "salary.json"
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
-
-        nested_json_save(
-          input,
-          nested_list = rv_json_lists$json_salary_list,
-          prefix = "",
-          folders = c(folder, "app/json"),
-          file_name
-        )
-
-        json_path <- file.path(folder, file_name)
-        file.copy(json_path, file)
-      },
-      contentType = "json"
     )
 
     output$save_download_grouped <- downloadHandler(
