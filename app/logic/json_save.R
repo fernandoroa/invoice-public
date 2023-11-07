@@ -45,8 +45,11 @@ nested_json_save <- function(input, nested_list, prefix, folders, file_name, use
 }
 
 #' @export
-nested_and_root_save <- function(input, nested_list, prefix, folders, file_name) {
+nested_and_root_save <- function(input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "") {
   list <- list()
+  if (useNS) {
+    namespace <- paste0(namespace, "-")
+  }
 
   nested_list_root <- nested_list |>
     map(~ is.list(.)) |>
@@ -58,13 +61,13 @@ nested_and_root_save <- function(input, nested_list, prefix, folders, file_name)
   nested_list_names_sublists <- names(nested_list_sublists)
 
   list <- lapply(nested_list_names_root, function(x) {
-    input[[paste0(prefix, x)]]
+    input[[paste0(namespace, prefix, x)]]
   })
   names(list) <- nested_list_names_root
 
   for (sublist_name in nested_list_names_sublists) {
     list[[sublist_name]] <- lapply(names(nested_list[[sublist_name]]), function(x) {
-      input[[paste0(prefix, sublist_name, x)]]
+      input[[paste0(namespace, prefix, sublist_name, x)]]
     })
     names(list[[sublist_name]]) <- names(nested_list[[sublist_name]])
   }

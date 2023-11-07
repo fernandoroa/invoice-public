@@ -161,11 +161,9 @@ server <- function(id, rv_sublist, salary_currency, inputs, file_reac) {
       grouped_currencies_list <- grouped_currency_inputs[sapply(grouped_currency_inputs, is.character)]
 
       oneliners_currency_exchange_value_list <- oneline_currencies_inputs[sapply(oneline_currencies_inputs, is.numeric)]
-      grouped_currency_exchange_value_list <- grouped_currency_inputs[sapply(grouped_currency_inputs, is.numeric)]
 
       oneliners_currencies_list_names <- names(oneliners_currency_exchange_value_list)
       oneliners_currencies_list_names_no_ns <- sub(paste0("^", oneliner_ns, "-"), "", oneliners_currencies_list_names)
-      grouped_currencies_list_names <- names(grouped_currency_exchange_value_list)
 
       currency_date_rv$exchange_oneliners <- list()
       for (currency_idx in seq_along(oneliners_currencies_list)) {

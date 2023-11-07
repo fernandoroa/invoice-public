@@ -79,11 +79,12 @@ server <- function(id, rv_json_lists, inputs) {
         nested_and_root_save(
           inputs,
           nested_list = rv_json_lists$json_grouped_list,
-          prefix = "grouped",
+          prefix = "",
           folders = c(folder, "app/json"),
-          file_name = "grouped_costs.json"
+          file_name = "grouped_costs.json",
+          useNS = TRUE,
+          namespace = "grouped_ns"
         )
-
 
         file.copy("app/json/fieldNames.json", folder)
 
