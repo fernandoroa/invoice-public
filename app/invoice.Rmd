@@ -30,7 +30,7 @@ json_final_currency_list <- rjson::fromJSON(file = file.path(params$app_path, "j
 #
 json_business_to_bill_list <- rjson::fromJSON(file = file.path(params$app_path, "json/business_to_bill.json"))
 json_consultant_account_list <- rjson::fromJSON(file = file.path(params$app_path, "json/consultant_account.json"))
-json_consultant_business_list <- rjson::fromJSON(file = file.path(params$app_path, "json/consultant_contact.json"))
+json_consultant_business_list <- rjson::fromJSON(file = file.path(params$app_path, "json/consultant_business.json"))
 
 # special multiline - salary - days
 json_salary_list <- rjson::fromJSON(file = file.path(params$app_path, "json/salary.json"))
