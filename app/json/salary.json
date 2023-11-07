@@ -1,0 +1,34 @@
+{
+  "file_identifier": ["salary"],
+  "main": {
+    "currency_exchange_to_Final_Currency": [5.1594],
+    "salary": [4000],
+    "use_salary_and_related": [true],
+    "currency": ["BRL"],
+    "total_days": [21],
+    "section_title": ["Consultancy Charges"],
+    "common_days_text": ["other:"]
+  },
+  "dates": {
+    "start": ["2022-03-01"],
+    "end": ["2022-03-31"],
+    "use": [true],
+    "date_connector": ["to"],
+    "delivery_month_text": ["Delivery date:"]
+  },
+  "modified_days": {
+    "days": [2],
+    "percentage": [45],
+    "use": [true],
+    "text": ["Services"]
+  },
+  "non_working_days": {
+    "days": [2],
+    "use": [true]
+  },
+  "period": {
+    "use": [false],
+    "number": [1],
+    "name": ["month(s)"]
+  }
+}

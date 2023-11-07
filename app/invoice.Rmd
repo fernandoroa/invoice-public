@@ -1,0 +1,359 @@
+---
+title: "Invoice"
+geometry: "left=3cm,right=2cm,top=0cm,bottom=2cm"
+fontsize: 11pt
+papersize: a4
+params: 
+  invoiceNumber: ''
+  lang: 1
+  app_path: 'app'
+output:
+  pdf_document
+---
+```{r setup, message = F,echo=F,warning=F}
+box::use(
+  lubridate[...],
+  readr[...],
+  dplyr[filter, bind_rows],
+  purrr[keep, discard],
+  magrittr[`%>%`]
+)
+
+lan_idx <- as.numeric(params$lang)
+
+# main
+json_fields_list <- rjson::fromJSON(file = file.path(params$app_path, "json/fieldNames.json"))
+json_final_currency_list <- rjson::fromJSON(file = file.path(params$app_path, "json/final_currency_inv_date.json"))
+
+#
+# bank and businesses
+#
+json_business_to_bill_list <- rjson::fromJSON(file = file.path(params$app_path, "json/business_to_bill.json"))
+json_consultant_account_list <- rjson::fromJSON(file = file.path(params$app_path, "json/consultant_account.json"))
+json_consultant_business_list <- rjson::fromJSON(file = file.path(params$app_path, "json/consultant_business.json"))
+
+# special multiline - salary - days
+json_salary_list <- rjson::fromJSON(file = file.path(params$app_path, "json/salary.json"))
+
+# oneliners
+json_oneliners_list <- rjson::fromJSON(file = file.path(params$app_path, "json/oneliner_costs.json"))
+json_oneliners_list <- json_oneliners_list %>% discard(names(.) %in% "file_identifier")
+
+# multiliners
+json_grouped_list <- rjson::fromJSON(file = file.path(params$app_path, "json/grouped_costs.json"))
+json_grouped_list <- json_grouped_list %>% discard(names(.) %in% "file_identifier")
+
+# dates
+sm <- month(json_salary_list$dates$start, label = TRUE)
+smna <- month(json_salary_list$dates$start, label = TRUE, abbr = FALSE)
+em <- month(json_salary_list$dates$end, label = TRUE)
+sdt <- day(json_salary_list$dates$start)
+edt <- day(json_salary_list$dates$end)
+sy <- year(json_salary_list$dates$start)
+ey <- year(json_salary_list$dates$end)
+
+inv_dt <- day(json_final_currency_list$invoiceDate)
+inv_m <- month(json_final_currency_list$invoiceDate, label = TRUE)
+inv_y <- year(json_final_currency_list$invoiceDate)
+
+# currencies
+final_currency <- json_final_currency_list$final_currency
+salary_currency <- json_salary_list$main$currency
+salary_currency_text <- salary_currency
+
+# oneliners
+oneliners_filtered_list <- json_oneliners_list |> keep(~ .$use)
+
+oneliners_filtered_df <- bind_rows(oneliners_filtered_list, .id = "name")
+
+oneliners_filtered_df$needs_exchange <- ifelse(oneliners_filtered_df$currency != final_currency, TRUE, FALSE)
+
+oneliners_filtered_df_not_exchanged <- oneliners_filtered_df |> filter(!needs_exchange)
+
+oneliners_filtered_df_not_exchanged$formatted_value <- format(round(oneliners_filtered_df_not_exchanged$value), scientific = FALSE)
+
+oneliners_filtered_df_exchanged <- oneliners_filtered_df |> filter(needs_exchange)
+oneliners_filtered_df_exchanged$exchanged_value <- round(
+  oneliners_filtered_df_exchanged$value / oneliners_filtered_df_exchanged$currency_exchange_to_Final_Currency
+)
+
+oneliners_filtered_df_exchanged$exchanged_value_formatted <- format(oneliners_filtered_df_exchanged$exchanged_value, scientific = FALSE)
+
+oneliners_exchange_text <- paste(
+  format(oneliners_filtered_df_exchanged$value, scientific = FALSE), "|", "/",
+  oneliners_filtered_df_exchanged$currency_exchange_to_Final_Currency, "="
+)
+
+oneliners_final <- sum(oneliners_filtered_df_not_exchanged$value, oneliners_filtered_df_exchanged$exchanged_value, na.rm = TRUE)
+
+grouped_currency <- json_grouped_list$currency
+grouped_currency_text <- grouped_currency
+
+# currency exchanges comparisons booleans
+final_to_salary_exchange_condition <- final_currency == salary_currency
+
+final_to_grouped_exchange_condition <- final_currency == grouped_currency
+
+if (final_to_salary_exchange_condition) {
+  salary_currency_text <- ""
+}
+
+if (final_to_grouped_exchange_condition) {
+  grouped_currency_text <- ""
+}
+
+use_dates <- json_salary_list$dates$use
+use_salary_and_related <- json_salary_list$main$use_salary_and_related
+use_period <- json_salary_list$period$use
+use_modified <- json_salary_list$modified_days$use
+use_nwd <- json_salary_list$non_working_days$use
+
+use_grouped <- json_grouped_list$use
+
+total_days <- json_salary_list$main$total_days
+
+salary_periods <- json_salary_list$period$number
+
+periods_string <- ifelse((salary_periods == 0 || salary_periods == "") || !use_period, "",
+  paste0(salary_periods, " ", json_salary_list$period$name, ":")
+)
+
+day_pay <- json_salary_list$main$salary / total_days
+
+modified_days <- ifelse(use_modified, json_salary_list$modified_days$days, 0)
+
+non_working_days <- ifelse(use_nwd, json_salary_list$non_working_days$days, 0)
+
+modified_pay <- modified_days * day_pay * (json_salary_list$modified_days$percentage / 100)
+
+common_payable_days <- total_days - modified_days - non_working_days
+
+common_payable_salary_days_pay <- common_payable_days * day_pay
+
+common_plus_modified_pay <- common_payable_salary_days_pay + modified_pay
+common_plus_modified_pay_rounded <- round(common_plus_modified_pay, 1)
+common_payable_salary_days_pay_rounded <- round(common_payable_salary_days_pay, 1)
+
+exchange_salary_text <- ifelse(final_to_salary_exchange_condition,
+  "|",
+  paste(
+    common_plus_modified_pay_rounded, "|",
+    "/", json_salary_list$main$currency_exchange_to_Final_Currency,
+    "="
+  )
+)
+
+salary_days_pay_final <- ifelse(final_to_salary_exchange_condition,
+  common_plus_modified_pay,
+  round(common_plus_modified_pay / json_salary_list$main$currency_exchange_to_Final_Currency)
+)
+
+modified_pay_rounded <- round(modified_pay, 1)
+
+salary_days_pay_final <- ifelse(use_salary_and_related, salary_days_pay_final, 0)
+
+exchange_grouped_text <- "|"
+
+if (use_grouped) {
+  grouped_list_root <- json_grouped_list %>% keep(names(.) %in% c(
+    "currency_exchange_to_Final_Currency", "use",
+    "GeneralName", "currency"
+  ))
+  grouped_sublists <- json_grouped_list %>% discard(names(.) %in% c(
+    "currency_exchange_to_Final_Currency", "use",
+    "GeneralName", "currency"
+  ))
+
+  json_sublists_df <- bind_rows(grouped_sublists, .id = "json_name")
+  grouped_root_df <- grouped_list_root |> bind_rows()
+  json_grouped_df <- cbind(grouped_root_df, json_sublists_df)
+  json_grouped_df
+  json_grouped_df$value_formatted <- format(json_grouped_df$value, scientific = FALSE)
+  total_grouped_finals_original <- total_grouped_finals <- sum(json_grouped_df$value)
+  if (final_to_grouped_exchange_condition) {
+    total_grouped_finals <- sum(json_grouped_df$value)
+  } else {
+    json_grouped_df$exchanged_value <- json_grouped_df$value / json_grouped_df$currency_exchange_to_Final_Currency
+    total_grouped_finals <- sum(json_grouped_df$exchanged_value)
+  }
+
+  if (!final_to_grouped_exchange_condition) {
+    exchange_grouped_text <- paste(
+      format(total_grouped_finals_original, scientific = FALSE), "|",
+      "/", grouped_list_root$currency_exchange_to_Final_Currency,
+      "="
+    )
+  }
+}
+
+total_sum <- sum(salary_days_pay_final, oneliners_final, total_grouped_finals, na.rm = TRUE)
+
+total_pay_rounded <- round(total_sum)
+total_pay_formatted_rounded <- format(total_pay_rounded, scientific = FALSE)
+
+salary_days_pay_final_rounded <- round(salary_days_pay_final)
+salary_days_pay_final_rounded_formatted <- format(salary_days_pay_final_rounded, scientific = FALSE)
+grouped_final_formatted <- format(round(total_grouped_finals), scientific = FALSE)
+```
+
+\pagenumbering{gobble} 
+
+\raggedright `r json_fields_list$invoiceNumber[lan_idx]`: `r params$invoiceNumber` \par
+
+\raggedleft `r json_fields_list$consultantBusiness[lan_idx]`: `r json_consultant_business_list$name`    
+\raggedleft `r json_consultant_business_list$address1`  
+\raggedleft `r json_consultant_business_list$address2`   
+\raggedleft `r json_consultant_business_list$address3`   
+\raggedleft `r json_consultant_business_list$country`    
+\raggedleft `r json_fields_list$consultantPhone[lan_idx]` :  `r json_consultant_business_list$phone` 
+
+\raggedright `r json_fields_list$billTo[lan_idx]` \par  
+ 
+`r json_business_to_bill_list$billTo1`  
+`r json_business_to_bill_list$billTo2`  
+`r json_business_to_bill_list$billTo3`  
+`r json_business_to_bill_list$billTo4`  
+`r json_business_to_bill_list$billTo5`  
+
+\begin{flushright} 
+`r json_fields_list$date[lan_idx]`:  `r inv_dt` `r inv_m` `r inv_y`  
+\end{flushright} 
+
+| `r json_fields_list$Services[lan_idx]`| |  |   |  | `r json_fields_list$amount[lan_idx]` |
+|--------|-------:|----|----:|----|-----------:|
+|`r json_salary_list$main$section_title`|  |  | | | |
+``` {r table, results="asis", echo=F, eval=T}
+cat( # nolint
+  if (use_dates) {
+    paste0("|\\hspace{2mm}", "", sdt, " ", sm, " ", sy, " ",
+           json_salary_list$dates$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n")
+  },
+  if (use_dates) {
+    paste0("|\\hspace{2mm}", json_salary_list$dates$delivery_month_text, " ", smna, " ", sy, "| | |  |   |   |\n")
+  },
+  if (use_modified && use_salary_and_related) {
+    paste0(
+      "|\\hspace{8mm}", json_salary_list$modified_days$text, ": |", modified_days, "/", total_days, "|",
+      "|", modified_pay_rounded, "|", salary_currency_text, "|  |", "\n"
+    )
+  },
+  if ((use_modified | use_nwd) && use_salary_and_related) {
+    paste0(
+      "|\\hspace{8mm}", json_salary_list$main$common_days_text, "|", common_payable_days, "/", total_days, "|",
+      "|", common_payable_salary_days_pay_rounded, "|", salary_currency_text, "|  |", "\n"
+    )
+  },
+  if (use_salary_and_related) {
+    paste0(
+      "|\\hspace{2mm}", periods_string,
+      "| |", salary_currency_text, "|", exchange_salary_text, "|", salary_days_pay_final_rounded_formatted, " ",
+      final_currency, "|", "\n"
+    )
+  },
+  if (length(oneliners_filtered_list)) {
+    oneliners_strings <- paste0("| | | | |  \n")
+    for (idx in seq_len(nrow(oneliners_filtered_df_not_exchanged))) {
+      oneliners_strings <- c(
+        oneliners_strings,
+        paste0(
+          "|", oneliners_filtered_df_not_exchanged[idx, "text"],
+          "| |", "|", "|", " ", "|",
+          oneliners_filtered_df_not_exchanged[idx, "formatted_value"], " ",
+          final_currency, "|", "\n"
+        )
+      )
+    }
+
+    for (idx in seq_len(nrow(oneliners_filtered_df_exchanged))) {
+      oneliners_strings <- c(
+        oneliners_strings,
+        paste0(
+          "|", oneliners_filtered_df_exchanged[idx, "text"], "| |",
+          oneliners_filtered_df_exchanged[idx, "currency"], "|",
+          oneliners_exchange_text[idx],
+          "|", " ", " ", oneliners_filtered_df_exchanged[idx, "exchanged_value_formatted"], " ",
+          final_currency, "|", "\n"
+        )
+      )
+    }
+    oneliners_strings
+  },
+  if (use_grouped) {
+    grouped_strings <- character()
+    for (grouped_idx in seq_len(nrow(json_grouped_df))) {
+      grouped_strings <- c(
+        grouped_strings,
+        paste0(
+          "|\\hspace{2mm}", json_grouped_df[grouped_idx, "name"], "| |", "|",
+          " ", json_grouped_df[grouped_idx, "value"], "|", json_grouped_df[grouped_idx, "currency"], " ", "| |", "\n"
+        )
+      )
+    }
+    grouped_strings <- c(
+      paste0("| | | | | \n"),
+      grouped_strings,
+      paste0(
+        "|", json_grouped_list$GeneralName, "| |", grouped_currency_text, "|", exchange_grouped_text, "|", grouped_final_formatted, " ",
+        final_currency, "|", "\n"
+      )
+    )
+    grouped_strings
+  },
+  paste0("| | | | | \n"),
+  paste0("| **TOTAL**  |   |   |   |   |**", total_pay_formatted_rounded, "** ", final_currency, "|"),
+  sep = ""
+)
+```
+
+&nbsp;  
+&nbsp;  
+\begin{flushright} 
+`r json_fields_list$Signature[lan_idx]`
+\end{flushright}
+
+\Large  \textbf{`r json_fields_list$WireInstructions[lan_idx]`} / \normalsize `r json_fields_list$BankAccountInformation[lan_idx]`
+
+``` {r intermediary, results="asis", echo=F, eval=json_consultant_account_list$use_intermediary} 
+cat(paste0(
+  "\\large \\textbf{", json_fields_list$Intermediary[lan_idx], "} /",
+  json_fields_list$CorrespondentBank[lan_idx], "\\textbf{ (Field 56):}  \n  "
+))
+cat(paste0("\\hspace{5mm}\\normalsize SWIFT: **", json_consultant_account_list$intermediary_bank_swift, "**  \n"))
+cat(paste0(
+  "\\hspace{5mm}", json_fields_list$Name[lan_idx], ": ", json_consultant_account_list$intermediary_bank_name, ", ",
+  json_consultant_account_list$intermediary_bank_country, "  \n"
+))
+```
+
+\large `r json_fields_list$Beneficiary[lan_idx]` \textbf{`r json_fields_list$Bank[lan_idx]`:}  
+\normalsize \hspace{5mm} SWIFT: \textbf{`r json_consultant_account_list$final_bank_swift`}  
+``` {r bank, results="asis", echo=F, eval=T} 
+if (json_consultant_account_list$use_intermediary) {
+  cat(paste(
+    "\\hspace{5mm}",
+    paste0(
+      "**",
+      paste(c(
+        json_consultant_account_list$final_bank_short_name,
+        " ",
+        json_fields_list$Account[lan_idx]
+      )[json_fields_list$order[[lan_idx]]], collapse = " "),
+      " **", json_fields_list$with[lan_idx]
+    ),
+    json_consultant_account_list$intermediary_bank_name,
+    ":",
+    paste0("**", json_consultant_account_list$final_bank_account, "**  \n")
+  ))
+} else {
+  cat("<!-- avoid line break -->")
+}
+```
+\hspace{5mm} `r json_fields_list$Name[lan_idx]`: \textbf{`r json_consultant_account_list$final_bank_name`}  
+\hspace{5mm} `r json_fields_list$Address[lan_idx]`: `r json_consultant_account_list$final_bank_address`, `r json_consultant_account_list$final_bank_country`  
+
+\large\textbf{`r json_fields_list$consultantBusiness[lan_idx]`} / `r json_fields_list$BeneficiaryCustomer[lan_idx]` \textbf{}:  
+\hspace{5mm} \normalsize `r json_fields_list$Name[lan_idx]`: `r json_consultant_business_list$name`    
+\hspace{5mm} IBAN: **`r json_consultant_account_list$IBAN`**  
+
+<!-- \large `r json_fields_list$RemittanceInformation[lan_idx]` \textbf{(Field 70)}:   -->
+<!-- \hspace{5mm} \normalsize `r json_fields_list$Includealso[lan_idx]` **invoice number**, **contract number** -->

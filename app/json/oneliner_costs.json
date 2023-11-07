@@ -1,0 +1,17 @@
+{
+  "file_identifier": ["oneliner_costs"],
+  "cost_1": {
+    "use": [true],
+    "currency_exchange_to_Final_Currency": [5.1594],
+    "currency": ["USD"],
+    "value": [6000],
+    "text": ["Oneliner Cost 1"]
+  },
+  "cost_2": {
+    "use": [true],
+    "currency_exchange_to_Final_Currency": [5.1594],
+    "currency": ["BRL"],
+    "value": [10000],
+    "text": ["Cost 2 oneliner"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "file_identifier": ["grouped_costs"],
+  "currency": ["USD"],
+  "currency_exchange_to_Final_Currency": [5.1594],
+  "GeneralName": ["Grouped Costs"],
+  "use": [true],
+  "cost_1": {
+    "name": ["Grouped Cost 1"],
+    "value": [500]
+  },
+  "cost_2": {
+    "name": ["Second of group"],
+    "value": [1000]
+  },
+  "cost_3": {
+    "name": ["Grouped cost 3"],
+    "value": [80]
+  }
+}

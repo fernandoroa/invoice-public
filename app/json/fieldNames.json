@@ -1,0 +1,106 @@
+{
+  "invoiceNumber": [
+    "Invoice Number",
+    "Invoice No."
+  ],
+  "consultantBusiness": [
+    "Consultant",
+    "ME do consultor"
+  ],
+  "consultantPhone": [
+    "Contact No.",
+    "No. de contato"
+  ],
+  "billTo": [
+    "Bill To:",
+    "Cobrar a:"
+  ],
+  "date": [
+    "Date",
+    "Data"
+  ],
+  "amount": [
+    "AMOUNT",
+    "Valor"
+  ],
+  "oneliners": [
+    "Oneliners",
+    "Beneficios"
+  ],
+  "Signature": [
+    "Signature",
+    "Assinatura"
+  ],
+  "WireInstructions": [
+    "Wire Instructions",
+    "Instruções do fio"
+  ],
+  "BankAccountInformation": [
+    "Bank Account Information",
+    "Conta bancária"
+  ],
+  "Services": [
+    "Services",
+    "Serviços prestados"
+  ],
+  "Intermediary": [
+    "Intermediary",
+    "Intermediário"
+  ],
+  "CorrespondentBank": [
+    "Correspondent Bank",
+    "Correspondente bancário"
+  ],
+  "Name": [
+    "Name",
+    "Nome"
+  ],
+  "Country": [
+    "Country",
+    "Pais"
+  ],
+  "Beneficiary": [
+    "Beneficiary",
+    "Beneficiario -"
+  ],
+  "with": [
+    "with",
+    "no"
+  ],
+  "order": [
+    [
+      1,
+      2,
+      3
+    ],
+    [
+      3,
+      2,
+      1
+    ]
+  ],
+  "Bank": [
+    "Bank",
+    "Banco"
+  ],
+  "Account": [
+    "Account",
+    "Conta"
+  ],
+  "Address": [
+    "Address",
+    "Endereço"
+  ],
+  "BeneficiaryCustomer": [
+    "Beneficiary Customer",
+    "Cliente beneficiario"
+  ],
+  "RemittanceInformation": [
+    "Remittance Information",
+    "Informação do remetente"
+  ],
+  "Includealso": [
+    "Include also",
+    "Incluir também"
+  ]
+}
