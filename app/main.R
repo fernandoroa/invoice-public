@@ -1201,7 +1201,9 @@ server <- function(id) { # nolint
         plain_json_save(
           input,
           plain_list = rv_json_lists$json_consultant_business_list,
-          folders = "app/json", file_name = "consultant_contact.json"
+          folders = "app/json", file_name = "consultant_contact.json",
+          useNS = TRUE,
+          namespace = "consultant_business_ns"
         )
         plain_json_save(
           input,
@@ -1211,7 +1213,9 @@ server <- function(id) { # nolint
         plain_json_save(
           input,
           plain_list = rv_json_lists$json_business_to_bill_list,
-          folders = "app/json", file_name = "business_to_bill.json"
+          folders = "app/json", file_name = "business_to_bill.json",
+          useNS = TRUE,
+          namespace = "bill_to_ns"
         )
         nested_json_save(
           input,
@@ -1236,7 +1240,9 @@ server <- function(id) { # nolint
           input,
           plain_list = rv_json_lists$json_final_currency_list,
           folders = "app/json",
-          file_name = "final_currency_inv_date.json"
+          file_name = "final_currency_inv_date.json",
+          useNS = TRUE,
+          namespace = "currency_date_ns"
         )
 
         folder <- paste0(gsub("file", "folder_", tempfile()))
