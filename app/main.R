@@ -15,7 +15,8 @@ box::use(
   modules / upload,
   modules / currency_date,
   modules / business,
-  modules / download_zip
+  modules / download_zip,
+  modules / generate_pdf
 )
 
 #' @export
@@ -37,14 +38,7 @@ ui <- function(id) {
                 actionButton(ns("reload"), "Discard unsaved changes"),
                 radioButtons(ns("lang"), "Language", c("english" = 1, "other" = 2))
               ),
-              div(
-                class = "generate_buttons",
-                br(),
-                helpText("Save changes and generates .pdf"),
-                div(
-                  downloadButton(ns("report"), "Render Document")
-                )
-              )
+              generate_pdf$ui(ns("report_ns"))
             )
           ),
           column(
@@ -238,6 +232,7 @@ server <- function(id) { # nolint
     )
 
     download_zip$server("download_zip_ns", rv_json_lists, input)
+    generate_pdf$server("report_ns", rv_json_lists, input)
 
     observeEvent(currency_date_vars$exchange_salary(), {
       updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = currency_date_vars$exchange_salary())
@@ -1195,71 +1190,7 @@ server <- function(id) { # nolint
       )
     })
 
-    output$report <- downloadHandler(
-      filename = "invoice.pdf",
-      content = function(file) {
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_consultant_business_list,
-          folders = "app/json", file_name = "consultant_contact.json",
-          useNS = TRUE,
-          namespace = "consultant_business_ns"
-        )
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_consultant_account_list,
-          folders = "app/json", file_name = "consultant_account.json"
-        )
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_business_to_bill_list,
-          folders = "app/json", file_name = "business_to_bill.json",
-          useNS = TRUE,
-          namespace = "bill_to_ns"
-        )
-        nested_json_save(
-          input,
-          nested_list = rv_json_lists$json_salary_list,
-          prefix = "",
-          folders = "app/json",
-          file_name = "salary.json"
-        )
-        nested_and_root_save(input,
-          nested_list = rv_json_lists$json_grouped_list,
-          prefix = "grouped",
-          folders = "app/json",
-          file_name = "grouped_costs.json"
-        )
-        nested_json_save(input,
-          nested_list = rv_json_lists$json_oneliners_list,
-          prefix = "oneliners",
-          folders = "app/json",
-          file_name = "oneliner_costs.json"
-        )
-        plain_json_save(
-          input,
-          plain_list = rv_json_lists$json_final_currency_list,
-          folders = "app/json",
-          file_name = "final_currency_inv_date.json",
-          useNS = TRUE,
-          namespace = "currency_date_ns"
-        )
 
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
-        temp_report <- file.path(folder, "inv_md_dont_modify.Rmd")
-        file.copy("app/invoice.Rmd", temp_report, overwrite = TRUE)
-        app_path <- file.path(getwd(), "app")
-        all_params <- reactiveValuesToList(input)
-        params <- list(invoiceNumber = all_params$invoiceNumber, lang = all_params$lang, app_path = app_path)
-
-        rmarkdown::render(temp_report,
-          output_file = file,
-          params = params,
-          envir = new.env(parent = globalenv())
-        )
-      }
-    )
 
     outputOptions(output, "salary_dates_panel", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_period_panel", suspendWhenHidden = FALSE)
