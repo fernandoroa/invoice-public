@@ -45,8 +45,10 @@ json_grouped_list <- json_grouped_list %>% discard(names(.) %in% "file_identifie
 
 # dates
 sm <- month(json_salary_list$dates$start, label = TRUE)
-smna <- month(json_salary_list$dates$start, label = TRUE, abbr = FALSE)
+
 em <- month(json_salary_list$dates$end, label = TRUE)
+emna <- month(json_salary_list$dates$end, label = TRUE, abbr = FALSE)
+
 sdt <- day(json_salary_list$dates$start)
 edt <- day(json_salary_list$dates$end)
 sy <- year(json_salary_list$dates$start)
@@ -63,7 +65,8 @@ salary_currency_text <- salary_currency
 
 # oneliners
 oneliners_filtered_list <- json_oneliners_list |> keep(~ .$use)
-
+oneliners_final <- 0
+if (length(oneliners_filtered_list) > 0) {
 oneliners_filtered_df <- bind_rows(oneliners_filtered_list, .id = "name")
 
 oneliners_filtered_df$needs_exchange <- ifelse(oneliners_filtered_df$currency != final_currency, TRUE, FALSE)
@@ -85,6 +88,7 @@ oneliners_exchange_text <- paste(
 )
 
 oneliners_final <- sum(oneliners_filtered_df_not_exchanged$value, oneliners_filtered_df_exchanged$exchanged_value, na.rm = TRUE)
+}
 
 grouped_currency <- json_grouped_list$currency
 grouped_currency_text <- grouped_currency
@@ -153,7 +157,7 @@ modified_pay_rounded <- round(modified_pay, 1)
 salary_days_pay_final <- ifelse(use_salary_and_related, salary_days_pay_final, 0)
 
 exchange_grouped_text <- "|"
-
+total_grouped_finals <- 0
 if (use_grouped) {
   grouped_list_root <- json_grouped_list %>% keep(names(.) %in% c(
     "currency_exchange_to_Final_Currency", "use",
@@ -229,7 +233,7 @@ cat( # nolint
            json_salary_list$dates$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n")
   },
   if (use_dates) {
-    paste0("|\\hspace{2mm}", json_salary_list$dates$delivery_month_text, " ", smna, " ", sy, "| | |  |   |   |\n")
+    paste0("|\\hspace{2mm}", json_salary_list$dates$delivery_month_text, " ", emna, " ", sy, "| | |  |   |   |\n")
   },
   if (use_modified && use_salary_and_related) {
     paste0(
