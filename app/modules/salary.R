@@ -422,7 +422,9 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
     })
 
     observeEvent(exchange_rate(), ignoreInit = TRUE, {
-      updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = exchange_rate())
+      if(is.numeric(exchange_rate())) {
+        updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = exchange_rate())
+      }
     })
 
     outputOptions(output, "non_working_days_box", suspendWhenHidden = FALSE)
@@ -432,6 +434,5 @@ server <- function(id, rv_sublist, file_reac, exchange_rate) {
     outputOptions(output, "modified_days_box", suspendWhenHidden = FALSE)
 
     return(reactive(input$maincurrency))
-
   })
 }

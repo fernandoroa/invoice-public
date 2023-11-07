@@ -50,6 +50,14 @@ server <- function(id, rv_json_lists, inputs) {
           useNS = TRUE,
           namespace = "bill_to_ns"
         )
+        plain_json_save(
+          inputs,
+          plain_list = rv_json_lists$json_final_currency_list,
+          folders = c(folder, "app/json"),
+          file_name = "final_currency_inv_date.json",
+          useNS = TRUE,
+          namespace = "currency_date_ns"
+        )
         nested_json_save(
           inputs,
           nested_list = rv_json_lists$json_salary_list,
@@ -59,6 +67,15 @@ server <- function(id, rv_json_lists, inputs) {
           useNS = TRUE,
           namespace = "salary_ns"
         )
+        nested_json_save(
+          inputs,
+          nested_list = rv_json_lists$json_oneliners_list,
+          prefix = "",
+          folders = c(folder, "app/json"),
+          file_name = "oneliner_costs.json",
+          useNS = TRUE,
+          namespace = "oneliner_ns"
+        )
         nested_and_root_save(
           inputs,
           nested_list = rv_json_lists$json_grouped_list,
@@ -66,21 +83,8 @@ server <- function(id, rv_json_lists, inputs) {
           folders = c(folder, "app/json"),
           file_name = "grouped_costs.json"
         )
-        nested_json_save(
-          inputs,
-          nested_list = rv_json_lists$json_oneliners_list,
-          prefix = "oneliners",
-          folders = c(folder, "app/json"),
-          file_name = "oneliner_costs.json"
-        )
-        plain_json_save(
-          inputs,
-          plain_list = rv_json_lists$json_final_currency_list,
-          folders = c(folder, "app/json"),
-          file_name = "final_currency_inv_date.json",
-          useNS = TRUE,
-          namespace = "currency_date_ns"
-        )
+
+
         file.copy("app/json/fieldNames.json", folder)
 
         zip_path <- file.path(folder, "json.zip")
