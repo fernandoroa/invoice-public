@@ -15,7 +15,7 @@ ui <- function(id) {
   uiOutput(ns("currency_date"))
 }
 
-server <- function(id, rv_json_lists, input_maincurrency) {
+server <- function(id, rv_json_lists, salary_currency, inputs) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$currency_date <- renderUI({
@@ -116,14 +116,14 @@ server <- function(id, rv_json_lists, input_maincurrency) {
     currency_date_rv <- reactiveValues()
 
     observeEvent(input$get_exchanges, {
-      if (input$final_currency != input_maincurrency()) {
+      if (input$final_currency != salary_currency()) {
         showModal(modalDialog(
           title = "Getting exchange rates",
           "Please wait!"
         ))
         date <- as.character(input$exchangeDate)
         while (TRUE) {
-          exchange_df <- try(get_exchange_rates(input$final_currency, input_maincurrency(), date), silent = TRUE)
+          exchange_df <- try(get_exchange_rates(input$final_currency, salary_currency(), date), silent = TRUE)
           date <- as.character(as.Date(date) - 1)
           if (!inherits(exchange_df, "try-error")) break
         }

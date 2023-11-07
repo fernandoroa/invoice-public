@@ -17,7 +17,8 @@ box::use(
   modules / currency_date,
   modules / business,
   modules / download_zip,
-  modules / generate_pdf
+  modules / generate_pdf,
+  modules / salary
 )
 
 #' @export
@@ -100,29 +101,7 @@ ui <- function(id) {
       "Salary dates and days",
       fluidPage(
         fluidRow(
-          column(
-            3,
-            uiOutput(ns("salary_dates_panel")),
-            uiOutput(ns("salary_period_panel"))
-          ),
-          column(
-            6,
-            div(
-              class = "salary_and_days_container",
-              div(
-                class = "salary",
-                uiOutput(ns("salary_box"))
-              ),
-              div(
-                class = "modified",
-                uiOutput(ns("modified_box"))
-              ),
-              div(
-                class = "non_working_days",
-                uiOutput(ns("non_working_days_box"))
-              )
-            )
-          ),
+          salary$ui(ns("salary_ns")),
           column(
             3,
             img(src = "static/invoice_salary.svg", style = "max-width:25vw")
@@ -208,11 +187,8 @@ server <- function(id) { # nolint
     json_upload_var <- upload$server("json_upload_ns", zip_upload_var, ".json")
     zip_upload_var <- upload$server("zip_upload_ns", json_upload_var, ".zip")
 
-    input_maincurrency <- reactive({
-      input$maincurrency
-    })
 
-    currency_date_vars <- currency_date$server("currency_date_ns", rv_json_lists, input_maincurrency)
+    currency_date_vars <- currency_date$server("currency_date_ns", rv_json_lists, salary_currency, input)
 
     business$server("bill_to_ns", rv_json_lists$json_business_to_bill_list, file_reac,
       useLabel = FALSE,
@@ -229,13 +205,11 @@ server <- function(id) { # nolint
     download_zip$server("download_zip_ns", rv_json_lists, input)
     generate_pdf$server("report_ns", rv_json_lists, input)
 
-    observeEvent(currency_date_vars$exchange_salary(), {
-      updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = currency_date_vars$exchange_salary())
-    })
+    salary_currency <- salary$server("salary_ns", rv_json_lists$json_salary_list, file_reac, currency_date_vars$exchange_salary)
+
 
     observeEvent(file_reac(),
       {
-
         rv_json_lists$json_final_currency_list <- rjson::fromJSON(file = "app/json/final_currency_inv_date.json")
         rv_json_lists$json_business_to_bill_list <- rjson::fromJSON(file = "app/json/business_to_bill.json")
         rv_json_lists$json_consultant_account_list <- rjson::fromJSON(file = "app/json/consultant_account.json")
@@ -277,105 +251,6 @@ server <- function(id) { # nolint
             session,
             x,
             value = consultant_account_list[[x]]
-          )
-        })
-
-        updateCheckboxInput(
-          session,
-          paste0("dates", "use"),
-          value = rv_json_lists$json_salary_list$dates$use
-        )
-
-        updateDateInput(session,
-          paste0("dates", "start"),
-          value = as.Date(rv_json_lists$json_salary_list$dates$start)
-        )
-
-        updateTextInput(
-          session, paste0("dates", "date_connector"),
-          value = rv_json_lists$json_salary_list$dates$date_connector
-        )
-
-        updateDateInput(session, paste0("dates", "end"),
-          value = as.Date(rv_json_lists$json_salary_list$dates$end)
-        )
-
-        updateTextInput(
-          session, paste0("dates", "delivery_month_text"),
-          value = rv_json_lists$json_salary_list$dates$delivery_month_text
-        )
-        json_salary_list_main <- rv_json_lists$json_salary_list$main
-        char_names <- names(which(sapply(json_salary_list_main, function(x) is.character(x))))
-        num_names <- names(which(sapply(json_salary_list_main, function(x) is.numeric(x))))
-        logic_names <- names(which(sapply(json_salary_list_main, function(x) is.logical(x))))
-
-        char_names_currency <- grep("currency", char_names, value = TRUE)
-        num_names_currency <- grep("currency", num_names, value = TRUE)
-
-        char_names_not_currency <- grep("currency", char_names, value = TRUE, invert = TRUE)
-        num_names_not_currency <- grep("currency", num_names, value = TRUE, invert = TRUE)
-
-        lapply(char_names_currency, function(x) {
-          updateTextInput(
-            session,
-            paste0("main", x),
-            value = json_salary_list_main[[x]]
-          )
-        })
-        lapply(num_names_currency, function(x) {
-          updateNumericInput(
-            session,
-            paste0("main", x),
-            value = json_salary_list_main[[x]]
-          )
-        })
-        lapply(char_names_not_currency, function(x) {
-          updateTextInput(
-            session,
-            paste0("main", x),
-            value = json_salary_list_main[[x]]
-          )
-        })
-        lapply(num_names_not_currency, function(x) {
-          updateNumericInput(
-            session,
-            paste0("main", x),
-            value = json_salary_list_main[[x]]
-          )
-        })
-        lapply(logic_names, function(x) {
-          updateCheckboxInput(
-            session,
-            paste0("main", x),
-            value = json_salary_list_main[[x]]
-          )
-        })
-        salary_list_period <- rv_json_lists$json_salary_list$period
-        char_period <- names(which(sapply(salary_list_period, function(x) is.character(x))))
-        num_period <- names(which(sapply(salary_list_period, function(x) is.numeric(x))))
-        logic_period <- names(which(sapply(salary_list_period, function(x) is.logical(x))))
-
-        lapply(num_period, function(x) {
-          updateNumericInput(
-            session,
-            paste0("period", x),
-            value = salary_list_period[[x]]
-          )
-        })
-
-        lapply(char_period, function(x) {
-          updateTextInput(
-            session,
-            paste0("period", x),
-            value = salary_list_period[[x]]
-          )
-        })
-
-        lapply(logic_period, function(x) {
-          updateCheckboxInput(
-            session,
-            paste0("period", x),
-            value = salary_list_period[[x]]
           )
         })
 
@@ -594,148 +469,6 @@ server <- function(id) { # nolint
       },
       contentType = "json"
     )
-
-
-    output$salary_dates_panel <- renderUI({
-      wellPanel(
-        h4(strong("Salary Dates")),
-        splitLayout(
-          div(
-            style = "display: flex;
-               flex-direction: column;
-               justify-content: space-between;
-               max-width:150px;
-               align-items:center;",
-            br(),
-            checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_json_lists$json_salary_list$dates$use),
-            actionButton(ns("increaseDate"), ""),
-            span("1 Month"),
-            br(),
-            actionButton(ns("decreaseDate"), "")
-          ),
-          tagList(
-            dateInput(ns(paste0("dates", "start")), "Start Date: ", value = as.Date(rv_json_lists$json_salary_list$dates$start)),
-            textInput(ns(paste0("dates", "date_connector")), "date connector", rv_json_lists$json_salary_list$dates$date_connector),
-            dateInput(ns(paste0("dates", "end")), "End Date: ", value = as.Date(rv_json_lists$json_salary_list$dates$end))
-          )
-        ),
-        div(
-          class = "two_column_grid",
-          div(
-            class = "go-center",
-            span(strong("Deliver title"))
-          ),
-          div(
-            class = "go-center",
-            textInput(ns(paste0("dates", "delivery_month_text")), "", rv_json_lists$json_salary_list$dates$delivery_month_text)
-          )
-        )
-      )
-    })
-
-    output$salary_box <- renderUI({
-      char_names <- names(which(sapply(rv_json_lists$json_salary_list$main, function(x) is.character(x))))
-      num_names <- names(which(sapply(rv_json_lists$json_salary_list$main, function(x) is.numeric(x))))
-      logic_names <- names(which(sapply(rv_json_lists$json_salary_list$main, function(x) is.logical(x))))
-
-      char_names_currency <- grep("currency", char_names, value = TRUE)
-      num_names_currency <- grep("currency", num_names, value = TRUE)
-
-      char_names_not_currency <- grep("currency", char_names, value = TRUE, invert = TRUE)
-      num_names_not_currency <- grep("currency", num_names, value = TRUE, invert = TRUE)
-
-
-      wellPanel(
-        h4(strong("Salary Details")),
-        {
-          char_names_currency_list <- lapply(char_names_currency, function(x) {
-            textInput(
-              ns(paste0("main", x)),
-              div(
-                class = "wrap",
-                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-              ),
-              rv_json_lists$json_salary_list$main[[x]]
-            )
-          })
-          num_names_currency_list <- lapply(num_names_currency, function(x) {
-            numericInput(
-              ns(paste0("main", x)),
-              div(
-                class = "wrap",
-                gsub("_", " ", x, perl = TRUE)
-              ),
-              rv_json_lists$json_salary_list$main[[x]]
-            )
-          })
-          char_list <- lapply(char_names_not_currency, function(x) {
-            textInput(
-              ns(paste0("main", x)),
-              div(
-                class = "wrap",
-                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-              ),
-              rv_json_lists$json_salary_list$main[[x]]
-            )
-          })
-          num_list <- lapply(num_names_not_currency, function(x) {
-            div(
-              class = "go-bottom",
-              numericInput(
-                ns(paste0("main", x)),
-                div(
-                  class = "wrap",
-                  gsub("_", " ", x, perl = TRUE)
-                ),
-                rv_json_lists$json_salary_list$main[[x]]
-              )
-            )
-          })
-          logic_list <- lapply(logic_names, function(x) {
-            checkboxInput(
-              ns(paste0("main", x)),
-              div(
-                class = "wrap",
-                gsub("_", " ", gsub(pattern_a, pattern_b, x))
-              ),
-              rv_json_lists$json_salary_list$main[[x]]
-            )
-          })
-          div(
-            div(
-              class = "four_column_grid",
-              div(
-                class = "go-bottom",
-                char_names_currency_list
-              ),
-              div(
-                class = "go-bottom",
-                num_names_currency_list
-              ),
-              num_list,
-            ),
-            div(
-              class = "three_column_grid_left_big",
-              char_list
-            )
-          )
-        },
-        div(
-          class = "two_column_grid",
-          logic_list,
-          div(
-            helpText("Go to Main tab to save all"),
-            downloadButton(ns("save_download_salary"),
-              strong(
-                "Save and Download", code("salary.json")
-              ),
-              style = "white-space: normal;
-                           word-wrap: break-word;"
-            )
-          )
-        )
-      )
-    })
 
     output$oneliners_box <- renderUI({
       oneliners_list <- rv_json_lists$json_oneliners_list %>% discard(names(.) %in% "file_identifier")
@@ -1004,104 +737,6 @@ server <- function(id) { # nolint
       )
     })
 
-    output$salary_period_panel <- renderUI({
-      char_period <- names(which(sapply(rv_json_lists$json_salary_list$period, function(x) is.character(x))))
-      num_period <- names(which(sapply(rv_json_lists$json_salary_list$period, function(x) is.numeric(x))))
-      logic_period <- names(which(sapply(rv_json_lists$json_salary_list$period, function(x) is.logical(x))))
-      wellPanel(
-        h4(strong("Salary Period(s)")),
-        splitLayout(
-          cellWidths = c("30%", "30%", "10%", "20%"),
-          lapply(num_period, function(x) {
-            numericInput(
-              ns(paste0("period", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_salary_list$period[[x]]
-            )
-          }),
-          lapply(char_period, function(x) {
-            textInput(
-              ns(paste0("period", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_salary_list$period[[x]]
-            )
-          }),
-          div(),
-          lapply(logic_period, function(x) {
-            checkboxInput(
-              ns(paste0("period", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_json_lists$json_salary_list$period[[x]]
-            )
-          })
-        )
-      )
-    })
-
-    output$modified_box <- renderUI({
-      char_modified <- names(which(sapply(rv_json_lists$json_salary_list$modified_days, function(x) is.character(x))))
-      num_modified <- names(which(sapply(rv_json_lists$json_salary_list$modified_days, function(x) is.numeric(x))))
-      logic_modified <- names(which(sapply(rv_json_lists$json_salary_list$modified_days, function(x) is.logical(x))))
-
-      tagList(
-        wellPanel(
-          h4(strong("Modified Pay Days")),
-          div(
-            class = "three_column_grid_left_big",
-            lapply(char_modified, function(x) {
-              textInput(
-                ns(paste0("modified_days", x)),
-                gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
-                rv_json_lists$json_salary_list$modified_days[[x]]
-              )
-            }),
-            lapply(num_modified, function(x) {
-              numericInput(
-                ns(paste0("modified_days", x)),
-                gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
-                rv_json_lists$json_salary_list$modified_days[[x]]
-              )
-            }),
-            lapply(logic_modified, function(x) {
-              checkboxInput(
-                ns(paste0("modified_days", x)),
-                gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                rv_json_lists$json_salary_list$modified_days[[x]]
-              )
-            })
-          )
-        )
-      )
-    })
-
-    output$non_working_days_box <- renderUI({
-      num_nwd <- names(which(sapply(rv_json_lists$json_salary_list$non_working_days, function(x) is.numeric(x))))
-      logic_nwd <- names(which(sapply(rv_json_lists$json_salary_list$non_working_days, function(x) is.logical(x))))
-      tagList(
-        wellPanel(
-          h4(strong("non-working Days")),
-          splitLayout(
-            cellWidths = c("50%", "10%", "30%"),
-            lapply(num_nwd, function(x) {
-              numericInput(
-                ns(paste0("non_working_days", x)),
-                "",
-                rv_json_lists$json_salary_list$non_working_days[[x]]
-              )
-            }),
-            div(),
-            lapply(logic_nwd, function(x) {
-              checkboxInput(
-                ns(paste0("non_working_days", x)),
-                gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                rv_json_lists$json_salary_list$non_working_days[[x]]
-              )
-            })
-          )
-        )
-      )
-    })
-
     output$consultant_account_box <- renderUI({
       consultant_account_list <- rv_json_lists$json_consultant_account_list %>% discard(names(.) %in% "file_identifier")
       char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
@@ -1140,15 +775,8 @@ server <- function(id) { # nolint
       )
     })
 
-
-
-    outputOptions(output, "salary_dates_panel", suspendWhenHidden = FALSE)
-    outputOptions(output, "salary_period_panel", suspendWhenHidden = FALSE)
-    outputOptions(output, "salary_box", suspendWhenHidden = FALSE)
-    outputOptions(output, "modified_box", suspendWhenHidden = FALSE)
     outputOptions(output, "oneliners_box", suspendWhenHidden = FALSE)
     outputOptions(output, "grouped_box", suspendWhenHidden = FALSE)
     outputOptions(output, "consultant_account_box", suspendWhenHidden = FALSE)
-    outputOptions(output, "non_working_days_box", suspendWhenHidden = FALSE)
   })
 }

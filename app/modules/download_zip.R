@@ -55,7 +55,9 @@ server <- function(id, rv_json_lists, inputs) {
           nested_list = rv_json_lists$json_salary_list,
           prefix = "",
           folders = c(folder, "app/json"),
-          file_name = "salary.json"
+          file_name = "salary.json",
+          useNS = TRUE,
+          namespace = "salary_ns"
         )
         nested_and_root_save(
           inputs,

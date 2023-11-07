@@ -23,12 +23,15 @@ plain_json_save <- function(input, plain_list, folders, file_name, useNS = FALSE
 }
 
 #' @export
-nested_json_save <- function(input, nested_list, prefix, folders, file_name) {
+nested_json_save <- function(input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "") {
   list <- list()
+  if (useNS) {
+    namespace <- paste0(namespace, "-")
+  }
   nested_list_names <- names(nested_list)
   for (name in nested_list_names) {
     list[[name]] <- lapply(names(nested_list[[name]]), function(x) {
-      input[[paste0(prefix, name, x)]]
+      input[[paste0(namespace, prefix, name, x)]]
     })
     names(list[[name]]) <- names(nested_list[[name]])
   }
