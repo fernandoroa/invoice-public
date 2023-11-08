@@ -22,7 +22,7 @@ box::use(
 lan_idx <- as.numeric(params$lang)
 
 # main
-json_fields_list <- rjson::fromJSON(file = file.path(params$app_path, "json/fieldNames.json"))
+json_fields_list <- rjson::fromJSON(file = file.path(params$app_path, "json/field_names.json"))
 json_final_currency_list <- rjson::fromJSON(file = file.path(params$app_path, "json/final_currency_inv_date.json"))
 
 #

@@ -9,7 +9,6 @@ box::use(
   .. / utils / constants[...],
 )
 
-
 ui <- function(id) {
   ns <- NS(id)
   uiOutput(ns("currency_date"))

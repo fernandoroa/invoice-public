@@ -33,7 +33,7 @@ server <- function(id, rv_json_lists, inputs) {
 
         save_all(inputs, c(folder, "app/json"), rv_json_lists)
 
-        file.copy("app/json/fieldNames.json", folder)
+        file.copy("app/json/field_names.json", folder)
 
         zip_path <- file.path(folder, "json.zip")
         files_to_zip <- dir(folder, full.names = TRUE)
