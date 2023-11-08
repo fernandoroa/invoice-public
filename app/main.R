@@ -30,8 +30,20 @@ box::use(
 ui <- function(id) {
   ns <- NS(id)
   navbarPage(
+    title = div(
+      a(
+        href = "https://www.github.com/fernandoroa/invoice-public",
+        img(
+          src = "static/github.svg",
+          style = "margin-top: -5px;
+                               padding-right:10px;
+                               padding-bottom:0;",
+          height = 25
+        )
+      ), "Invoice Generator"
+    ),
+    windowTitle = "Invoice",
     selected = "Invoice, businesses and date",
-    "Invoice Generator",
     tabPanel(
       "Main",
       fluidPage(
