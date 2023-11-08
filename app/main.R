@@ -11,7 +11,7 @@ box::use(
 
 box::use(
   logic / exchange[...],
-  logic / json_save[...],
+  logic / save_files[...],
   utils / constants[...],
   modules / upload,
   modules / currency_date,
@@ -22,7 +22,8 @@ box::use(
   modules / oneliner,
   modules / grouped_costs,
   modules / account,
-  modules / json_ace
+  modules / json_ace,
+  modules / rmd_ace,
 )
 
 #' @export
@@ -38,13 +39,18 @@ ui <- function(id) {
           column(
             3,
             wellPanel(
-              h4(strong("Invoice rendering")),
               div(
                 class = "two_column",
                 actionButton(ns("reload"), "Discard unsaved changes"),
                 radioButtons(ns("lang"), "Language", c("english" = 1, "other" = 2))
-              ),
-              generate_pdf$ui(ns("report_ns"))
+              )
+            ),
+            wellPanel(
+              div(
+                class = "generate_buttons",
+                h4(strong("Invoice rendering")),
+                generate_pdf$ui(ns("report_ns"))
+              )
             )
           ),
           column(
@@ -102,7 +108,7 @@ ui <- function(id) {
       )
     ),
     tabPanel(
-      "Salary dates and days",
+      "Salary and related",
       fluidPage(
         fluidRow(
           salary$ui(ns("salary_ns")),
@@ -114,7 +120,7 @@ ui <- function(id) {
       )
     ),
     tabPanel(
-      "One-liners costs",
+      "One-liner costs",
       fluidPage(
         fluidRow(
           column(
@@ -147,7 +153,7 @@ ui <- function(id) {
       )
     ),
     tabPanel(
-      "Bank Account information",
+      "Bank Account",
       fluidPage(
         fluidRow(
           column(
@@ -163,7 +169,7 @@ ui <- function(id) {
       )
     ),
     tabPanel(
-      "Configure titles",
+      "Titles",
       fluidPage(
         fluidRow(
           json_ace$ui(ns("json_ace_ns"))

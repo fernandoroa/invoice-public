@@ -26,9 +26,8 @@ ui <- function(id) {
     column(
       3,
       tagList(
-        p("These labels are used in the invoice", code(".pdf"), "file"),
-        p("corresponding to two languages, that you can"),
-        p("select in the", em("Main"), "tab"),
+        p("This is the R-markdown file", code(".Rmd")),
+        p("that reads the", code(".json"), "files to render the Invoice"),
         br(),
         helpText("To reset changes, go to", em("Main"), "tab"),
         br(),

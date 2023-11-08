@@ -12,7 +12,7 @@ ui <- function(id) {
   div(
     class = "generate_buttons",
     br(),
-    helpText("Save changes and generates .pdf"),
+    helpText("Save changes and generate .pdf"),
     div(
       downloadButton(ns("report"), "Render Document")
     )

@@ -6,7 +6,7 @@ box::use(
 
 box::use(
   .. / utils / constants[...],
-  .. / logic / json_save[...]
+  .. / logic / save_files[...]
 )
 
 ui <- function(id) {
@@ -120,7 +120,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
             )
           })
         ),
-        helpText("Go to Main tab to save all"),
+        br(),
+        helpText("Go to Main tab to save all .json files"),
         downloadButton(ns("save_download_oneliners"),
           strong("Save and Download", code("oneliner_costs.json")),
           style = "white-space: normal;

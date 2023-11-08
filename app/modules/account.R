@@ -6,7 +6,7 @@ box::use(
 
 box::use(
   .. / utils / constants[...],
-  .. / logic / json_save[...]
+  .. / logic / save_files[...]
 )
 
 ui <- function(id) {
@@ -68,7 +68,7 @@ server <- function(id, rv_sublist, file_reac) {
             div(char_inputs[(half + 1):char_inputs_len]),
           )
         },
-        helpText("Go to Main tab to save all"),
+        helpText("Go to Main tab to save all .json files"),
         downloadButton(ns("save_download_account"),
           strong("Save and Download", code("consultant_account.json")),
           style = "white-space: normal;

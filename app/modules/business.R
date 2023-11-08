@@ -5,7 +5,7 @@ box::use(
 )
 
 box::use(
-  .. / logic / json_save[...],
+  .. / logic / save_files[...],
   .. / utils / constants[...],
 )
 
@@ -46,7 +46,7 @@ server <- function(id, rv_jsons, file_reac, useLabel = TRUE, basename, box_title
           })
         },
         br(),
-        helpText("Go to Main tab to save all"),
+        helpText("Go to Main tab to save all .json files"),
         downloadButton(ns("save_download"),
           strong("Save and Download", code(filename)),
           style = "white-space: normal;
