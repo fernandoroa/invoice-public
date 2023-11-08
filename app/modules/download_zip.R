@@ -4,7 +4,7 @@ box::use(
 )
 
 box::use(
-  .. / logic / json_save[...],
+  .. / logic / save_files[...],
 )
 
 ui <- function(id) {
@@ -12,9 +12,14 @@ ui <- function(id) {
   wellPanel(
     div(
       class = "generate_buttons",
-      h4("Download Source files as .zip"),
-      helpText("with current changes"),
-      span(code(".zip"), "contains", code(".json"), "files"),
+      h4("Download as .zip"),
+      helpText("saves current changes"),
+      helpText("go to .Rmd tab to save that file"),
+      br(),
+      div(
+        class = "bottom-margin-10",
+        span(code(".zip"), "contains", code(".json"), "files")
+      ),
       downloadButton(ns("downloadPresets"), "Download .zip", class = "btn-success")
     )
   )

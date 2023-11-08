@@ -4,7 +4,7 @@ box::use(
 )
 
 box::use(
-  .. / logic / json_save[...]
+  .. / logic / save_files[...]
 )
 ui <- function(id) {
   ns <- NS(id)
@@ -26,12 +26,18 @@ ui <- function(id) {
         p("corresponding to two languages, that you can"),
         p("select in the", em("Main"), "tab"),
         br(),
-        helpText("Go to Main tab to save all"),
-        downloadButton(
-          ns("save"),
-          strong(
-            "Save and Download", code("field_names.json")
-          ),
+        helpText("To reset changes, go to", em("Main"), "tab"),
+        br(),
+        helpText("To upload a file, go to", em("Main"), "tab"),
+        br(),
+        wellPanel(
+          helpText("Go to Main tab to save all .json files"),
+          downloadButton(
+            ns("save"),
+            strong(
+              "Save and Download", code("field_names.json")
+            ),
+          )
         )
       )
     )
@@ -57,7 +63,7 @@ server <- function(id, file_reac) {
 
         folders <- c(folder, "app/json")
 
-        ace_json_save(input, "ace", folders, file_name, useNS = FALSE)
+        ace_save(input, "ace", folders, file_name, useNS = FALSE)
 
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)

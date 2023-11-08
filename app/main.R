@@ -169,6 +169,14 @@ ui <- function(id) {
           json_ace$ui(ns("json_ace_ns"))
         )
       )
+    ),
+    tabPanel(
+      "Invoice.Rmd",
+      fluidPage(
+        fluidRow(
+          rmd_ace$ui(ns("rmd_ace_ns"))
+        )
+      )
     )
   )
 }
@@ -240,6 +248,8 @@ server <- function(id) { # nolint
     account$server("account_ns", rv_json_lists, files_ready_reac)
 
     json_ace$server("json_ace_ns", files_ready_reac)
+
+    rmd_ace$server("rmd_ace_ns", files_ready_reac)
 
     observeEvent(file_reac(),
       {
