@@ -1,7 +1,7 @@
 box::use(
   shiny[...],
   dplyr[...],
-  rjson[...],
+  rjson[rjson_fromJSON = fromJSON],
   jsonlite[...],
   lubridate[...],
   purrr[discard, keep],
@@ -21,7 +21,8 @@ box::use(
   modules / salary,
   modules / oneliner,
   modules / grouped_costs,
-  modules / account
+  modules / account,
+  modules / json_ace
 )
 
 #' @export
@@ -160,6 +161,14 @@ ui <- function(id) {
           )
         )
       )
+    ),
+    tabPanel(
+      "Configure titles",
+      fluidPage(
+        fluidRow(
+          json_ace$ui(ns("json_ace_ns"))
+        )
+      )
     )
   )
 }
@@ -170,14 +179,17 @@ server <- function(id) { # nolint
     ns <- session$ns
 
     rv_json_lists <- reactiveValues(
-      final_currency_list = rjson::fromJSON(file = "app/json/final_currency_inv_date.json"),
-      salary_list = rjson::fromJSON(file = "app/json/salary.json"),
-      oneliners_list = rjson::fromJSON(file = "app/json/oneliner_costs.json"),
-      grouped_list = rjson::fromJSON(file = "app/json/grouped_costs.json"),
-      business_to_bill_list = rjson::fromJSON(file = "app/json/business_to_bill.json"),
-      consultant_account_list = rjson::fromJSON(file = "app/json/consultant_account.json"),
-      consultant_business_list = rjson::fromJSON(file = "app/json/consultant_business.json")
+      final_currency_list = rjson_fromJSON(file = "app/json/final_currency_inv_date.json"),
+      salary_list = rjson_fromJSON(file = "app/json/salary.json"),
+      oneliners_list = rjson_fromJSON(file = "app/json/oneliner_costs.json"),
+      grouped_list = rjson_fromJSON(file = "app/json/grouped_costs.json"),
+      business_to_bill_list = rjson_fromJSON(file = "app/json/business_to_bill.json"),
+      consultant_account_list = rjson_fromJSON(file = "app/json/consultant_account.json"),
+      consultant_business_list = rjson_fromJSON(file = "app/json/consultant_business.json")
     )
+
+    file_reac <- reactiveVal()
+    files_ready_reac <- reactiveVal(TRUE)
 
     observeEvent(input$reload,
       {
@@ -227,22 +239,22 @@ server <- function(id) { # nolint
 
     account$server("account_ns", rv_json_lists, files_ready_reac)
 
+    json_ace$server("json_ace_ns", files_ready_reac)
+
     observeEvent(file_reac(),
       {
-        rv_json_lists$final_currency_list <- rjson::fromJSON(file = "app/json/final_currency_inv_date.json")
-        rv_json_lists$business_to_bill_list <- rjson::fromJSON(file = "app/json/business_to_bill.json")
-        rv_json_lists$consultant_account_list <- rjson::fromJSON(file = "app/json/consultant_account.json")
-        rv_json_lists$consultant_business_list <- rjson::fromJSON(file = "app/json/consultant_business.json")
-        rv_json_lists$salary_list <- rjson::fromJSON(file = "app/json/salary.json")
-        rv_json_lists$oneliners_list <- rjson::fromJSON(file = "app/json/oneliner_costs.json")
-        rv_json_lists$grouped_list <- rjson::fromJSON(file = "app/json/grouped_costs.json")
+        rv_json_lists$final_currency_list <- rjson_fromJSON(file = "app/json/final_currency_inv_date.json")
+        rv_json_lists$business_to_bill_list <- rjson_fromJSON(file = "app/json/business_to_bill.json")
+        rv_json_lists$consultant_account_list <- rjson_fromJSON(file = "app/json/consultant_account.json")
+        rv_json_lists$consultant_business_list <- rjson_fromJSON(file = "app/json/consultant_business.json")
+        rv_json_lists$salary_list <- rjson_fromJSON(file = "app/json/salary.json")
+        rv_json_lists$oneliners_list <- rjson_fromJSON(file = "app/json/oneliner_costs.json")
+        rv_json_lists$grouped_list <- rjson_fromJSON(file = "app/json/grouped_costs.json")
+
         files_ready_reac(!files_ready_reac())
       },
       ignoreInit = TRUE
     )
-
-    file_reac <- reactiveVal()
-    files_ready_reac <- reactiveVal(TRUE)
 
     observeEvent(zip_upload_var(),
       {

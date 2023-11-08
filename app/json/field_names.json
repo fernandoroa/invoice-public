@@ -1,4 +1,5 @@
 {
+  "file_identifier": "field_names.json",
   "invoiceNumber": [
     "Invoice Number",
     "Invoice No."
@@ -22,10 +23,6 @@
   "amount": [
     "AMOUNT",
     "Valor"
-  ],
-  "oneliners": [
-    "Oneliners",
-    "Beneficios"
   ],
   "Signature": [
     "Signature",

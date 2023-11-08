@@ -23,6 +23,20 @@ plain_json_save <- function(input, plain_list, folders, file_name, useNS = FALSE
 }
 
 #' @export
+ace_json_save <- function(input, input_name, folders, file_name, useNS = FALSE, namespace = "") {
+  if (useNS) {
+    namespace <- paste0(namespace, "-")
+  }
+
+  content <- input[[paste0(namespace, input_name)]]
+
+  for (folder in folders) {
+    file_path <- file.path(folder, file_name)
+    write(content, file_path)
+  }
+}
+
+#' @export
 nested_json_save <- function(input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "") {
   list <- list()
   if (useNS) {
@@ -137,5 +151,10 @@ save_all <- function(inputs, folders, rv_json_lists) {
     file_name = "grouped_costs.json",
     useNS = TRUE,
     namespace = "grouped_ns"
+  )
+  ace_json_save(
+    inputs, "ace", folders,
+    file_name = "field_names.json", useNS = TRUE,
+    namespace = "json_ace_ns"
   )
 }
