@@ -31,62 +31,7 @@ server <- function(id, rv_json_lists, inputs) {
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)
 
-        plain_json_save(
-          inputs,
-          plain_list = rv_json_lists$consultant_business_list,
-          folders = c(folder, "app/json"), file_name = "consultant_business.json",
-          useNS = TRUE,
-          namespace = "consultant_business_ns"
-        )
-        plain_json_save(
-          inputs,
-          plain_list = rv_json_lists$consultant_account_list,
-          folders = c(folder, "app/json"), file_name = "consultant_account.json",
-          useNS = TRUE,
-          namespace = "account_ns"
-        )
-        plain_json_save(
-          inputs,
-          plain_list = rv_json_lists$business_to_bill_list,
-          folders = c(folder, "app/json"), file_name = "business_to_bill.json",
-          useNS = TRUE,
-          namespace = "bill_to_ns"
-        )
-        plain_json_save(
-          inputs,
-          plain_list = rv_json_lists$final_currency_list,
-          folders = c(folder, "app/json"),
-          file_name = "final_currency_inv_date.json",
-          useNS = TRUE,
-          namespace = "currency_date_ns"
-        )
-        nested_json_save(
-          inputs,
-          nested_list = rv_json_lists$salary_list,
-          prefix = "",
-          folders = c(folder, "app/json"),
-          file_name = "salary.json",
-          useNS = TRUE,
-          namespace = "salary_ns"
-        )
-        nested_json_save(
-          inputs,
-          nested_list = rv_json_lists$oneliners_list,
-          prefix = "",
-          folders = c(folder, "app/json"),
-          file_name = "oneliner_costs.json",
-          useNS = TRUE,
-          namespace = "oneliner_ns"
-        )
-        nested_and_root_save(
-          inputs,
-          nested_list = rv_json_lists$grouped_list,
-          prefix = "",
-          folders = c(folder, "app/json"),
-          file_name = "grouped_costs.json",
-          useNS = TRUE,
-          namespace = "grouped_ns"
-        )
+        save_all(inputs, c(folder, "app/json"), rv_json_lists)
 
         file.copy("app/json/fieldNames.json", folder)
 
