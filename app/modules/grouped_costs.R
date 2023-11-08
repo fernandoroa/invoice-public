@@ -6,7 +6,7 @@ box::use(
 
 box::use(
   .. / utils / constants[...],
-  .. / logic / json_save[...]
+  .. / logic / save_files[...]
 )
 
 ui <- function(id) {
@@ -40,78 +40,64 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
       grouped_list_names <- names(grouped_sublists)
 
       tagList(
-        wellPanel(
-          {
-            tagList({
-              char_names_currency_list <- lapply(char_names_currency, function(x) {
-                textInput(
-                  ns(x),
-                  div(
-                    class = "wrap",
-                    sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-                  ),
-                  grouped_list[[x]]
-                )
-              })
-              num_names_currency_list <- lapply(num_names_currency, function(x) {
-                numericInput(
-                  ns(x),
-                  div(
-                    class = "wrap",
-                    gsub("_", " ", x, perl = TRUE)
-                  ),
-                  grouped_list[[x]]
-                )
-              })
-              char_names_grouped_list <- lapply(char_names_not_currency, function(x) {
-                textInput(
-                  ns(x),
-                  gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
-                  grouped_list[[x]]
-                )
-              })
-              logic_names_grouped_list <- lapply(logic_names_grouped, function(x) {
-                checkboxInput(
-                  ns(x),
-                  gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                  grouped_list[[x]]
-                )
-              })
-              div(
-                class = "five_column_grid",
-                h4(strong("Grouped Costs")),
+        wellPanel({
+          tagList({
+            char_names_currency_list <- lapply(char_names_currency, function(x) {
+              textInput(
+                ns(x),
                 div(
-                  class = "go-bottom",
-                  char_names_grouped_list
+                  class = "wrap",
+                  sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
                 ),
-                div(
-                  class = "go-bottom",
-                  char_names_currency_list
-                ),
-                div(
-                  class = "go-bottom",
-                  num_names_currency_list
-                ),
-                div(
-                  class = "go-bottom",
-                  logic_names_grouped_list
-                )
+                grouped_list[[x]]
               )
             })
-          },
-          div(
-            class = "five_column_grid",
-            div(),
+            num_names_currency_list <- lapply(num_names_currency, function(x) {
+              numericInput(
+                ns(x),
+                div(
+                  class = "wrap",
+                  gsub("_", " ", x, perl = TRUE)
+                ),
+                grouped_list[[x]]
+              )
+            })
+            char_names_grouped_list <- lapply(char_names_not_currency, function(x) {
+              textInput(
+                ns(x),
+                gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
+                grouped_list[[x]]
+              )
+            })
+            logic_names_grouped_list <- lapply(logic_names_grouped, function(x) {
+              checkboxInput(
+                ns(x),
+                gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+                grouped_list[[x]]
+              )
+            })
             div(
-              helpText("Go to Main tab to save all"),
-              downloadButton(ns("save_download_grouped"),
-                strong("Save and Download", code("grouped_costs.json")),
-                style = "white-space: normal;
-                           word-wrap: break-word;"
+              class = "five_column_grid",
+              h4(strong("Grouped Costs")),
+              div(
+                class = "go-bottom",
+                char_names_grouped_list
+              ),
+              div(
+                class = "go-bottom",
+                char_names_currency_list
+              ),
+              div(
+                class = "go-bottom",
+                num_names_currency_list
+              ),
+              div(
+                class = "go-bottom",
+                logic_names_grouped_list
               )
             )
-          )
-        ),
+          })
+        }),
         wellPanel(
           tagList(
             lapply(seq_along(grouped_list_names), function(idx) {
@@ -167,6 +153,19 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
                 )
               )
             })
+          )
+        ),
+        div(
+          class = "fit-content",
+          wellPanel(
+            div(
+              helpText("Go to Main tab to save all .json files"),
+              downloadButton(ns("save_download_grouped"),
+                strong("Save and Download", code("grouped_costs.json")),
+                style = "white-space: normal;
+                           word-wrap: break-word;"
+              )
+            )
           )
         )
       )

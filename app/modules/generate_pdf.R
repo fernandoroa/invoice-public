@@ -4,7 +4,7 @@ box::use(
 )
 
 box::use(
-  .. / logic / json_save[...],
+  .. / logic / save_files[...],
 )
 
 ui <- function(id) {
@@ -12,7 +12,7 @@ ui <- function(id) {
   div(
     class = "generate_buttons",
     br(),
-    helpText("Save changes and generates .pdf"),
+    helpText("Save changes and generate .pdf"),
     div(
       downloadButton(ns("report"), "Render Document")
     )
@@ -28,6 +28,7 @@ server <- function(id, rv_json_lists, inputs) {
       },
       content = function(file) {
         save_all(inputs, "app/json", rv_json_lists)
+        ace_save(inputs, "ace", folders = "app", file_name = "invoice.Rmd", useNS = TRUE, namespace = "rmd_ace_ns")
 
         folder <- paste0(gsub("file", "folder_", tempfile()))
         dir.create(folder)

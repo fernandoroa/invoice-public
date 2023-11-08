@@ -23,7 +23,7 @@ plain_json_save <- function(input, plain_list, folders, file_name, useNS = FALSE
 }
 
 #' @export
-ace_json_save <- function(input, input_name, folders, file_name, useNS = FALSE, namespace = "") {
+ace_save <- function(input, input_name, folders, file_name, useNS = FALSE, namespace = "") {
   if (useNS) {
     namespace <- paste0(namespace, "-")
   }
@@ -152,7 +152,7 @@ save_all <- function(inputs, folders, rv_json_lists) {
     useNS = TRUE,
     namespace = "grouped_ns"
   )
-  ace_json_save(
+  ace_save(
     inputs, "ace", folders,
     file_name = "field_names.json", useNS = TRUE,
     namespace = "json_ace_ns"

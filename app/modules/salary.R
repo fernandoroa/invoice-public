@@ -5,7 +5,7 @@ box::use(
 
 box::use(
   .. / utils / constants[...],
-  .. / logic / json_save[...]
+  .. / logic / save_files[...]
 )
 
 ui <- function(id) {
@@ -14,7 +14,8 @@ ui <- function(id) {
     column(
       3,
       uiOutput(ns("salary_dates_panel")),
-      uiOutput(ns("salary_period_panel"))
+      uiOutput(ns("salary_period_panel")),
+      uiOutput(ns("save_salary_box"))
     ),
     column(
       6,
@@ -187,22 +188,27 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
             ),
             div(
               class = "three_column_grid_left_big",
-              char_list
+              char_list,
+              div(
+                class = "go-bottom",
+                logic_list
+              )
             )
           )
-        },
+        }
+      )
+    })
+
+    output$save_salary_box <- renderUI({
+      wellPanel(
         div(
-          class = "two_column_grid",
-          logic_list,
-          div(
-            helpText("Go to Main tab to save all"),
-            downloadButton(ns("save_download_salary"),
-              strong(
-                "Save and Download", code("salary.json")
-              ),
-              style = "white-space: normal;
+          helpText("Go to Main tab to save all .json files"),
+          downloadButton(ns("save_download_salary"),
+            strong(
+              "Save and Download", code("salary.json")
+            ),
+            style = "white-space: normal;
                            word-wrap: break-word;"
-            )
           )
         )
       )
@@ -422,7 +428,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
     })
 
     observeEvent(exchange_rate(), ignoreInit = TRUE, {
-      if(is.numeric(exchange_rate())) {
+      if (is.numeric(exchange_rate())) {
         updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = exchange_rate())
       }
     })
