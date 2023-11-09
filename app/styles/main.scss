@@ -84,6 +84,12 @@ button[type="button"] {
   gap: 15px;
 }
 
+.well .seven_column_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 3fr 1fr 1fr 1fr;
+  gap: 10px;
+}
+
 .well .five_column_grid {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
@@ -203,6 +209,10 @@ button[type="button"] {
 
 .go-bottom > div {
   flex-grow: 1;
+}
+
+.go-bottom > button[type="button"] {
+  margin-bottom: 0;
 }
 
 .bottom-margin-10 {

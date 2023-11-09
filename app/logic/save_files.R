@@ -1,6 +1,7 @@
 box::use(
   purrr[map, discard, keep],
-  shiny[reactiveValuesToList]
+  shiny[reactiveValuesToList],
+  magrittr[`%>%`]
 )
 #' @export
 plain_json_save <- function(input, plain_list, folders, file_name, useNS = FALSE, namespace = "") {
@@ -37,7 +38,7 @@ ace_save <- function(input, input_name, folders, file_name, useNS = FALSE, names
 }
 
 #' @export
-nested_json_save <- function(input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "") {
+nested_json_save <- function(input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "", to_remove = "") {
   list <- list()
   if (useNS) {
     namespace <- paste0(namespace, "-")
@@ -49,6 +50,7 @@ nested_json_save <- function(input, nested_list, prefix, folders, file_name, use
     })
     names(list[[name]]) <- names(nested_list[[name]])
   }
+  list <- list %>% discard(names(.) %in% to_remove)
   list$file_identifier <- sub(".json$", "", file_name)
   json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
 
@@ -95,7 +97,7 @@ nested_and_root_save <- function(input, nested_list, prefix, folders, file_name,
 }
 
 #' @export
-save_all <- function(inputs, folders, rv_json_lists) {
+save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove) {
   plain_json_save(
     inputs,
     plain_list = rv_json_lists$consultant_business_list,
@@ -141,7 +143,8 @@ save_all <- function(inputs, folders, rv_json_lists) {
     folders = folders,
     file_name = "oneliner_costs.json",
     useNS = TRUE,
-    namespace = "oneliner_ns"
+    namespace = "oneliner_ns",
+    to_remove = oneliner_to_remove
   )
   nested_and_root_save(
     inputs,

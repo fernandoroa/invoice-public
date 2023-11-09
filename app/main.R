@@ -245,15 +245,15 @@ server <- function(id) { # nolint
       box_title = "Consultant details"
     )
 
-    download_zip$server("download_zip_ns", rv_json_lists, input)
-    generate_pdf$server("report_ns", rv_json_lists, input)
+    download_zip$server("download_zip_ns", rv_json_lists, input, oneliner_to_remove)
+    generate_pdf$server("report_ns", rv_json_lists, input, oneliner_to_remove)
 
     salary_currency <- salary$server(
       "salary_ns", rv_json_lists, "salary_list",
       files_ready_reac, currency_date_vars$exchange_salary
     )
 
-    oneliner$server(
+    oneliner_to_remove <- oneliner$server(
       "oneliner_ns", rv_json_lists, "oneliners_list",
       files_ready_reac, currency_date_vars$exchange_oneliners
     )

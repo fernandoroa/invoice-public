@@ -17,9 +17,11 @@ ui <- function(id) {
 server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    rv_oneliners_list_names_remove <- reactiveVal()
     output$oneliners_box <- renderUI({
       oneliners_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
+      rv_oneliners_list_names_remove(paste0(oneliners_list_names, "remove_oneliner"))
 
       wellPanel(
         tagList(
@@ -88,8 +90,17 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
                 oneliners_list[[name]][[x]]
               )
             })
+            if (idx > 1) {
+              drop_button <- div(
+                class = "go-bottom",
+                actionButton(ns(paste0(name, "remove_oneliner")), "Drop")
+              )
+            } else {
+              drop_button <- div()
+            }
             div(
-              class = "six_column_grid",
+              id = ns(name),
+              class = "seven_column_grid",
               div(
                 class = "go-bottom",
                 h4(strong(name))
@@ -116,7 +127,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
                     oneliners_list[[name]][[x]]
                   )
                 })
-              )
+              ),
+              drop_button
             )
           })
         ),
@@ -129,6 +141,24 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
         )
       )
     })
+    rv_input_to_remove <- reactiveVal()
+    observeEvent(sapply(rv_oneliners_list_names_remove(), function(x) input[[x]], simplify = FALSE),
+      {
+        name_input_button_list <- sapply(rv_oneliners_list_names_remove(), function(x) input[[x]], simplify = FALSE)
+        for (input_name in names(name_input_button_list)) {
+          if (isTruthy(input_name)) {
+            if (isTruthy(input[[input_name]])) {
+              oneliner_to_remove <- sub("remove_oneliner$", "", input_name)
+              rv_input_to_remove(c(rv_input_to_remove(), oneliner_to_remove))
+              removeUI(
+                selector = paste0("#", ns(oneliner_to_remove))
+              )
+            }
+          }
+        }
+      },
+      ignoreInit = TRUE
+    )
 
     output$save_download_oneliners <- downloadHandler(
       filename = function() {
@@ -143,7 +173,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
           nested_list = rv_jsons[[sublist]],
           prefix = "",
           folders = c(folder, "app/json"),
-          file_name
+          file_name,
+          to_remove = rv_input_to_remove()
         )
 
         json_path <- file.path(folder, file_name)
@@ -152,9 +183,10 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
       contentType = "json"
     )
 
-    observeEvent(file_reac(), {
+    observeEvent(file_reac(), ignoreInit = TRUE, {
       oneliners_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
+
       lapply(oneliners_list_names, function(name) {
         num_names_not_currency <- char_names_not_currency <- num_names_currency <- char_names_currency <- logic_names_oneliners <- list()
         num_names_oneliners <- char_names_oneliners <- list()
@@ -214,5 +246,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
     })
 
     outputOptions(output, "oneliners_box", suspendWhenHidden = FALSE)
+    return(reactive(rv_input_to_remove()))
   })
 }
