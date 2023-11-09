@@ -19,7 +19,7 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_json_lists, inputs, oneliner_to_remove) {
+server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_remove) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$report <- downloadHandler(
@@ -27,7 +27,7 @@ server <- function(id, rv_json_lists, inputs, oneliner_to_remove) {
         "invoice.pdf"
       },
       content = function(file) {
-        save_all(inputs, "app/json", rv_json_lists, oneliner_to_remove())
+        save_all(inputs, "app/json", rv_json_lists, oneliner_to_remove(), grouped_to_remove())
         ace_save(inputs, "ace", folders = "app", file_name = "invoice.Rmd", useNS = TRUE, namespace = "rmd_ace_ns")
 
         folder <- paste0(gsub("file", "folder_", tempfile()))

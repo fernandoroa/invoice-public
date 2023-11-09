@@ -38,7 +38,9 @@ ace_save <- function(input, input_name, folders, file_name, useNS = FALSE, names
 }
 
 #' @export
-nested_json_save <- function(input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "", to_remove = "") {
+nested_json_save <- function(
+    input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "",
+    to_remove = "") {
   list <- list()
   if (useNS) {
     namespace <- paste0(namespace, "-")
@@ -61,7 +63,10 @@ nested_json_save <- function(input, nested_list, prefix, folders, file_name, use
 }
 
 #' @export
-nested_and_root_save <- function(input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "") {
+nested_and_root_save <- function(
+    input, nested_list, prefix, folders, file_name, useNS = FALSE,
+    namespace = "",
+    to_remove) {
   list <- list()
   if (useNS) {
     namespace <- paste0(namespace, "-")
@@ -87,6 +92,8 @@ nested_and_root_save <- function(input, nested_list, prefix, folders, file_name,
     })
     names(list[[sublist_name]]) <- names(nested_list[[sublist_name]])
   }
+  list <- list %>% discard(names(.) %in% to_remove)
+
   list$file_identifier <- sub(".json$", "", file_name)
   json_data <- jsonlite::toJSON(x = list, pretty = TRUE)
 
@@ -97,7 +104,7 @@ nested_and_root_save <- function(input, nested_list, prefix, folders, file_name,
 }
 
 #' @export
-save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove) {
+save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped_to_remove) {
   plain_json_save(
     inputs,
     plain_list = rv_json_lists$consultant_business_list,
@@ -153,7 +160,8 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove) {
     folders = folders,
     file_name = "grouped_costs.json",
     useNS = TRUE,
-    namespace = "grouped_ns"
+    namespace = "grouped_ns",
+    to_remove = grouped_to_remove
   )
   ace_save(
     inputs, "ace", folders,

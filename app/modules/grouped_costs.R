@@ -17,7 +17,10 @@ ui <- function(id) {
 server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    rv_grouped_list_names_remove <- reactiveVal()
+
     output$grouped_box <- renderUI({
+      file_reac()
       grouped_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
 
       root_names <- c(
@@ -38,6 +41,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
 
       grouped_sublists <- grouped_list %>% discard(names(.) %in% root_names)
       grouped_list_names <- names(grouped_sublists)
+      rv_grouped_list_names_remove(paste0(grouped_list_names, "remove_element"))
 
       tagList(
         wellPanel({
@@ -76,6 +80,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
                 grouped_list[[x]]
               )
             })
+
             div(
               class = "five_column_grid",
               h4(strong("Grouped Costs")),
@@ -137,8 +142,17 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
                   grouped_list[[name]][[x]]
                 )
               })
+              if (idx > 1) {
+                drop_button <- div(
+                  class = "go-bottom",
+                  actionButton(ns(paste0(name, "remove_element")), "Drop")
+                )
+              } else {
+                drop_button <- div()
+              }
               div(
-                class = "three_column_grid_center",
+                id = ns(name),
+                class = "four_column_grid_center",
                 div(
                   class = "go-bottom",
                   h4(strong(name))
@@ -150,7 +164,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
                 div(
                   class = "go-bottom",
                   num_names_list
-                )
+                ),
+                drop_button
               )
             })
           )
@@ -171,6 +186,25 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
       )
     })
 
+    rv_input_to_remove <- reactiveVal()
+    observeEvent(sapply(rv_grouped_list_names_remove(), function(x) input[[x]], simplify = FALSE),
+      {
+        name_input_button_list <- sapply(rv_grouped_list_names_remove(), function(x) input[[x]], simplify = FALSE)
+        for (input_name in names(name_input_button_list)) {
+          if (isTruthy(input_name)) {
+            if (isTruthy(input[[input_name]])) {
+              element_to_remove <- sub("remove_element$", "", input_name)
+              rv_input_to_remove(c(rv_input_to_remove(), element_to_remove))
+              removeUI(
+                selector = paste0("#", ns(element_to_remove))
+              )
+            }
+          }
+        }
+      },
+      ignoreInit = TRUE
+    )
+
     output$save_download_grouped <- downloadHandler(
       filename = function() {
         "grouped_costs.json"
@@ -184,7 +218,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
           nested_list = rv_jsons[[sublist]],
           prefix = "",
           folders = c(folder, "app/json"),
-          file_name
+          file_name,
+          to_remove = rv_input_to_remove()
         )
 
         json_path <- file.path(folder, file_name)
@@ -199,7 +234,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
       }
     })
 
-    observeEvent(file_reac(), {
+    observeEvent(file_reac(), ignoreInit = TRUE, {
       grouped_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
 
       root_names <- c(
@@ -276,5 +311,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
       })
     })
     outputOptions(output, "grouped_box", suspendWhenHidden = FALSE)
+    return(reactive(rv_input_to_remove()))
   })
 }
