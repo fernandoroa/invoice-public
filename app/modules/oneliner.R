@@ -14,7 +14,7 @@ ui <- function(id) {
   uiOutput(ns("oneliners_box"))
 }
 
-server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     rv_oneliners_list_names_remove <- reactiveVal()
@@ -170,13 +170,13 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
       },
       content = function(file) {
         file_name <- "oneliner_costs.json"
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
+        folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
+        dir.create(folder, recursive = TRUE)
 
         nested_json_save(input,
           nested_list = rv_jsons[[sublist]],
           prefix = "",
-          folders = c(folder, "app/json"),
+          folders = c(folder, file.path(temp_folder_session(), "json")),
           file_name,
           to_remove = rv_input_to_remove()
         )

@@ -19,24 +19,28 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_remove) {
+server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_remove, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
     output$report <- downloadHandler(
       filename = function() {
         "invoice.pdf"
       },
       content = function(file) {
-        save_all(inputs, "app/json", rv_json_lists, oneliner_to_remove(), grouped_to_remove())
-        ace_save(inputs, "ace", folders = "app", file_name = "invoice.Rmd", useNS = TRUE, namespace = "rmd_ace_ns")
+        save_all(
+          inputs,
+          file.path(temp_folder_session(), "json"),
+          rv_json_lists, oneliner_to_remove(), grouped_to_remove()
+        )
+        ace_save(inputs, "ace", folders = temp_folder_session(), file_name = "invoice.Rmd", useNS = TRUE, namespace = "rmd_ace_ns")
 
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
+        folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
+        dir.create(folder, recursive = TRUE)
         temp_report <- file.path(folder, "inv_md_dont_modify.Rmd")
-        file.copy("app/invoice.Rmd", temp_report, overwrite = TRUE)
-        app_path <- file.path(getwd(), "app")
+        file.copy(file.path(temp_folder_session(), "invoice.Rmd"), temp_report, overwrite = TRUE)
         all_params <- reactiveValuesToList(inputs)
-        params <- list(invoiceNumber = all_params$invoiceNumber, lang = all_params$lang, app_path = app_path)
+        params <- list(invoiceNumber = all_params$invoiceNumber, lang = all_params$lang, app_path = temp_folder_session())
 
         render(temp_report,
           output_file = file,

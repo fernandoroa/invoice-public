@@ -15,7 +15,7 @@ ui <- function(id, output_id) {
   uiOutput(ns(output_id))
 }
 
-server <- function(id, rv_jsons, file_reac, useLabel = TRUE, basename, box_title) {
+server <- function(id, rv_jsons, file_reac, useLabel = TRUE, basename, box_title, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output_id <- paste0(basename, "_box")
@@ -60,13 +60,13 @@ server <- function(id, rv_jsons, file_reac, useLabel = TRUE, basename, box_title
         filename
       },
       content = function(file) {
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
+        folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
+        dir.create(folder, recursive = TRUE)
 
         plain_json_save(
           input,
           plain_list = rv_jsons[[sublist]],
-          folders = c(folder, "app/json"),
+          folders = c(folder, file.path(temp_folder_session(), "json")),
           filename
         )
 

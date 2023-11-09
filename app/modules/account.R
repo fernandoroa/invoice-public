@@ -14,7 +14,7 @@ ui <- function(id) {
   uiOutput(ns("consultant_account_box"))
 }
 
-server <- function(id, rv_sublist, file_reac) {
+server <- function(id, rv_sublist, file_reac, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$save_download_account <- downloadHandler(
@@ -23,13 +23,13 @@ server <- function(id, rv_sublist, file_reac) {
       },
       content = function(file) {
         file_name <- "consultant_account.json"
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
+        folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
+        dir.create(folder, recursive = TRUE)
 
         plain_json_save(
           input,
           plain_list = rv_sublist$consultant_account_list,
-          folders = c(folder, "app/json"),
+          folders = c(folder, file.path(temp_folder_session(), "json")),
           file_name
         )
 
