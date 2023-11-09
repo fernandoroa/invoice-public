@@ -18,7 +18,9 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     rv_oneliners_list_names_remove <- reactiveVal()
+
     output$oneliners_box <- renderUI({
+      file_reac()
       oneliners_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
       rv_oneliners_list_names_remove(paste0(oneliners_list_names, "remove_oneliner"))
@@ -141,7 +143,9 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates) {
         )
       )
     })
+
     rv_input_to_remove <- reactiveVal()
+
     observeEvent(sapply(rv_oneliners_list_names_remove(), function(x) input[[x]], simplify = FALSE),
       {
         name_input_button_list <- sapply(rv_oneliners_list_names_remove(), function(x) input[[x]], simplify = FALSE)
