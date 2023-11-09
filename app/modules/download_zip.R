@@ -25,7 +25,7 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_remove) {
+server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_remove, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$downloadPresets <- downloadHandler(
@@ -33,12 +33,16 @@ server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_rem
         "json.zip"
       },
       content = function(file) {
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
+        folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
+        dir.create(folder, recursive = TRUE)
 
-        save_all(inputs, c(folder, "app/json"), rv_json_lists, oneliner_to_remove(), grouped_to_remove())
+        save_all(
+          inputs,
+          c(folder, file.path(temp_folder_session(), "json")),
+          rv_json_lists, oneliner_to_remove(), grouped_to_remove()
+        )
 
-        file.copy("app/json/field_names.json", folder)
+        file.copy(file.path(temp_folder_session(), "json/field_names.json"), folder)
 
         zip_path <- file.path(folder, "json.zip")
         files_to_zip <- dir(folder, full.names = TRUE)

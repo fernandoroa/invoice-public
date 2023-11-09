@@ -14,7 +14,7 @@ ui <- function(id) {
   uiOutput(ns("currency_date"))
 }
 
-server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac) {
+server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$currency_date <- renderUI({
@@ -79,13 +79,13 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac) {
       },
       content = function(file) {
         file_name <- "final_currency_inv_date.json"
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
+        folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
+        dir.create(folder, recursive = TRUE)
 
         plain_json_save(
           input,
           plain_list = rv_jsons[[sublist]],
-          folders = c(folder, "app/json"),
+          folders = c(folder, file.path(temp_folder_session(), "json")),
           file_name
         )
 

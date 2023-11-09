@@ -38,7 +38,7 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$non_working_days_box <- renderUI({
@@ -309,14 +309,14 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate) {
       },
       content = function(file) {
         file_name <- "salary.json"
-        folder <- paste0(gsub("file", "folder_", tempfile()))
-        dir.create(folder)
+        folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
+        dir.create(folder, recursive = TRUE)
 
         nested_json_save(
           input,
           nested_list = rv_jsons[[sublist]],
           prefix = "",
-          folders = c(folder, "app/json"),
+          folders = c(folder, file.path(temp_folder_session(), "json")),
           file_name
         )
 
