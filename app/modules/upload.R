@@ -53,6 +53,7 @@ server <- function(id, other_input_upload, file_type) {
       },
       ignoreInit = TRUE
     )
+    outputOptions(output, "upload_ui", suspendWhenHidden = FALSE)
     return(reactive(file_reac()))
   })
 }

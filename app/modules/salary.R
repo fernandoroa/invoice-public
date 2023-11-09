@@ -438,6 +438,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     outputOptions(output, "salary_period_panel", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_box", suspendWhenHidden = FALSE)
     outputOptions(output, "modified_days_box", suspendWhenHidden = FALSE)
+    outputOptions(output, "save_salary_box", suspendWhenHidden = FALSE)
 
     return(reactive(input$maincurrency))
   })
