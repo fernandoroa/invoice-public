@@ -97,7 +97,7 @@ server <- function(id, file_reac, temp_folder_session) {
           file.copy(input_file$datapath, file.path(temp_folder_session(), input_file$name), overwrite = TRUE)
           rmd_ready_reac(!rmd_ready_reac())
         } else {
-          showNotification("Forbidden strings found, nothing done")
+          showNotification("Forbidden strings found, nothing done", type = "error", duration = 15)
         }
         unlink(input_file$datapath, recursive = TRUE, force = TRUE)
       },
