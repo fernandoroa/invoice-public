@@ -19,7 +19,6 @@ server <- function(id, file_type = ".Rmd") {
       title <- tagList(
         h4(paste("Upload", file_type))
       )
-      multiple <- FALSE
 
       wellPanel(
         div(
@@ -27,7 +26,7 @@ server <- function(id, file_type = ".Rmd") {
           title,
           fileInput(ns("file_input_id"),
             "",
-            multiple = multiple,
+            multiple = FALSE,
             accept = c(
               file_type
             )

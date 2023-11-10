@@ -17,3 +17,18 @@ validate_json_files <- function(folder) {
 
   return(all_true)
 }
+
+check_rmd <- function(file) {
+  lines <- try(readLines(file), silent = TRUE)
+  if (inherits(lines, "try-error")) {
+    return(FALSE)
+  } else {
+    delete_pattern <- "\\bunlink\\b|\\bfile.remove\\b"
+    command_pattern <- "\\binstall.packages\\b|\\bsystem2\\b|\\bsprintf\\b"
+    state <- !any(grepl(paste(delete_pattern, command_pattern, sep = "|"), lines))
+  }
+  if (state) {
+    return(grepl("---", lines[1]))
+  }
+  state
+}

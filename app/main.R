@@ -15,7 +15,7 @@ box::use(
   logic / save_files[...],
   utils / constants[...],
   utils / create_files[...],
-  utils / validate_json[...],
+  utils / validate[...],
   modules / upload,
   modules / currency_date,
   modules / business,
@@ -342,6 +342,7 @@ server <- function(id) { # nolint
           exdir = json_folder_pre_path,
           junkpaths = TRUE
         )
+
         all_valid <- validate_json_files(json_folder_pre_path)
         if (all_valid) {
           json_files_path <- list.files(json_folder_pre_path, full.names = TRUE)
@@ -365,6 +366,7 @@ server <- function(id) { # nolint
       {
         req(json_upload_var())
         input_file <- json_upload_var()
+
         json_folder_pre_path <- path_dir(input_file$datapath) |> unique()
 
         all_valid <- validate_json_files(json_folder_pre_path)
@@ -379,6 +381,7 @@ server <- function(id) { # nolint
         } else {
           showNotification("One or more invalid .json files, nothing done")
         }
+
         unlink(json_folder_pre_path, recursive = TRUE, force = TRUE)
       },
       ignoreInit = TRUE
