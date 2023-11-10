@@ -1,7 +1,6 @@
 create_files <- function() {
   temp_folder_session <- paste0(gsub("file", "folder_", tempfile()))
-  dir.create(temp_folder_session)
-  dir.create(file.path(temp_folder_session, "json"))
+  dir.create(file.path(temp_folder_session, "json"), recursive = TRUE)
 
   file.copy("app/invoice.Rmd", file.path(temp_folder_session, "invoice.Rmd"))
   json_files <- file.path("app", "json", list.files("app/json"))

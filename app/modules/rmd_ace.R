@@ -5,6 +5,7 @@ box::use(
 
 box::use(
   .. / logic / save_files[...],
+  .. / utils / validate[...],
   .. / modules / upload_rmd
 )
 ui <- function(id) {
@@ -77,7 +78,10 @@ server <- function(id, file_reac, temp_folder_session) {
 
         folders <- c(folder, temp_folder_session())
 
-        ace_save(input, "ace", folders, file_name, useNS = FALSE)
+        is_valid <- ace_save(input, "ace", folders, file_name, useNS = FALSE)
+        if (!is_valid) {
+          folder <- file.path(temp_folder_session())
+        }
 
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
@@ -88,10 +92,14 @@ server <- function(id, file_reac, temp_folder_session) {
       {
         req(rmd_upload_var())
         input_file <- rmd_upload_var()
-        lapply(seq_along(input_file$name), function(x) {
-          file.copy(input_file$datapath[x], file.path(temp_folder_session(), input_file$name[x]), overwrite = TRUE)
-        })
-        rmd_ready_reac(!rmd_ready_reac())
+        is_valid <- check_rmd(input_file$datapath)
+        if (is_valid) {
+          file.copy(input_file$datapath, file.path(temp_folder_session(), input_file$name), overwrite = TRUE)
+          rmd_ready_reac(!rmd_ready_reac())
+        } else {
+          showNotification("Forbidden strings found, nothing done")
+        }
+        unlink(input_file$datapath, recursive = TRUE, force = TRUE)
       },
       ignoreInit = TRUE
     )

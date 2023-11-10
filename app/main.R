@@ -6,7 +6,8 @@ box::use(
   lubridate[...],
   purrr[discard, keep],
   utils[zip, unzip],
-  stats[runif]
+  stats[runif],
+  fs[path_dir]
 )
 
 box::use(
@@ -14,6 +15,7 @@ box::use(
   logic / save_files[...],
   utils / constants[...],
   utils / create_files[...],
+  utils / validate[...],
   modules / upload,
   modules / currency_date,
   modules / business,
@@ -331,11 +333,31 @@ server <- function(id) { # nolint
       {
         req(zip_upload_var())
         input_file <- zip_upload_var()
+
+        json_folder_path <- file.path(rv_temp_folder_session(), "json")
+        json_folder_pre_path <- file.path(rv_temp_folder_session(), "pre_json")
+        dir.create(json_folder_pre_path, recursive = TRUE)
+
         unzip(input_file$datapath,
-          exdir = file.path(rv_temp_folder_session(), "json"),
+          exdir = json_folder_pre_path,
           junkpaths = TRUE
         )
-        file_reac(runif(1))
+
+        all_valid <- validate_json_files(json_folder_pre_path)
+        if (all_valid) {
+          json_files_path <- list.files(json_folder_pre_path, full.names = TRUE)
+          json_files_path_base <- list.files(json_folder_pre_path)
+          lapply(seq_along(json_files_path), function(x) {
+            file.copy(json_files_path[x],
+              file.path(rv_temp_folder_session(), "json", json_files_path_base[x]),
+              overwrite = TRUE
+            )
+          })
+          file_reac(runif(1))
+        } else {
+          showNotification("One or more invalid .json files, nothing done")
+        }
+        unlink(json_folder_pre_path, recursive = TRUE, force = TRUE)
       },
       ignoreInit = TRUE
     )
@@ -344,13 +366,23 @@ server <- function(id) { # nolint
       {
         req(json_upload_var())
         input_file <- json_upload_var()
-        lapply(seq_along(input_file$name), function(x) {
-          file.copy(input_file$datapath[x],
-            file.path(rv_temp_folder_session(), "json", input_file$name[x]),
-            overwrite = TRUE
-          )
-        })
-        file_reac(runif(1))
+
+        json_folder_pre_path <- path_dir(input_file$datapath) |> unique()
+
+        all_valid <- validate_json_files(json_folder_pre_path)
+        if (all_valid) {
+          lapply(seq_along(input_file$name), function(x) {
+            file.copy(input_file$datapath[x],
+              file.path(rv_temp_folder_session(), "json", input_file$name[x]),
+              overwrite = TRUE
+            )
+          })
+          file_reac(runif(1))
+        } else {
+          showNotification("One or more invalid .json files, nothing done")
+        }
+
+        unlink(json_folder_pre_path, recursive = TRUE, force = TRUE)
       },
       ignoreInit = TRUE
     )

@@ -1,7 +1,12 @@
 box::use(
   purrr[map, discard, keep],
-  shiny[reactiveValuesToList],
-  magrittr[`%>%`]
+  shiny[showNotification, tagList, p],
+  magrittr[`%>%`],
+  jsonlite[validate],
+  tools[file_ext]
+)
+box::use(
+  .. / utils / validate[...]
 )
 #' @export
 plain_json_save <- function(input, plain_list, folders, file_name, useNS = FALSE, namespace = "") {
@@ -30,11 +35,37 @@ ace_save <- function(input, input_name, folders, file_name, useNS = FALSE, names
   }
 
   content <- input[[paste0(namespace, input_name)]]
+  extension <- file_ext(file_name) |> tolower()
 
-  for (folder in folders) {
-    file_path <- file.path(folder, file_name)
-    write(content, file_path)
+  if (extension == "json") {
+    is_valid <- validate(content)
+  } else if (extension == "rmd") {
+    is_valid <- check_rmd(content)
+    if (!is_valid) {
+      showNotification("invalid content or forbidden strings found in .Rmd",
+        type = "error",
+        duration = 15
+      )
+    }
   }
+
+  if (is_valid) {
+    for (folder in folders) {
+      file_path <- file.path(folder, file_name)
+      write(content, file_path)
+    }
+  } else {
+    showNotification(
+      tagList(
+        p(paste0("invalid ", file_name, ", changes not saved")),
+        p("A previous version of the file was saved/used !!"),
+        p("click on 'Discard unsaved' button (Main tab) or fix problems")
+      ),
+      type = "error",
+      duration = 15
+    )
+  }
+  return(is_valid)
 }
 
 #' @export

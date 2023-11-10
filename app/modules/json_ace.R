@@ -71,7 +71,10 @@ server <- function(id, file_reac, temp_folder_session) {
 
         folders <- c(folder, file.path(temp_folder_session(), "json"))
 
-        ace_save(input, "ace", folders, file_name, useNS = FALSE)
+        is_valid <- ace_save(input, "ace", folders, file_name, useNS = FALSE)
+        if (!is_valid) {
+          folder <- file.path(temp_folder_session(), "json")
+        }
 
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
