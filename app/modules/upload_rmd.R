@@ -43,6 +43,8 @@ server <- function(id, file_type = ".Rmd") {
       },
       ignoreInit = TRUE
     )
+    outputOptions(output, "upload_ui", suspendWhenHidden = FALSE)
+
     return(reactive(file_reac()))
   })
 }
