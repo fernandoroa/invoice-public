@@ -18,8 +18,22 @@ validate_json_files <- function(folder) {
   return(all_true)
 }
 
-check_rmd <- function(file) {
-  lines <- try(readLines(file), silent = TRUE)
+validate_json_file <- function(file) {
+  R_json <- try(read_json(file), silent = TRUE)
+  if (inherits(R_json, "try-error")) {
+    return(FALSE)
+  } else {
+    json <- R_json |> toJSON(pretty = TRUE)
+    return(validate(json))
+  }
+}
+
+check_rmd <- function(file_path_or_file_content) {
+  if (file.exists(file_path_or_file_content)) {
+    lines <- try(readLines(file_path_or_file_content), silent = TRUE)
+  } else {
+    lines <- strsplit(file_path_or_file_content, "\n") |> unlist()
+  }
   if (inherits(lines, "try-error")) {
     return(FALSE)
   } else {
