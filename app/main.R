@@ -355,7 +355,7 @@ server <- function(id) { # nolint
           })
           file_reac(runif(1))
         } else {
-          showNotification("One or more invalid .json files, nothing done")
+          showNotification("One or more invalid .json files, nothing done", type = "error", duration = 15)
         }
         unlink(json_folder_pre_path, recursive = TRUE, force = TRUE)
       },
@@ -379,7 +379,7 @@ server <- function(id) { # nolint
           })
           file_reac(runif(1))
         } else {
-          showNotification("One or more invalid .json files, nothing done")
+          showNotification("One or more invalid .json files, nothing done", type = "error", duration = 15)
         }
 
         unlink(json_folder_pre_path, recursive = TRUE, force = TRUE)
