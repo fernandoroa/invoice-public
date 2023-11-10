@@ -6,7 +6,8 @@ box::use(
   lubridate[...],
   purrr[discard, keep],
   utils[zip, unzip],
-  stats[runif]
+  stats[runif],
+  fs[path_dir]
 )
 
 box::use(
@@ -364,13 +365,21 @@ server <- function(id) { # nolint
       {
         req(json_upload_var())
         input_file <- json_upload_var()
-        lapply(seq_along(input_file$name), function(x) {
-          file.copy(input_file$datapath[x],
-            file.path(rv_temp_folder_session(), "json", input_file$name[x]),
-            overwrite = TRUE
-          )
-        })
-        file_reac(runif(1))
+        json_folder_pre_path <- path_dir(input_file$datapath) |> unique()
+
+        all_valid <- validate_json_files(json_folder_pre_path)
+        if (all_valid) {
+          lapply(seq_along(input_file$name), function(x) {
+            file.copy(input_file$datapath[x],
+              file.path(rv_temp_folder_session(), "json", input_file$name[x]),
+              overwrite = TRUE
+            )
+          })
+          file_reac(runif(1))
+        } else {
+          showNotification("One or more invalid .json files, nothing done")
+        }
+        unlink(json_folder_pre_path, recursive = TRUE, force = TRUE)
       },
       ignoreInit = TRUE
     )
