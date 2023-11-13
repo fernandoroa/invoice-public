@@ -51,7 +51,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
             cellWidths = c("50%", "10%", "30%"),
             lapply(num_nwd, function(x) {
               numericInput(
-                ns(paste0("non_working_days", x)),
+                ns(paste0("non_working_days", "-", x)),
                 "",
                 rv_jsons[[sublist]]$non_working_days[[x]]
               )
@@ -59,7 +59,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
             div(),
             lapply(logic_nwd, function(x) {
               checkboxInput(
-                ns(paste0("non_working_days", x)),
+                ns(paste0("non_working_days", "-", x)),
                 gsub("_", " ", gsub(pattern_a, pattern_b, x)),
                 rv_jsons[[sublist]]$non_working_days[[x]]
               )
@@ -81,21 +81,21 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
             class = "three_column_grid_left_big",
             lapply(char_modified, function(x) {
               textInput(
-                ns(paste0("modified_days", x)),
+                ns(paste0("modified_days", "-", x)),
                 gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
                 rv_jsons[[sublist]]$modified_days[[x]]
               )
             }),
             lapply(num_modified, function(x) {
               numericInput(
-                ns(paste0("modified_days", x)),
+                ns(paste0("modified_days", "-", x)),
                 gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
                 rv_jsons[[sublist]]$modified_days[[x]]
               )
             }),
             lapply(logic_modified, function(x) {
               checkboxInput(
-                ns(paste0("modified_days", x)),
+                ns(paste0("modified_days", "-", x)),
                 gsub("_", " ", gsub(pattern_a, pattern_b, x)),
                 rv_jsons[[sublist]]$modified_days[[x]]
               )
@@ -122,7 +122,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         {
           char_names_currency_list <- lapply(char_names_currency, function(x) {
             textInput(
-              ns(paste0("main", x)),
+              ns(paste0("main", "-", x)),
               div(
                 class = "wrap",
                 sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
@@ -132,7 +132,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           })
           num_names_currency_list <- lapply(num_names_currency, function(x) {
             numericInput(
-              ns(paste0("main", x)),
+              ns(paste0("main", "-", x)),
               div(
                 class = "wrap",
                 gsub("_", " ", x, perl = TRUE)
@@ -142,7 +142,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           })
           char_list <- lapply(char_names_not_currency, function(x) {
             textInput(
-              ns(paste0("main", x)),
+              ns(paste0("main", "-", x)),
               div(
                 class = "wrap",
                 sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
@@ -154,7 +154,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
             div(
               class = "go-bottom",
               numericInput(
-                ns(paste0("main", x)),
+                ns(paste0("main", "-", x)),
                 div(
                   class = "wrap",
                   gsub("_", " ", x, perl = TRUE)
@@ -165,7 +165,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           })
           logic_list <- lapply(logic_names, function(x) {
             checkboxInput(
-              ns(paste0("main", x)),
+              ns(paste0("main", "-", x)),
               div(
                 class = "wrap",
                 gsub("_", " ", gsub(pattern_a, pattern_b, x))
@@ -224,14 +224,14 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           cellWidths = c("30%", "30%", "10%", "20%"),
           lapply(num_period, function(x) {
             numericInput(
-              ns(paste0("period", x)),
+              ns(paste0("period", "-", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_jsons[[sublist]]$period[[x]]
             )
           }),
           lapply(char_period, function(x) {
             textInput(
-              ns(paste0("period", x)),
+              ns(paste0("period", "-", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_jsons[[sublist]]$period[[x]]
             )
@@ -239,7 +239,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           div(),
           lapply(logic_period, function(x) {
             checkboxInput(
-              ns(paste0("period", x)),
+              ns(paste0("period", "-", x)),
               gsub("_", " ", gsub(pattern_a, pattern_b, x)),
               rv_jsons[[sublist]]$period[[x]]
             )
@@ -259,16 +259,16 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
                max-width:150px;
                align-items:center;",
             br(),
-            checkboxInput(ns(paste0("dates", "use")), "Show Dates", rv_jsons[[sublist]]$dates$use),
+            checkboxInput(ns(paste0("dates", "-", "use")), "Show Dates", rv_jsons[[sublist]]$dates$use),
             actionButton(ns("increaseDate"), ""),
             span("1 Month"),
             br(),
             actionButton(ns("decreaseDate"), "")
           ),
           tagList(
-            dateInput(ns(paste0("dates", "start")), "Start Date: ", value = as.Date(rv_jsons[[sublist]]$dates$start)),
-            textInput(ns(paste0("dates", "date_connector")), "date connector", rv_jsons[[sublist]]$dates$date_connector),
-            dateInput(ns(paste0("dates", "end")), "End Date: ", value = as.Date(rv_jsons[[sublist]]$dates$end))
+            dateInput(ns(paste0("dates", "-", "start")), "Start Date: ", value = as.Date(rv_jsons[[sublist]]$dates$start)),
+            textInput(ns(paste0("dates", "-", "date_connector")), "date connector", rv_jsons[[sublist]]$dates$date_connector),
+            dateInput(ns(paste0("dates", "-", "end")), "End Date: ", value = as.Date(rv_jsons[[sublist]]$dates$end))
           )
         ),
         div(
@@ -279,7 +279,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           ),
           div(
             class = "go-center",
-            textInput(ns(paste0("dates", "delivery_month_text")), "", rv_jsons[[sublist]]$dates$delivery_month_text)
+            textInput(ns(paste0("dates", "-", "delivery_month_text")), "", rv_jsons[[sublist]]$dates$delivery_month_text)
           )
         )
       )
@@ -290,8 +290,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       edate <- input$datesend
       smon <- month(sdate)
       emon <- month(edate)
-      updateDateInput(session, "datesstart", value = sdate + mon_span[smon + 1])
-      updateDateInput(session, "datesend", value = edate + mon_span[emon + 2])
+      updateDateInput(session, "dates-start", value = sdate + mon_span[smon + 1])
+      updateDateInput(session, "dates-end", value = edate + mon_span[emon + 2])
     })
 
     observeEvent(input$decreaseDate, {
@@ -299,8 +299,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       edate <- input$datesend
       smon <- month(sdate)
       emon <- month(edate)
-      updateDateInput(session, "datesstart", value = sdate - mon_span[smon])
-      updateDateInput(session, "datesend", value = edate - mon_span[emon + 1])
+      updateDateInput(session, "dates-start", value = sdate - mon_span[smon])
+      updateDateInput(session, "dates-end", value = edate - mon_span[emon + 1])
     })
 
     output$save_download_salary <- downloadHandler(
@@ -329,26 +329,26 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     observeEvent(file_reac(), {
       updateCheckboxInput(
         session,
-        paste0("dates", "use"),
+        paste0("dates", "-", "use"),
         value = rv_jsons[[sublist]]$dates$use
       )
 
       updateDateInput(session,
-        paste0("dates", "start"),
+        paste0("dates", "-", "start"),
         value = as.Date(rv_jsons[[sublist]]$dates$start)
       )
 
       updateTextInput(
-        session, paste0("dates", "date_connector"),
+        session, paste0("dates", "-", "date_connector"),
         value = rv_jsons[[sublist]]$dates$date_connector
       )
 
-      updateDateInput(session, paste0("dates", "end"),
+      updateDateInput(session, paste0("dates", "-", "end"),
         value = as.Date(rv_jsons[[sublist]]$dates$end)
       )
 
       updateTextInput(
-        session, paste0("dates", "delivery_month_text"),
+        session, paste0("dates", "-", "delivery_month_text"),
         value = rv_jsons[[sublist]]$dates$delivery_month_text
       )
       json_salary_list_main <- rv_jsons[[sublist]]$main
@@ -365,35 +365,35 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       lapply(char_names_currency, function(x) {
         updateTextInput(
           session,
-          paste0("main", x),
+          paste0("main", "-", x),
           value = json_salary_list_main[[x]]
         )
       })
       lapply(num_names_currency, function(x) {
         updateNumericInput(
           session,
-          paste0("main", x),
+          paste0("main", "-", x),
           value = json_salary_list_main[[x]]
         )
       })
       lapply(char_names_not_currency, function(x) {
         updateTextInput(
           session,
-          paste0("main", x),
+          paste0("main", "-", x),
           value = json_salary_list_main[[x]]
         )
       })
       lapply(num_names_not_currency, function(x) {
         updateNumericInput(
           session,
-          paste0("main", x),
+          paste0("main", "-", x),
           value = json_salary_list_main[[x]]
         )
       })
       lapply(logic_names, function(x) {
         updateCheckboxInput(
           session,
-          paste0("main", x),
+          paste0("main", "-", x),
           value = json_salary_list_main[[x]]
         )
       })
@@ -405,7 +405,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       lapply(num_period, function(x) {
         updateNumericInput(
           session,
-          paste0("period", x),
+          paste0("period", "-", x),
           value = salary_list_period[[x]]
         )
       })
@@ -413,7 +413,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       lapply(char_period, function(x) {
         updateTextInput(
           session,
-          paste0("period", x),
+          paste0("period", "-", x),
           value = salary_list_period[[x]]
         )
       })
@@ -421,7 +421,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       lapply(logic_period, function(x) {
         updateCheckboxInput(
           session,
-          paste0("period", x),
+          paste0("period", "-", x),
           value = salary_list_period[[x]]
         )
       })
@@ -429,7 +429,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
 
     observeEvent(exchange_rate(), ignoreInit = TRUE, {
       if (is.numeric(exchange_rate())) {
-        updateNumericInput(session, paste0("main", "currency_exchange_to_Final_Currency"), value = exchange_rate())
+        updateNumericInput(session, paste0("main", "-", "currency_exchange_to_Final_Currency"), value = exchange_rate())
       }
     })
 
@@ -440,6 +440,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     outputOptions(output, "modified_days_box", suspendWhenHidden = FALSE)
     outputOptions(output, "save_salary_box", suspendWhenHidden = FALSE)
 
-    return(reactive(input$maincurrency))
+    return(reactive(input$`main-currency`))
   })
 }
