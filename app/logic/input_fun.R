@@ -6,7 +6,7 @@ box::use(
   .. / utils / constants[...]
 )
 
-create_text_input <- function(char_names_currency_this_name, oneliners_list_active, ns, idx) {
+create_text_input <- function(char_names_currency_this_name, field_list, ns, idx) {
   lapply(char_names_currency_this_name, function(x) {
     textInput(
       ns(x),
@@ -18,12 +18,12 @@ create_text_input <- function(char_names_currency_this_name, oneliners_list_acti
       } else {
         ""
       },
-      oneliners_list_active[[x]]
+      field_list[[x]]
     )
   })
 }
 
-create_numeric_input <- function(num_names_currency_this_name, oneliners_list_active, ns, idx) {
+create_numeric_input <- function(num_names_currency_this_name, field_list, ns, idx) {
   lapply(num_names_currency_this_name, function(x) {
     numericInput(
       ns(x),
@@ -35,12 +35,12 @@ create_numeric_input <- function(num_names_currency_this_name, oneliners_list_ac
       } else {
         ""
       },
-      oneliners_list_active[[x]]
+      field_list[[x]]
     )
   })
 }
 
-create_numeric_input_nc <- function(num_names_not_currency_this_name, oneliners_list_active, ns, idx) {
+create_numeric_input_nc <- function(num_names_not_currency_this_name, field_list, ns, idx) {
   lapply(num_names_not_currency_this_name, function(x) {
     numericInput(
       ns(x),
@@ -49,12 +49,12 @@ create_numeric_input_nc <- function(num_names_not_currency_this_name, oneliners_
       } else {
         ""
       },
-      oneliners_list_active[[x]]
+      field_list[[x]]
     )
   })
 }
 
-create_text_input_nc <- function(char_names_not_currency_this_name, oneliners_list_active, ns, idx) {
+create_text_input_nc <- function(char_names_not_currency_this_name, field_list, ns, idx) {
   lapply(char_names_not_currency_this_name, function(x) {
     textInput(
       ns(x),
@@ -63,17 +63,26 @@ create_text_input_nc <- function(char_names_not_currency_this_name, oneliners_li
       } else {
         ""
       },
-      oneliners_list_active[[x]]
+      field_list[[x]]
     )
   })
 }
 
-create_check_box_input <- function(logic_names_oneliners_this_name, oneliners_list_active, ns) {
-  lapply(logic_names_oneliners_this_name, function(x) {
+create_text_input_with_patterns <- function(char_fields, field_list, ns) {
+  lapply(char_fields, function(x) {
+    textInput(ns(x),
+      gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+      value = field_list[[x]]
+    )
+  })
+}
+
+create_check_box_input <- function(logic_fields, field_list, ns) {
+  lapply(logic_fields, function(x) {
     checkboxInput(
       ns(x),
       gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-      oneliners_list_active[[x]]
+      field_list[[x]]
     )
   })
 }

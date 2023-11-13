@@ -6,7 +6,9 @@ box::use(
 
 box::use(
   .. / utils / constants[...],
-  .. / logic / save_files[...]
+  .. / logic / save_files[...],
+  .. / logic / input_fun[...],
+  .. / logic / update_fun[...],
 )
 
 ui <- function(id) {
@@ -46,20 +48,10 @@ server <- function(id, rv_sublist, file_reac, temp_folder_session) {
 
       wellPanel(
         h4(strong("Consultant Account")),
-        lapply(logic_char_consultant_account, function(x) {
-          checkboxInput(
-            ns(x),
-            gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-            consultant_account_list[[x]]
-          )
-        }),
+        create_check_box_input(logic_char_consultant_account, consultant_account_list, ns),
         {
-          char_inputs <- lapply(char_consultant_account, function(x) {
-            textInput(ns(x),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              value = consultant_account_list[[x]]
-            )
-          })
+          char_inputs <- create_text_input_with_patterns(char_consultant_account, consultant_account_list, ns)
+
           char_inputs_len <- length(char_inputs)
           half <- ceiling(char_inputs_len / 2)
           div(
@@ -83,21 +75,9 @@ server <- function(id, rv_sublist, file_reac, temp_folder_session) {
       char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
       logic_char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.logical(x))))
 
-      lapply(logic_char_consultant_account, function(x) {
-        updateCheckboxInput(
-          session,
-          x,
-          value = consultant_account_list[[x]]
-        )
-      })
+      update_checkbox_list(session, logic_char_consultant_account, consultant_account_list)
 
-      lapply(char_consultant_account, function(x) {
-        updateTextInput(
-          session,
-          x,
-          value = consultant_account_list[[x]]
-        )
-      })
+      update_text_input_list(session, char_consultant_account, consultant_account_list)
     })
 
     outputOptions(output, "consultant_account_box", suspendWhenHidden = FALSE)
