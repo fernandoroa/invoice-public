@@ -234,3 +234,11 @@ button[type="button"] {
 a:hover {
   text-decoration: none;
 }
+
+.flex-dates {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: 150px;
+  align-items: center;
+}

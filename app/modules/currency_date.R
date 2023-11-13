@@ -40,11 +40,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
         ),
         splitLayout(
           div(
-            style = "display: flex;
-               flex-direction: column;
-               justify-content: space-between;
-               max-width:150px;
-               align-items:center;",
+            class = "flex-dates",
             br(),
             actionButton(ns("increaseDate_Final"), ""),
             span("1 Month"),
