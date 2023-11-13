@@ -20,6 +20,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
     ns <- session$ns
 
     rv_input_to_remove <- reactiveVal()
+    rv_add_signal <- reactiveVal(TRUE)
 
     output$oneliners_box <- renderUI({
       file_reac()
@@ -33,6 +34,11 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
             single_oneliner$ui(ns(name))
           })
         ),
+        div(
+          class = "add-button-container",
+          br(),
+          actionButton(ns("save_and_add_oneliner"), "Save Changes, then add oneliner row")
+        ),
         br(),
         helpText("Go to Main tab to save all .json files"),
         downloadButton(ns("save_download_oneliners"),
@@ -43,8 +49,26 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
       )
     })
 
+    observeEvent(input$save_and_add_oneliner, ignoreInit = TRUE, {
+      to_remove <- c()
+      for (e in rv_input_to_remove()) {
+        to_remove <- c(to_remove, e())
+      }
+      file_name <- "oneliner_costs.json"
+
+      nested_json_save(
+        input,
+        nested_list = rv_jsons[[sublist]],
+        prefix = "",
+        folders = file.path(temp_folder_session(), "json"),
+        file_name,
+        to_remove = to_remove
+      )
+
+      rv_add_signal(!rv_add_signal())
+    })
+
     observeEvent(file_reac(), {
-      file_reac()
       oneliners_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
 
@@ -109,6 +133,14 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
     })
 
     outputOptions(output, "oneliners_box", suspendWhenHidden = FALSE)
-    return(reactive(rv_input_to_remove()))
+    return(
+      list(
+        to_remove = reactive(rv_input_to_remove()),
+        add_oneliner = reactive({
+          req(input$save_and_add_oneliner)
+          rv_add_signal()
+        })
+      )
+    )
   })
 }

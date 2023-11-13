@@ -79,6 +79,8 @@ server <- function(id, char_names_currency_this_name, num_names_currency_this_na
       )
     })
 
+    outputOptions(output, "item_id", suspendWhenHidden = FALSE)
+
     return(reactive(rv_input_to_remove()))
   })
 }

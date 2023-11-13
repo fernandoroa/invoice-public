@@ -25,7 +25,7 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_remove, temp_folder_session) {
+server <- function(id, rv_json_lists, inputs, oneliner_vars, grouped_to_remove, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$downloadPresets <- downloadHandler(
@@ -39,7 +39,7 @@ server <- function(id, rv_json_lists, inputs, oneliner_to_remove, grouped_to_rem
         save_all(
           inputs,
           c(folder, file.path(temp_folder_session(), "json")),
-          rv_json_lists, oneliner_to_remove(), grouped_to_remove()
+          rv_json_lists, oneliner_vars$to_remove(), grouped_to_remove()
         )
 
         file.copy(file.path(temp_folder_session(), "json/field_names.json"), folder)
