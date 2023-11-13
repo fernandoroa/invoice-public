@@ -23,6 +23,25 @@ create_text_input <- function(char_names_currency_this_name, field_list, ns, idx
   })
 }
 
+create_text_input_with_patterns_container <- function(filtered_sublist, useLabel, ns) {
+  className <- ifelse(useLabel, "", "form-group-container")
+  lapply(seq_along(filtered_sublist), function(x) {
+    div(
+      class = className,
+      textInput(ns(names(filtered_sublist[x])),
+        {
+          if (useLabel) {
+            gsub("_", " ", gsub(pattern_a, pattern_b, names(filtered_sublist[x])))
+          } else {
+            ""
+          }
+        },
+        value = filtered_sublist[[x]]
+      )
+    )
+  })
+}
+
 create_numeric_input <- function(num_names_currency_this_name, field_list, ns, idx) {
   lapply(num_names_currency_this_name, function(x) {
     numericInput(

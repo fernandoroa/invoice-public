@@ -1,5 +1,5 @@
 box::use(
-  shiny[updateCheckboxInput]
+  shiny[updateCheckboxInput, updateTextInput]
 )
 
 update_checkbox_list <- function(session, logic_fields, field_list) {
@@ -18,6 +18,16 @@ update_text_input_list <- function(session, char_fields, field_list) {
       session,
       x,
       value = field_list[[x]]
+    )
+  })
+}
+
+update_text_input_list_by_idx <- function(session, filtered_sublist) {
+  lapply(seq_along(filtered_sublist), function(x) {
+    updateTextInput(
+      session,
+      names(filtered_sublist[x]),
+      value = filtered_sublist[[x]]
     )
   })
 }
