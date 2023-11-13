@@ -79,7 +79,7 @@ nested_json_save <- function(
   nested_list_names <- names(nested_list)
   for (name in nested_list_names) {
     list[[name]] <- lapply(names(nested_list[[name]]), function(x) {
-      input[[paste0(namespace, prefix, name, x)]]
+      input[[paste0(namespace, prefix, name, "-", x)]]
     })
     names(list[[name]]) <- names(nested_list[[name]])
   }
@@ -174,6 +174,11 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
     useNS = TRUE,
     namespace = "salary_ns"
   )
+
+  to_remove <- c()
+  for (e in oneliner_to_remove) {
+    to_remove <- c(to_remove, e())
+  }
   nested_json_save(
     inputs,
     nested_list = rv_json_lists$oneliners_list,
@@ -182,7 +187,7 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
     file_name = "oneliner_costs.json",
     useNS = TRUE,
     namespace = "oneliner_ns",
-    to_remove = oneliner_to_remove
+    to_remove = to_remove
   )
   nested_and_root_save(
     inputs,

@@ -16,6 +16,7 @@ box::use(
   utils / constants[...],
   utils / create_files[...],
   utils / validate[...],
+  utils / continue_sequence[...],
   modules / upload,
   modules / currency_date,
   modules / business,
@@ -287,8 +288,8 @@ server <- function(id) { # nolint
       rv_temp_folder_session
     )
 
-    download_zip$server("download_zip_ns", rv_json_lists, input, oneliner_to_remove, grouped_to_remove, rv_temp_folder_session)
-    generate_pdf$server("report_ns", rv_json_lists, input, oneliner_to_remove, grouped_to_remove, rv_temp_folder_session)
+    download_zip$server("download_zip_ns", rv_json_lists, input, oneliner_vars, grouped_to_remove, rv_temp_folder_session)
+    generate_pdf$server("report_ns", rv_json_lists, input, oneliner_vars, grouped_to_remove, rv_temp_folder_session)
 
     salary_currency <- salary$server(
       "salary_ns", rv_json_lists, "salary_list",
@@ -296,11 +297,18 @@ server <- function(id) { # nolint
       rv_temp_folder_session
     )
 
-    oneliner_to_remove <- oneliner$server(
+    oneliner_vars <- oneliner$server(
       "oneliner_ns", rv_json_lists, "oneliners_list",
       files_ready_reac, currency_date_vars$exchange_oneliners,
       rv_temp_folder_session
     )
+
+    observeEvent(oneliner_vars$add_oneliner(), {
+      rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
+      last_element <- duplicate_last_list_element(rv_json_lists$oneliners_list)
+      rv_json_lists$oneliners_list <- c(rv_json_lists$oneliners_list, last_element)
+      files_ready_reac(!files_ready_reac())
+    })
 
     grouped_to_remove <- grouped_costs$server(
       "grouped_ns", rv_json_lists, "grouped_list",
@@ -316,10 +324,18 @@ server <- function(id) { # nolint
 
     observeEvent(file_reac(),
       {
-        rv_json_lists$final_currency_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "final_currency_inv_date.json"))
-        rv_json_lists$business_to_bill_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "business_to_bill.json"))
-        rv_json_lists$consultant_account_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "consultant_account.json"))
-        rv_json_lists$consultant_business_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "consultant_business.json"))
+        rv_json_lists$final_currency_list <- rjson_fromJSON(
+          file = file.path(rv_temp_folder_session(), "json", "final_currency_inv_date.json")
+        )
+        rv_json_lists$business_to_bill_list <- rjson_fromJSON(
+          file = file.path(rv_temp_folder_session(), "json", "business_to_bill.json")
+        )
+        rv_json_lists$consultant_account_list <- rjson_fromJSON(
+          file = file.path(rv_temp_folder_session(), "json", "consultant_account.json")
+        )
+        rv_json_lists$consultant_business_list <- rjson_fromJSON(
+          file = file.path(rv_temp_folder_session(), "json", "consultant_business.json")
+        )
         rv_json_lists$salary_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "salary.json"))
         rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
         rv_json_lists$grouped_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "grouped_costs.json"))

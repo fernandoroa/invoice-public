@@ -6,3 +6,9 @@ pattern_a <- "([[:lower:]]+)([[:upper:]])([[:alpha:]]+)([[:digit:]]?)"
 
 #' @export
 pattern_b <- "\\1 \\2\\3 \\4"
+
+#' @export
+delete_pattern <- "\\bunlink\\b|\\bfile.remove\\b|\\w*(?<!\\w|\\.)rm"
+
+#' @export
+command_pattern <- "\\binstall.packages\\b|\\bsystem2\\b|\\bprintf\\b"

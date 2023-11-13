@@ -19,3 +19,4 @@ settings.json
 .rscignore
 .Renviron
 .lintr
+tmp_dir/

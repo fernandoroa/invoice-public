@@ -2,6 +2,10 @@ box::use(
   jsonlite[validate, read_json, toJSON]
 )
 
+box::use(
+  .. / utils / constants[...]
+)
+
 validate_json_files <- function(folder) {
   states <- c()
   for (file in list.files(folder, full.names = TRUE)) {
@@ -37,9 +41,7 @@ check_rmd <- function(file_path_or_file_content) {
   if (inherits(lines, "try-error")) {
     return(FALSE)
   } else {
-    delete_pattern <- "\\bunlink\\b|\\bfile.remove\\b"
-    command_pattern <- "\\binstall.packages\\b|\\bsystem2\\b|\\bsprintf\\b"
-    state <- !any(grepl(paste(delete_pattern, command_pattern, sep = "|"), lines))
+    state <- !any(grepl(paste(delete_pattern, command_pattern, sep = "|"), lines, perl = TRUE))
   }
   if (state) {
     return(grepl("---", lines[1]))

@@ -19,12 +19,12 @@ It has a lot of modifications, and now it is for single person use.
 ### Inner logic
 
 - A couple of inputs are passed to the `.Rmd` via `params` in `yaml` header.
-- Other inputs/boxes are held in `.json` files
+- Other inputs/boxes are held in `.json` files upon saving.
 - The `.Rmd` reads the `.json` files directly.
-- If you modify the `.json` outside the app, during app use, there is a reload button to use.
-- Includes oneliners and grouped costs
+- The `reload` button discards unsaved changes.
+- Includes oneliner costs and grouped costs
 - Includes bilingual option
-- Names of 'field' names in `.Rmd` depend on the `fieldNames.json` for bilingual management
+- Names of 'field' names in `.Rmd` depend on the `fieldNames.json` for bilingual management, see the Ace editor tabs
 
 ### Exchange rates
 
@@ -32,7 +32,7 @@ It has a lot of modifications, and now it is for single person use.
 - It is possible to get a exchange rate for a defined date, for those.
 - Package `quantmod` and function `getSymbol` is used for the exchange.
 
-### `use` inputs
+### Selectable inputs
 
 - The table consists of 3 big blocks:
 
@@ -43,6 +43,13 @@ It has a lot of modifications, and now it is for single person use.
 - Not only those parts can be selectively used with checkBoxes but also
   parts of them
 
-### Link
+### Demo Link
 
 https://ferapps.shinyapps.io/open-invoice/
+
+### Disclaimer (shinyapps link)
+
+Shinyapps (demo) uses the same filesystem for every user. This apps uses temporary folders for your data,
+and you can explicitly remove the temporary folder of your session with the `Reset` button.
+As this files allows for uploading an .Rmd file with R code or other content, the app is vulnerable, despite
+measures taken to protect users data.
