@@ -288,8 +288,8 @@ server <- function(id) { # nolint
       rv_temp_folder_session
     )
 
-    download_zip$server("download_zip_ns", rv_json_lists, input, oneliner_vars, grouped_to_remove, rv_temp_folder_session)
-    generate_pdf$server("report_ns", rv_json_lists, input, oneliner_vars, grouped_to_remove, rv_temp_folder_session)
+    download_zip$server("download_zip_ns", rv_json_lists, input, oneliner_vars, grouped_vars, rv_temp_folder_session)
+    generate_pdf$server("report_ns", rv_json_lists, input, oneliner_vars, grouped_vars, rv_temp_folder_session)
 
     salary_currency <- salary$server(
       "salary_ns", rv_json_lists, "salary_list",
@@ -303,6 +303,12 @@ server <- function(id) { # nolint
       rv_temp_folder_session
     )
 
+    grouped_vars <- grouped_costs$server(
+      "grouped_ns", rv_json_lists, "grouped_list",
+      files_ready_reac, currency_date_vars$exchange_grouped,
+      rv_temp_folder_session
+    )
+
     observeEvent(oneliner_vars$add_oneliner(), {
       rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
       last_element <- duplicate_last_list_element(rv_json_lists$oneliners_list)
@@ -310,11 +316,12 @@ server <- function(id) { # nolint
       files_ready_reac(!files_ready_reac())
     })
 
-    grouped_to_remove <- grouped_costs$server(
-      "grouped_ns", rv_json_lists, "grouped_list",
-      files_ready_reac, currency_date_vars$exchange_grouped,
-      rv_temp_folder_session
-    )
+    observeEvent(grouped_vars$add_grouped_element(), {
+      rv_json_lists$grouped_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "grouped_costs.json"))
+      last_element <- duplicate_last_list_element(rv_json_lists$grouped_list)
+      rv_json_lists$grouped_list <- c(rv_json_lists$grouped_list, last_element)
+      files_ready_reac(!files_ready_reac())
+    })
 
     account$server("account_ns", rv_json_lists, files_ready_reac, rv_temp_folder_session)
 

@@ -7,6 +7,8 @@ box::use(
 box::use(
   .. / logic / save_files[...],
   .. / utils / constants[...],
+  .. / logic / input_fun[...],
+  .. / logic / update_fun[...]
 )
 
 
@@ -28,22 +30,8 @@ server <- function(id, rv_jsons, file_reac, useLabel = TRUE, basename, box_title
         {
           filtered_sublist <- rv_jsons[[sublist]] %>%
             discard(names(.) %in% "file_identifier")
-          className <- ifelse(useLabel, "", "form-group-container")
-          lapply(seq_along(filtered_sublist), function(x) {
-            div(
-              class = className,
-              textInput(ns(names(filtered_sublist[x])),
-                {
-                  if (useLabel) {
-                    gsub("_", " ", gsub(pattern_a, pattern_b, names(filtered_sublist[x])))
-                  } else {
-                    ""
-                  }
-                },
-                value = filtered_sublist[[x]]
-              )
-            )
-          })
+
+          create_text_input_with_patterns_container(filtered_sublist, useLabel, ns)
         },
         br(),
         helpText("Go to Main tab to save all .json files"),
@@ -80,13 +68,7 @@ server <- function(id, rv_jsons, file_reac, useLabel = TRUE, basename, box_title
       filtered_sublist <- rv_jsons[[sublist]] %>%
         discard(names(.) %in% "file_identifier")
 
-      lapply(seq_along(filtered_sublist), function(x) {
-        updateTextInput(
-          session,
-          names(filtered_sublist[x]),
-          value = filtered_sublist[[x]]
-        )
-      })
+      update_text_input_list_by_idx(session, filtered_sublist)
     })
     outputOptions(output, output_id, suspendWhenHidden = FALSE)
   })

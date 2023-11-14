@@ -40,11 +40,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
         ),
         splitLayout(
           div(
-            style = "display: flex;
-               flex-direction: column;
-               justify-content: space-between;
-               max-width:150px;
-               align-items:center;",
+            class = "flex-dates",
             br(),
             actionButton(ns("increaseDate_Final"), ""),
             span("1 Month"),
@@ -99,8 +95,8 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       edate <- input$exchangeDate
       cmon <- month(cdate)
       emon <- month(edate)
-      updateDateInput(session, "invoiceDate", value = cdate + mon_span[cmon + 2])
-      updateDateInput(session, "exchangeDate", value = edate + mon_span[emon + 2])
+      updateDateInput(session, "invoiceDate", value = cdate + mon_span[cmon + 1])
+      updateDateInput(session, "exchangeDate", value = edate + mon_span[emon + 1])
     })
 
     observeEvent(input$decreaseDate_Final, {
@@ -108,8 +104,8 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       edate <- input$exchangeDate
       cmon <- month(cdate)
       emon <- month(edate)
-      updateDateInput(session, "invoiceDate", value = cdate - mon_span[cmon + 1])
-      updateDateInput(session, "exchangeDate", value = cdate - mon_span[emon + 1])
+      updateDateInput(session, "invoiceDate", value = cdate - mon_span[cmon])
+      updateDateInput(session, "exchangeDate", value = edate - mon_span[emon])
     })
 
     observeEvent(file_reac(), {

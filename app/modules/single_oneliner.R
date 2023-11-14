@@ -72,7 +72,7 @@ server <- function(id, char_names_currency_this_name, num_names_currency_this_na
       )
     })
 
-    observeEvent(input$remove_oneliner, ignoreInit = TRUE, {
+    observeEvent(input$remove_row, ignoreInit = TRUE, {
       rv_input_to_remove(id)
       removeUI(
         selector = paste0("#", ns(id))
