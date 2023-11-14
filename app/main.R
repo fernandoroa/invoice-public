@@ -300,24 +300,54 @@ server <- function(id) { # nolint
     oneliner_vars <- oneliner$server(
       "oneliner_ns", rv_json_lists, "oneliners_list",
       files_ready_reac, currency_date_vars$exchange_oneliners,
-      rv_temp_folder_session
+      rv_temp_folder_session, input, grouped_vars
     )
 
     grouped_vars <- grouped_costs$server(
       "grouped_ns", rv_json_lists, "grouped_list",
       files_ready_reac, currency_date_vars$exchange_grouped,
-      rv_temp_folder_session
+      rv_temp_folder_session, input, oneliner_vars
     )
 
     observeEvent(oneliner_vars$add_oneliner(), {
+      rv_json_lists$final_currency_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "final_currency_inv_date.json")
+      )
+      rv_json_lists$business_to_bill_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "business_to_bill.json")
+      )
+      rv_json_lists$consultant_account_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "consultant_account.json")
+      )
+      rv_json_lists$consultant_business_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "consultant_business.json")
+      )
+      rv_json_lists$salary_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "salary.json"))
       rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
+      rv_json_lists$grouped_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "grouped_costs.json"))
+
       last_element <- duplicate_last_list_element(rv_json_lists$oneliners_list)
       rv_json_lists$oneliners_list <- c(rv_json_lists$oneliners_list, last_element)
       files_ready_reac(!files_ready_reac())
     })
 
     observeEvent(grouped_vars$add_grouped_element(), {
+      rv_json_lists$final_currency_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "final_currency_inv_date.json")
+      )
+      rv_json_lists$business_to_bill_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "business_to_bill.json")
+      )
+      rv_json_lists$consultant_account_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "consultant_account.json")
+      )
+      rv_json_lists$consultant_business_list <- rjson_fromJSON(
+        file = file.path(rv_temp_folder_session(), "json", "consultant_business.json")
+      )
+      rv_json_lists$salary_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "salary.json"))
+      rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
       rv_json_lists$grouped_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "grouped_costs.json"))
+
       last_element <- duplicate_last_list_element(rv_json_lists$grouped_list)
       rv_json_lists$grouped_list <- c(rv_json_lists$grouped_list, last_element)
       files_ready_reac(!files_ready_reac())

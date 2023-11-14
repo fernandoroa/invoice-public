@@ -16,7 +16,7 @@ ui <- function(id) {
   uiOutput(ns("grouped_box"))
 }
 
-server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_session) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_session, inputs, oneliner_vars) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -134,6 +134,12 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         to_remove <- c(to_remove, e())
       }
       file_name <- "grouped_costs.json"
+
+      save_all(
+        inputs,
+        file.path(temp_folder_session(), "json"),
+        rv_jsons, oneliner_vars$to_remove(), rv_input_to_remove()
+      )
 
       nested_and_root_save(
         input,
