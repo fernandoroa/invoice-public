@@ -5,7 +5,9 @@ box::use(
 
 box::use(
   .. / utils / constants[...],
-  .. / logic / save_files[...]
+  .. / logic / save_files[...],
+  .. / logic / input_fun[...],
+  .. / logic / update_fun[...]
 )
 
 ui <- function(id) {
@@ -41,74 +43,66 @@ ui <- function(id) {
 server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
     output$non_working_days_box <- renderUI({
-      num_nwd <- names(which(sapply(rv_jsons[[sublist]]$non_working_days, function(x) is.numeric(x))))
-      logic_nwd <- names(which(sapply(rv_jsons[[sublist]]$non_working_days, function(x) is.logical(x))))
+      salary_list <- rv_jsons[[sublist]]
+      num_nwd <- names(which(sapply(salary_list$non_working_days, function(x) is.numeric(x))))
+      logic_nwd <- names(which(sapply(salary_list$non_working_days, function(x) is.logical(x))))
+      child_namespace <- "non_working_days"
       tagList(
         wellPanel(
           h4(strong("non-working Days")),
           splitLayout(
             cellWidths = c("50%", "10%", "30%"),
-            lapply(num_nwd, function(x) {
-              numericInput(
-                ns(paste0("non_working_days", "-", x)),
-                "",
-                rv_jsons[[sublist]]$non_working_days[[x]]
-              )
-            }),
+            create_numeric_input(num_nwd, salary_list$non_working_days, ns,
+              idx = 50, useChildNS = TRUE, child_namespace = child_namespace
+            ),
             div(),
-            lapply(logic_nwd, function(x) {
-              checkboxInput(
-                ns(paste0("non_working_days", "-", x)),
-                gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                rv_jsons[[sublist]]$non_working_days[[x]]
-              )
-            })
+            create_check_box_input(logic_nwd, salary_list$non_working_days,
+              ns,
+              useChildNS = TRUE, child_namespace = child_namespace
+            )
           )
         )
       )
     })
 
     output$modified_days_box <- renderUI({
-      char_modified <- names(which(sapply(rv_jsons[[sublist]]$modified_days, function(x) is.character(x))))
-      num_modified <- names(which(sapply(rv_jsons[[sublist]]$modified_days, function(x) is.numeric(x))))
-      logic_modified <- names(which(sapply(rv_jsons[[sublist]]$modified_days, function(x) is.logical(x))))
+      salary_list <- rv_jsons[[sublist]]
 
+      char_modified <- names(which(sapply(salary_list$modified_days, function(x) is.character(x))))
+      num_modified <- names(which(sapply(salary_list$modified_days, function(x) is.numeric(x))))
+      logic_modified <- names(which(sapply(salary_list$modified_days, function(x) is.logical(x))))
+      child_namespace <- "modified_days"
       tagList(
         wellPanel(
           h4(strong("Modified Pay Days")),
           div(
             class = "three_column_grid_left_big",
-            lapply(char_modified, function(x) {
-              textInput(
-                ns(paste0("modified_days", "-", x)),
-                gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
-                rv_jsons[[sublist]]$modified_days[[x]]
-              )
-            }),
-            lapply(num_modified, function(x) {
-              numericInput(
-                ns(paste0("modified_days", "-", x)),
-                gsub("(.*?)([[:upper:]])", "\\1 \\2", x, perl = TRUE),
-                rv_jsons[[sublist]]$modified_days[[x]]
-              )
-            }),
-            lapply(logic_modified, function(x) {
-              checkboxInput(
-                ns(paste0("modified_days", "-", x)),
-                gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-                rv_jsons[[sublist]]$modified_days[[x]]
-              )
-            })
+            create_text_input_nc_simple(
+              char_modified, salary_list$modified_days, ns,
+              useChildNS = TRUE,
+              child_namespace = child_namespace
+            ),
+            create_numeric_input_nc(
+              num_modified, salary_list$modified_days, ns,
+              idx = 50,
+              useChildNS = TRUE, child_namespace = child_namespace
+            ),
+            create_check_box_input(logic_modified, salary_list$modified_days, ns,
+              useChildNS = TRUE, child_namespace = child_namespace
+            )
           )
         )
       )
     })
 
     output$salary_box <- renderUI({
-      char_names <- names(which(sapply(rv_jsons[[sublist]]$main, function(x) is.character(x))))
-      num_names <- names(which(sapply(rv_jsons[[sublist]]$main, function(x) is.numeric(x))))
-      logic_names <- names(which(sapply(rv_jsons[[sublist]]$main, function(x) is.logical(x))))
+      salary_list <- rv_jsons[[sublist]]
+
+      char_names <- names(which(sapply(salary_list$main, function(x) is.character(x))))
+      num_names <- names(which(sapply(salary_list$main, function(x) is.numeric(x))))
+      logic_names <- names(which(sapply(salary_list$main, function(x) is.logical(x))))
 
       char_names_currency <- grep("currency", char_names, value = TRUE)
       num_names_currency <- grep("currency", num_names, value = TRUE)
@@ -116,63 +110,33 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       char_names_not_currency <- grep("currency", char_names, value = TRUE, invert = TRUE)
       num_names_not_currency <- grep("currency", num_names, value = TRUE, invert = TRUE)
 
-
+      child_namespace <- "main"
       wellPanel(
         h4(strong("Salary Details")),
         {
-          char_names_currency_list <- lapply(char_names_currency, function(x) {
-            textInput(
-              ns(paste0("main", "-", x)),
-              div(
-                class = "wrap",
-                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-              ),
-              rv_jsons[[sublist]]$main[[x]]
-            )
-          })
-          num_names_currency_list <- lapply(num_names_currency, function(x) {
-            numericInput(
-              ns(paste0("main", "-", x)),
-              div(
-                class = "wrap",
-                gsub("_", " ", x, perl = TRUE)
-              ),
-              rv_jsons[[sublist]]$main[[x]]
-            )
-          })
-          char_list <- lapply(char_names_not_currency, function(x) {
-            textInput(
-              ns(paste0("main", "-", x)),
-              div(
-                class = "wrap",
-                sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
-              ),
-              rv_jsons[[sublist]]$main[[x]]
-            )
-          })
-          num_list <- lapply(num_names_not_currency, function(x) {
-            div(
-              class = "go-bottom",
-              numericInput(
-                ns(paste0("main", "-", x)),
-                div(
-                  class = "wrap",
-                  gsub("_", " ", x, perl = TRUE)
-                ),
-                rv_jsons[[sublist]]$main[[x]]
-              )
-            )
-          })
-          logic_list <- lapply(logic_names, function(x) {
-            checkboxInput(
-              ns(paste0("main", "-", x)),
-              div(
-                class = "wrap",
-                gsub("_", " ", gsub(pattern_a, pattern_b, x))
-              ),
-              rv_jsons[[sublist]]$main[[x]]
-            )
-          })
+          char_names_currency_list <- create_text_input_wrap(
+            char_names_currency,
+            salary_list$main, ns,
+            useChildNS = TRUE, child_namespace = child_namespace
+          )
+
+          num_names_currency_list <- create_numeric_input_wrap(
+            num_names_currency,
+            salary_list$main, ns,
+            useChildNS = TRUE, child_namespace = child_namespace
+          )
+          char_list <- create_text_input_wrap(
+            char_names_not_currency, salary_list$main, ns,
+            useChildNS = TRUE, child_namespace = child_namespace
+          )
+
+          num_list <- create_numeric_input_nc_child_bottom(
+            num_names_not_currency, salary_list$main, ns,
+            child_namespace = child_namespace
+          )
+
+          logic_list <- create_check_box_input_child(logic_names, salary_list$main, ns, child_namespace)
+
           div(
             div(
               class = "four_column_grid",
@@ -215,40 +179,34 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     })
 
     output$salary_period_panel <- renderUI({
-      char_period <- names(which(sapply(rv_jsons[[sublist]]$period, function(x) is.character(x))))
-      num_period <- names(which(sapply(rv_jsons[[sublist]]$period, function(x) is.numeric(x))))
-      logic_period <- names(which(sapply(rv_jsons[[sublist]]$period, function(x) is.logical(x))))
+      salary_list <- rv_jsons[[sublist]]
+
+      char_period <- names(which(sapply(salary_list$period, function(x) is.character(x))))
+      num_period <- names(which(sapply(salary_list$period, function(x) is.numeric(x))))
+      logic_period <- names(which(sapply(salary_list$period, function(x) is.logical(x))))
+      child_namespace <- "period"
       wellPanel(
         h4(strong("Salary Period(s)")),
         splitLayout(
           cellWidths = c("30%", "30%", "10%", "20%"),
-          lapply(num_period, function(x) {
-            numericInput(
-              ns(paste0("period", "-", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_jsons[[sublist]]$period[[x]]
-            )
-          }),
-          lapply(char_period, function(x) {
-            textInput(
-              ns(paste0("period", "-", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_jsons[[sublist]]$period[[x]]
-            )
-          }),
+          create_numeric_input_child_pattern(
+            num_period, salary_list$period, ns,
+            child_namespace = child_namespace
+          ),
+          create_text_input_with_child_patterns(
+            char_period, salary_list$period, ns, child_namespace
+          ),
           div(),
-          lapply(logic_period, function(x) {
-            checkboxInput(
-              ns(paste0("period", "-", x)),
-              gsub("_", " ", gsub(pattern_a, pattern_b, x)),
-              rv_jsons[[sublist]]$period[[x]]
-            )
-          })
+          create_check_box_input(logic_period, salary_list$period, ns,
+            useChildNS = TRUE, child_namespace = child_namespace
+          )
         )
       )
     })
 
     output$salary_dates_panel <- renderUI({
+      salary_list <- rv_jsons[[sublist]]
+
       wellPanel(
         h4(strong("Salary Dates")),
         splitLayout(
@@ -259,16 +217,16 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
                max-width:150px;
                align-items:center;",
             br(),
-            checkboxInput(ns(paste0("dates", "-", "use")), "Show Dates", rv_jsons[[sublist]]$dates$use),
+            checkboxInput(ns(paste0("dates", "-", "use")), "Show Dates", salary_list$dates$use),
             actionButton(ns("increaseDate"), ""),
             span("1 Month"),
             br(),
             actionButton(ns("decreaseDate"), "")
           ),
           tagList(
-            dateInput(ns(paste0("dates", "-", "start")), "Start Date: ", value = as.Date(rv_jsons[[sublist]]$dates$start)),
-            textInput(ns(paste0("dates", "-", "date_connector")), "date connector", rv_jsons[[sublist]]$dates$date_connector),
-            dateInput(ns(paste0("dates", "-", "end")), "End Date: ", value = as.Date(rv_jsons[[sublist]]$dates$end))
+            dateInput(ns(paste0("dates", "-", "start")), "Start Date: ", value = as.Date(salary_list$dates$start)),
+            textInput(ns(paste0("dates", "-", "date_connector")), "date connector", salary_list$dates$date_connector),
+            dateInput(ns(paste0("dates", "-", "end")), "End Date: ", value = as.Date(salary_list$dates$end))
           )
         ),
         div(
@@ -279,15 +237,15 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           ),
           div(
             class = "go-center",
-            textInput(ns(paste0("dates", "-", "delivery_month_text")), "", rv_jsons[[sublist]]$dates$delivery_month_text)
+            textInput(ns(paste0("dates", "-", "delivery_month_text")), "", salary_list$dates$delivery_month_text)
           )
         )
       )
     })
 
     observeEvent(input$increaseDate, {
-      sdate <- input$datesstart
-      edate <- input$datesend
+      sdate <- input$`dates-start`
+      edate <- input$`dates-end`
       smon <- month(sdate)
       emon <- month(edate)
       updateDateInput(session, "dates-start", value = sdate + mon_span[smon + 1])
@@ -295,8 +253,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     })
 
     observeEvent(input$decreaseDate, {
-      sdate <- input$datesstart
-      edate <- input$datesend
+      sdate <- input$`dates-start`
+      edate <- input$`dates-end`
       smon <- month(sdate)
       emon <- month(edate)
       updateDateInput(session, "dates-start", value = sdate - mon_span[smon])
@@ -311,10 +269,11 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         file_name <- "salary.json"
         folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
         dir.create(folder, recursive = TRUE)
+        salary_list <- rv_jsons[[sublist]]
 
         nested_json_save(
           input,
-          nested_list = rv_jsons[[sublist]],
+          nested_list = salary_list,
           prefix = "",
           folders = c(folder, file.path(temp_folder_session(), "json")),
           file_name
@@ -327,31 +286,33 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     )
 
     observeEvent(file_reac(), {
+      salary_list <- rv_jsons[[sublist]]
+
       updateCheckboxInput(
         session,
         paste0("dates", "-", "use"),
-        value = rv_jsons[[sublist]]$dates$use
+        value = salary_list$dates$use
       )
 
       updateDateInput(session,
         paste0("dates", "-", "start"),
-        value = as.Date(rv_jsons[[sublist]]$dates$start)
+        value = as.Date(salary_list$dates$start)
       )
 
       updateTextInput(
         session, paste0("dates", "-", "date_connector"),
-        value = rv_jsons[[sublist]]$dates$date_connector
+        value = salary_list$dates$date_connector
       )
 
       updateDateInput(session, paste0("dates", "-", "end"),
-        value = as.Date(rv_jsons[[sublist]]$dates$end)
+        value = as.Date(salary_list$dates$end)
       )
 
       updateTextInput(
         session, paste0("dates", "-", "delivery_month_text"),
-        value = rv_jsons[[sublist]]$dates$delivery_month_text
+        value = salary_list$dates$delivery_month_text
       )
-      json_salary_list_main <- rv_jsons[[sublist]]$main
+      json_salary_list_main <- salary_list$main
       char_names <- names(which(sapply(json_salary_list_main, function(x) is.character(x))))
       num_names <- names(which(sapply(json_salary_list_main, function(x) is.numeric(x))))
       logic_names <- names(which(sapply(json_salary_list_main, function(x) is.logical(x))))
@@ -361,70 +322,58 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
 
       char_names_not_currency <- grep("currency", char_names, value = TRUE, invert = TRUE)
       num_names_not_currency <- grep("currency", num_names, value = TRUE, invert = TRUE)
+      child_namespace <- "main"
 
-      lapply(char_names_currency, function(x) {
-        updateTextInput(
-          session,
-          paste0("main", "-", x),
-          value = json_salary_list_main[[x]]
-        )
-      })
-      lapply(num_names_currency, function(x) {
-        updateNumericInput(
-          session,
-          paste0("main", "-", x),
-          value = json_salary_list_main[[x]]
-        )
-      })
-      lapply(char_names_not_currency, function(x) {
-        updateTextInput(
-          session,
-          paste0("main", "-", x),
-          value = json_salary_list_main[[x]]
-        )
-      })
-      lapply(num_names_not_currency, function(x) {
-        updateNumericInput(
-          session,
-          paste0("main", "-", x),
-          value = json_salary_list_main[[x]]
-        )
-      })
-      lapply(logic_names, function(x) {
-        updateCheckboxInput(
-          session,
-          paste0("main", "-", x),
-          value = json_salary_list_main[[x]]
-        )
-      })
-      salary_list_period <- rv_jsons[[sublist]]$period
+      update_text_input_list(
+        session, char_names_currency, json_salary_list_main,
+        useChildNS = TRUE, child_namespace
+      )
+
+      update_numeric_input_list(session,
+        num_names_currency, json_salary_list_main,
+        useChildNS = TRUE,
+        child_namespace
+      )
+
+      update_text_input_list(
+        session, char_names_not_currency, json_salary_list_main,
+        useChildNS = TRUE, child_namespace
+      )
+
+      update_numeric_input_list(session,
+        num_names_not_currency, json_salary_list_main,
+        useChildNS = TRUE,
+        child_namespace
+      )
+
+      update_checkbox_list(
+        session, logic_names, json_salary_list_main,
+        useChildNS = TRUE,
+        child_namespace
+      )
+
+      salary_list_period <- salary_list$period
       char_period <- names(which(sapply(salary_list_period, function(x) is.character(x))))
       num_period <- names(which(sapply(salary_list_period, function(x) is.numeric(x))))
       logic_period <- names(which(sapply(salary_list_period, function(x) is.logical(x))))
+      child_namespace <- "period"
 
-      lapply(num_period, function(x) {
-        updateNumericInput(
-          session,
-          paste0("period", "-", x),
-          value = salary_list_period[[x]]
-        )
-      })
+      update_numeric_input_list(session,
+        num_period, salary_list_period,
+        useChildNS = TRUE,
+        child_namespace
+      )
 
-      lapply(char_period, function(x) {
-        updateTextInput(
-          session,
-          paste0("period", "-", x),
-          value = salary_list_period[[x]]
-        )
-      })
+      update_text_input_list(
+        session, char_period, salary_list_period,
+        useChildNS = TRUE, child_namespace
+      )
 
-      lapply(logic_period, function(x) {
-        updateCheckboxInput(
-          session,
-          paste0("period", "-", x),
-          value = salary_list_period[[x]]
-        )
-      })
+      update_checkbox_list(
+        session, logic_period, salary_list_period,
+        useChildNS = TRUE,
+        child_namespace
+      )
     })
 
     observeEvent(exchange_rate(), ignoreInit = TRUE, {

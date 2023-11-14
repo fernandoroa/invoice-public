@@ -76,6 +76,7 @@ nested_json_save <- function(
   if (useNS) {
     namespace <- paste0(namespace, "-")
   }
+
   nested_list_names <- names(nested_list)
   for (name in nested_list_names) {
     list[[name]] <- lapply(names(nested_list[[name]]), function(x) {
