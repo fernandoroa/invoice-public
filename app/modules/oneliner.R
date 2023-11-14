@@ -15,7 +15,7 @@ ui <- function(id) {
   uiOutput(ns("oneliners_box"))
 }
 
-server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder_session) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder_session, inputs, grouped_vars) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -82,6 +82,12 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
         to_remove <- c(to_remove, e())
       }
       file_name <- "oneliner_costs.json"
+
+      save_all(
+        inputs,
+        file.path(temp_folder_session(), "json"),
+        rv_jsons, rv_input_to_remove(), grouped_vars$to_remove()
+      )
 
       nested_json_save(
         input,
