@@ -47,9 +47,9 @@ It has a lot of modifications, and now it is for single person use.
 
 https://ferapps.shinyapps.io/open-invoice/
 
-### Disclaimer (shinyapps link)
+### Disclaimer (shinyapps.io demo link)
 
-Shinyapps (demo) uses the same filesystem for every user. This apps uses temporary folders for your data,
+Shinyapps.io (demo) uses the same filesystem for every user. This app uses temporary folders for your data,
 and you can explicitly remove the temporary folder of your session with the `Reset` button.
-As this files allows for uploading an .Rmd file with R code or other content, the app is vulnerable, despite
+As this app allows for uploading an .Rmd file with R code or other content, the shinyapps.io app is vulnerable, despite
 measures taken to protect users data.
