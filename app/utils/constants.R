@@ -12,3 +12,9 @@ delete_pattern <- "\\bunlink\\b|\\bfile.remove\\b|\\w*(?<!\\w|\\.)rm"
 
 #' @export
 command_pattern <- "\\binstall.packages\\b|\\bsystem2\\b|\\bprintf\\b"
+
+#' @export
+root_names <- c(
+  "currency_exchange_to_Final_Currency", "use",
+  "GeneralName", "currency"
+)

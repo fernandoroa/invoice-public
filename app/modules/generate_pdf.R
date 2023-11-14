@@ -19,7 +19,7 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_json_lists, inputs, oneliner_vars, grouped_to_remove, temp_folder_session) {
+server <- function(id, rv_json_lists, inputs, oneliner_vars, grouped_vars, temp_folder_session) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -31,7 +31,7 @@ server <- function(id, rv_json_lists, inputs, oneliner_vars, grouped_to_remove, 
         save_all(
           inputs,
           file.path(temp_folder_session(), "json"),
-          rv_json_lists, oneliner_vars$to_remove(), grouped_to_remove()
+          rv_json_lists, oneliner_vars$to_remove(), grouped_vars$to_remove()
         )
         ace_save(inputs, "ace", folders = temp_folder_session(), file_name = "invoice.Rmd", useNS = TRUE, namespace = "rmd_ace_ns")
 

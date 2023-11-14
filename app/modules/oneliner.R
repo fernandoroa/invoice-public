@@ -49,25 +49,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
       )
     })
 
-    observeEvent(input$save_and_add_oneliner, ignoreInit = TRUE, {
-      to_remove <- c()
-      for (e in rv_input_to_remove()) {
-        to_remove <- c(to_remove, e())
-      }
-      file_name <- "oneliner_costs.json"
-
-      nested_json_save(
-        input,
-        nested_list = rv_jsons[[sublist]],
-        prefix = "",
-        folders = file.path(temp_folder_session(), "json"),
-        file_name,
-        to_remove = to_remove
-      )
-
-      rv_add_signal(!rv_add_signal())
-    })
-
     observeEvent(file_reac(), {
       oneliners_list <- rv_jsons[[sublist]] %>% discard(names(.) %in% "file_identifier")
       oneliners_list_names <- names(oneliners_list)
@@ -95,6 +76,25 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
       rv_input_to_remove(to_remove)
     })
 
+    observeEvent(input$save_and_add_oneliner, ignoreInit = TRUE, {
+      to_remove <- c()
+      for (e in rv_input_to_remove()) {
+        to_remove <- c(to_remove, e())
+      }
+      file_name <- "oneliner_costs.json"
+
+      nested_json_save(
+        input,
+        nested_list = rv_jsons[[sublist]],
+        prefix = "",
+        folders = file.path(temp_folder_session(), "json"),
+        file_name,
+        to_remove = to_remove
+      )
+
+      rv_add_signal(!rv_add_signal())
+    })
+
     output$save_download_oneliners <- downloadHandler(
       filename = function() {
         "oneliner_costs.json"
@@ -108,6 +108,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
         for (e in rv_input_to_remove()) {
           to_remove <- c(to_remove, e())
         }
+
         nested_json_save(input,
           nested_list = rv_jsons[[sublist]],
           prefix = "",
@@ -133,6 +134,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
     })
 
     outputOptions(output, "oneliners_box", suspendWhenHidden = FALSE)
+
     return(
       list(
         to_remove = reactive(rv_input_to_remove()),

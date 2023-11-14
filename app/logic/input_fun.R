@@ -6,8 +6,8 @@ box::use(
   .. / utils / constants[...]
 )
 
-create_text_input <- function(char_names_currency_this_name, field_list, ns, idx) {
-  lapply(char_names_currency_this_name, function(x) {
+create_text_input <- function(char_field_names, field_list, ns, idx) {
+  lapply(char_field_names, function(x) {
     textInput(
       ns(x),
       if (idx == 1) {
@@ -18,6 +18,19 @@ create_text_input <- function(char_names_currency_this_name, field_list, ns, idx
       } else {
         ""
       },
+      field_list[[x]]
+    )
+  })
+}
+
+create_text_input_wrap <- function(char_field_names, field_list, ns) {
+  lapply(char_field_names, function(x) {
+    textInput(
+      ns(x),
+      div(
+        class = "wrap",
+        sub("_", " ", sub("(.*)_([[:alpha:]])(.*)", "\\1 \\U\\2\\L\\3", x, perl = TRUE))
+      ),
       field_list[[x]]
     )
   })
@@ -59,6 +72,19 @@ create_numeric_input <- function(num_names_currency_this_name, field_list, ns, i
   })
 }
 
+create_numeric_input_wrap <- function(num_field_names, field_list, ns) {
+  lapply(num_field_names, function(x) {
+    numericInput(
+      ns(x),
+      div(
+        class = "wrap",
+        gsub("_", " ", x, perl = TRUE)
+      ),
+      field_list[[x]]
+    )
+  })
+}
+
 create_numeric_input_nc <- function(num_names_not_currency_this_name, field_list, ns, idx) {
   lapply(num_names_not_currency_this_name, function(x) {
     numericInput(
@@ -87,6 +113,16 @@ create_text_input_nc <- function(char_names_not_currency_this_name, field_list, 
   })
 }
 
+create_text_input_nc_simple <- function(char_field_names, field_list, ns) {
+  lapply(char_field_names, function(x) {
+    textInput(
+      ns(x),
+      gsub("_", " ", gsub("(.*)([[:upper:]])", "\\1 \\2", x)),
+      field_list[[x]]
+    )
+  })
+}
+
 create_text_input_with_patterns <- function(char_fields, field_list, ns) {
   lapply(char_fields, function(x) {
     textInput(ns(x),
@@ -109,6 +145,6 @@ create_check_box_input <- function(logic_fields, field_list, ns) {
 create_drop_button <- function(ns) {
   div(
     class = "go-bottom",
-    actionButton(ns("remove_oneliner"), "Drop")
+    actionButton(ns("remove_row"), "Drop")
   )
 }

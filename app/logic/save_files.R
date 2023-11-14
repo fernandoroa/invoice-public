@@ -99,6 +99,7 @@ nested_and_root_save <- function(
     namespace = "",
     to_remove) {
   list <- list()
+
   if (useNS) {
     namespace <- paste0(namespace, "-")
   }
@@ -106,9 +107,11 @@ nested_and_root_save <- function(
   nested_list_root <- nested_list |>
     map(~ is.list(.)) |>
     discard(~.x)
+
   nested_list_sublists <- nested_list |>
     map(~ is.list(.)) |>
     keep(~.x)
+
   nested_list_names_root <- names(nested_list_root)
   nested_list_names_sublists <- names(nested_list_sublists)
 
@@ -119,7 +122,7 @@ nested_and_root_save <- function(
 
   for (sublist_name in nested_list_names_sublists) {
     list[[sublist_name]] <- lapply(names(nested_list[[sublist_name]]), function(x) {
-      input[[paste0(namespace, prefix, sublist_name, x)]]
+      input[[paste0(namespace, prefix, sublist_name, "-", x)]]
     })
     names(list[[sublist_name]]) <- names(nested_list[[sublist_name]])
   }
@@ -189,6 +192,12 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
     namespace = "oneliner_ns",
     to_remove = to_remove
   )
+
+  to_remove_g <- c()
+  for (e in grouped_to_remove) {
+    to_remove_g <- c(to_remove_g, e())
+  }
+
   nested_and_root_save(
     inputs,
     nested_list = rv_json_lists$grouped_list,
@@ -197,7 +206,7 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
     file_name = "grouped_costs.json",
     useNS = TRUE,
     namespace = "grouped_ns",
-    to_remove = grouped_to_remove
+    to_remove = to_remove_g
   )
   ace_save(
     inputs, "ace", folders,
