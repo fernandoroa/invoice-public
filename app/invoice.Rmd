@@ -85,9 +85,10 @@ inv_y <- year(final_currency_list$invoiceDate)
 #   currencies VARIABLES
 #
 
-final_currency <- final_currency_list$final_currency
-salary_currency <- salary_list$main$currency
-salary_currency_text <- salary_currency
+final_currency <- toupper(final_currency_list$final_currency)
+salary_currency <- toupper(salary_list$main$currency)
+salary_currency_text <- toupper(salary_currency)
+grouped_currency <- toupper(grouped_list$currency)
 
 #
 #   SALARY LOGIC
@@ -192,11 +193,10 @@ if (length(oneliners_filtered_list) > 0) {
 #   GROUPED COSTS LOGIC
 #
 
-grouped_currency <- grouped_list$currency
-grouped_currency_text <- grouped_currency
-
 # currency exchanges comparisons
 final_to_grouped_exchange_condition <- final_currency == grouped_currency
+
+grouped_currency_text <- grouped_currency
 
 if (final_to_grouped_exchange_condition) {
   grouped_currency_text <- ""
