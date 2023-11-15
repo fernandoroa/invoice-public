@@ -61,7 +61,7 @@ try_exchange_rates <- function(date, final_currency, currency_to_convert, tries 
 #' @export
 try_exchange_rates_direct_and_indirect <- function(date, final_currency, currency_to_convert, tries = 8) {
   date <- date_orig <- as.character(date)
-
+  adjusted_value <- "symbol or exchange not found"
   i <- 0
   while (i < tries) {
     exchange_df <- try(get_exchange_rates(
