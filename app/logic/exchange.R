@@ -57,3 +57,57 @@ try_exchange_rates <- function(date, final_currency, currency_to_convert, tries 
   }
   return(exchange_df)
 }
+
+#' @export
+try_exchange_rates_direct_and_indirect <- function(date, final_currency, currency_to_convert, tries = 8) {
+  date <- date_orig <- as.character(date)
+
+  i <- 0
+  while (i < tries) {
+    exchange_df <- try(get_exchange_rates(
+      toupper(final_currency),
+      toupper(currency_to_convert), date
+    ), silent = TRUE)
+    date <- as.character(as.Date(date) - 1)
+    i <- i + 1
+    if (!inherits(exchange_df, "try-error")) break
+  }
+
+  if (inherits(exchange_df, "data.frame")) {
+    adjusted_value <- exchange_df$Adjusted_Sy
+  }
+
+  i <- 0
+  date <- date_orig
+  if (inherits(exchange_df, "try-error") && final_currency != "USD" && currency_to_convert != "USD") {
+    while (i < tries) {
+      exchange_df_final_to_USD <- try(get_exchange_rates(
+        toupper("USD"),
+        toupper(final_currency), date
+      ), silent = TRUE)
+      date <- as.character(as.Date(date) - 1)
+      i <- i + 1
+      if (!inherits(exchange_df_final_to_USD, "try-error")) break
+    }
+
+    i <- 0
+    date <- date_orig
+    if (!inherits(exchange_df_final_to_USD, "try-error") && final_currency != currency_to_convert) {
+      while (i < tries) {
+        exchange_df_start_currency_to_USD <- try(get_exchange_rates(
+          toupper("USD"),
+          toupper(currency_to_convert), date
+        ), silent = TRUE)
+        date <- as.character(as.Date(date) - 1)
+        i <- i + 1
+        if (!inherits(exchange_df_start_currency_to_USD, "try-error")) break
+      }
+    }
+
+    if (!inherits(exchange_df_final_to_USD, "try-error") && !inherits(exchange_df_start_currency_to_USD, "try-error")) {
+      adjusted_value <- (1 / exchange_df_final_to_USD$Adjusted_Sy) * exchange_df_start_currency_to_USD$Adjusted_Sy
+    }
+  }
+
+  return(adjusted_value)
+}
