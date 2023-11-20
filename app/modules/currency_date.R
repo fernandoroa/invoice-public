@@ -7,6 +7,7 @@ box::use(
   .. / logic / exchange[...],
   .. / logic / save_files[...],
   .. / utils / constants[...],
+  .. / utils / continue_sequence[...]
 )
 
 ui <- function(id) {
@@ -19,9 +20,31 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
     ns <- session$ns
     output$currency_date <- renderUI({
       wellPanel(
-        h4(strong("Currency and Invoice Date")),
+        h4(strong("Invoice and Final Currency")),
+        splitLayout(
+          div(
+            class = "flex-dates",
+            br(),
+            actionButton(ns("increaseInvoiceNumber"), ""),
+            actionButton(ns("decreaseInvoiceNumber"), "")
+          ),
+          tagList(
+            div(
+              class = "go-center",
+              span(strong("Invoice Number"))
+            ),
+            div(
+              class = "go-center",
+              textInput(
+                ns("invoice_number"), "",
+                rv_jsons[[sublist]]$invoice_number
+              )
+            )
+          )
+        ),
+        br(),
         div(
-          class = "two_column_right_big",
+          class = "two_column_grid",
           textInput(
             ns("final_currency"),
             div(
@@ -31,10 +54,13 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
             rv_jsons[[sublist]]$final_currency
           ),
           div(
-            id = "exchange_container", style = "display:inline-block", title = "Updates exchange values in other tabs",
-            actionButton(
-              ns("get_exchanges"),
-              "Get exchange values"
+            class = "go-bottom",
+            div(
+              id = "exchange_container", style = "display:inline-block", title = "Updates exchange values in other tabs",
+              actionButton(
+                ns("get_exchanges"),
+                "Get exchange values"
+              )
             )
           )
         ),
@@ -61,7 +87,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
         downloadButton(ns("button_id"),
           class = "button",
           strong(
-            "Save and Download", code("final_currency_inv_date.json")
+            "Save and Download", code("invoice_and_final_currency.json")
           ),
           style = "white-space: normal;
                    word-wrap: break-word;"
@@ -71,10 +97,10 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
 
     output$button_id <- downloadHandler(
       filename = function() {
-        "final_currency_inv_date.json"
+        "invoice_and_final_currency.json"
       },
       content = function(file) {
-        file_name <- "final_currency_inv_date.json"
+        file_name <- "invoice_and_final_currency.json"
         folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
         dir.create(folder, recursive = TRUE)
 
@@ -99,6 +125,11 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       updateDateInput(session, "exchangeDate", value = edate + mon_span[emon + 1])
     })
 
+    observeEvent(input$increaseInvoiceNumber, {
+      vector <- continue_sequence(input$invoice_number, sep = "-")
+      updateTextInput(session, "invoice_number", value = vector[length(vector)])
+    })
+
     observeEvent(input$decreaseDate_Final, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
@@ -106,6 +137,11 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       emon <- month(edate)
       updateDateInput(session, "invoiceDate", value = cdate - mon_span[cmon])
       updateDateInput(session, "exchangeDate", value = edate - mon_span[emon])
+    })
+
+    observeEvent(input$decreaseInvoiceNumber, {
+      vector <- continue_sequence(input$invoice_number, sep = "-", factor = -1)
+      updateTextInput(session, "invoice_number", value = vector[length(vector)])
     })
 
     observeEvent(file_reac(), {
