@@ -40,7 +40,7 @@ server <- function(id, rv_json_lists, inputs, oneliner_vars, grouped_vars, temp_
         temp_report <- file.path(folder, "inv_md_dont_modify.Rmd")
         file.copy(file.path(temp_folder_session(), "invoice.Rmd"), temp_report, overwrite = TRUE)
         all_params <- reactiveValuesToList(inputs)
-        params <- list(invoiceNumber = all_params$invoiceNumber, lang = all_params$lang, app_path = temp_folder_session())
+        params <- list(lang = all_params$lang, app_path = temp_folder_session())
 
         render(temp_report,
           output_file = file,

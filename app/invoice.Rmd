@@ -4,7 +4,6 @@ geometry: "left=3cm,right=2cm,top=2cm,bottom=2cm"
 fontsize: 11pt
 papersize: a4
 params: 
-  invoiceNumber: ''
   lang: 1
   app_path: 'app'
 header-includes:
@@ -36,7 +35,7 @@ lan_idx <- as.numeric(params$lang)
 
 # main files
 fields_names_list <- rjson_fromJSON(file = file.path(params$app_path, "json/field_names.json"))
-final_currency_list <- rjson_fromJSON(file = file.path(params$app_path, "json/final_currency_inv_date.json"))
+final_currency_list <- rjson_fromJSON(file = file.path(params$app_path, "json/invoice_and_final_currency.json"))
 
 #
 # bank and businesses
@@ -268,20 +267,20 @@ salary_days_pay_final_rounded_formatted <- format(salary_days_pay_final_rounded,
 
 \fancyhf{}
 \renewcommand{\headrulewidth}{0pt}
-\cfoot{\thepage\ of \pageref{LastPage}}
+\cfoot{\thepage\ `r fields_names_list$of[lan_idx]` \pageref{LastPage}}
 
 <!-- pdf part 1: left up: invoice number -->
 
 \vspace{-12truemm}
-\raggedright `r fields_names_list$invoiceNumber[lan_idx]`: `r params$invoiceNumber` \par
+\raggedright `r fields_names_list$invoiceNumber[lan_idx]`: `r final_currency_list$invoice_number` \par
 
 <!-- part 2: right up: consultant business -->
 
 \raggedleft `r fields_names_list$consultantBusiness[lan_idx]`: `r consultant_business_list$name`    
+\raggedleft `r fields_names_list$consultantBusinessId[lan_idx]`: `r consultant_business_list$id`    
 \raggedleft `r consultant_business_list$address1`  
 \raggedleft `r consultant_business_list$address2`   
 \raggedleft `r consultant_business_list$address3`   
-\raggedleft `r consultant_business_list$country`    
 \raggedleft `r fields_names_list$consultantPhone[lan_idx]` :  `r consultant_business_list$phone` 
 
 <!-- part 3: left: bill to business -->

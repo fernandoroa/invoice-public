@@ -1,13 +1,28 @@
-continue_sequence <- function(chr_vector, sep = "_") {
-  end <- sub(paste0(".*_([0-9]+)"), "\\1", grep(paste0("_([0-9]*)$"),
+box::use(
+  shiny[isTruthy]
+)
+
+continue_sequence <- function(chr_vector, sep = "_", factor = 1) {
+  end <- sub(paste0(".*", sep, "([[:alnum:]]+)"), "\\1", grep(paste0(sep, "([[:alnum:]]*)$"),
     chr_vector,
     value = TRUE
   ))
+  next_one <- 1
+  numeric_end <- as.numeric(end)
 
-  next_one <- max(as.numeric(end)) + 1
-  next_one <- ifelse(is.na(next_one), 1, next_one)
+  if (isTruthy(numeric_end)) {
+    next_one <- max(numeric_end, na.rm = TRUE) + 1 * factor
+  } else if (is.character(end)) {
+    pos <- grep(end, letters)
+    if (length(pos)) {
+      next_one <- letters[pos + 1 * factor]
+    } else {
+      pos <- grep(end, LETTERS)
+      next_one <- LETTERS[pos + 1 * factor]
+    }
+  }
 
-  beg <- sub(paste0("(.*)_[0-9]+"), "\\1", grep(paste0("_([0-9]*)$"),
+  beg <- sub(paste0("(.*)", sep, "[[:alnum:]]+"), "\\1", grep(paste0(sep, "([[:alnum:]]*)$"),
     chr_vector,
     value = TRUE
   ))

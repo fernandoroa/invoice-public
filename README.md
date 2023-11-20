@@ -13,8 +13,8 @@ It has a lot of modifications, and now it is for single person use.
 2. The `invoice.Rmd` file is the RMarkdown file, which you can modify to suit your own particular invoice. This file also
    processes data.
 
-3. each `.json` file can be updated in the app. It is mandatory
-   to save them after modifications done in the app, using buttons, before creating the `.pdf`
+3. each `.json` file can be updated in the app. The act of downloading or rendering the `.pdf` saves changes that, otherwise
+   can be discarded by buttons for that purpose.
 
 ### Inner logic
 
@@ -24,7 +24,7 @@ It has a lot of modifications, and now it is for single person use.
 - The `reload` button discards unsaved changes.
 - Includes oneliner costs and grouped costs
 - Includes bilingual option
-- Names of 'field' names in `.Rmd` depend on the `fieldNames.json` for bilingual management, see the Ace editor tabs
+- Names or Titles in the `.pdf` depend on the `fieldNames.json`, which allows the bilingual option, see the Ace editor tabs.
 
 ### Exchange rates
 
@@ -32,7 +32,7 @@ It has a lot of modifications, and now it is for single person use.
 - It is possible to get a exchange rate for a defined date, for those.
 - Package `quantmod` and function `getSymbol` is used for the exchange.
 
-### Selectable inputs
+### inputs' check-boxes
 
 - The table consists of 3 big blocks:
 
@@ -40,7 +40,7 @@ It has a lot of modifications, and now it is for single person use.
   - Oneliners
   - Grouped costs
 
-- Not only those parts can be selectively used with checkBoxes but also
+- Not only those parts can be selectively used with check-boxes but also
   parts of them
 
 ### Demo Link

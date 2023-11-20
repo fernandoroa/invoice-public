@@ -17,6 +17,7 @@ box::use(
   utils / create_files[...],
   utils / validate[...],
   utils / continue_sequence[...],
+  utils / reactive_saver[...],
   modules / upload,
   modules / currency_date,
   modules / business,
@@ -95,19 +96,6 @@ ui <- function(id) {
         fluidRow(
           column(
             3,
-            wellPanel(
-              div(
-                class = "two_column_grid",
-                div(
-                  class = "go-center",
-                  span(strong("Invoice Number"))
-                ),
-                div(
-                  class = "go-center",
-                  textInput(ns("invoiceNumber"), "", paste(format(Sys.time(), "%Y-")))
-                )
-              )
-            ),
             div(
               style = "max-width:600px",
               business$ui(ns("bill_to_ns"), "business_to_bill_box")
@@ -126,7 +114,7 @@ ui <- function(id) {
           ),
           column(
             3,
-            img(src = "static/invoice_header.svg", style = "max-width:25vw")
+            img(src = "static/invoice_header.svg")
           )
         )
       )
@@ -138,7 +126,7 @@ ui <- function(id) {
           salary$ui(ns("salary_ns")),
           column(
             3,
-            img(src = "static/invoice_salary.svg", style = "max-width:25vw")
+            img(src = "static/invoice_salary.svg")
           )
         )
       )
@@ -154,7 +142,7 @@ ui <- function(id) {
           column(1),
           column(
             3,
-            img(src = "static/invoice_oneliners.svg", style = "max-width:25vw")
+            img(src = "static/invoice_oneliners.svg")
           )
         )
       )
@@ -171,7 +159,7 @@ ui <- function(id) {
           column(1),
           column(
             3,
-            img(src = "static/invoice_grouped.svg", style = "max-width:25vw")
+            img(src = "static/invoice_grouped.svg")
           )
         )
       )
@@ -187,7 +175,7 @@ ui <- function(id) {
           column(2),
           column(
             3,
-            img(src = "static/invoice_bank.svg", style = "max-width:25vw")
+            img(src = "static/invoice_bank.svg")
           )
         )
       )
@@ -230,7 +218,7 @@ server <- function(id) { # nolint
     rv_temp_folder_session <- reactiveVal(temp_folder_session)
 
     rv_json_lists <- reactiveValues(
-      final_currency_list = rjson_fromJSON(file = file.path(temp_folder_session, "json", "final_currency_inv_date.json")),
+      final_currency_list = rjson_fromJSON(file = file.path(temp_folder_session, "json", "invoice_and_final_currency.json")),
       salary_list = rjson_fromJSON(file = file.path(temp_folder_session, "json", "salary.json")),
       oneliners_list = rjson_fromJSON(file = file.path(temp_folder_session, "json", "oneliner_costs.json")),
       grouped_list = rjson_fromJSON(file = file.path(temp_folder_session, "json", "grouped_costs.json")),
@@ -310,21 +298,7 @@ server <- function(id) { # nolint
     )
 
     observeEvent(oneliner_vars$add_oneliner(), {
-      rv_json_lists$final_currency_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "final_currency_inv_date.json")
-      )
-      rv_json_lists$business_to_bill_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "business_to_bill.json")
-      )
-      rv_json_lists$consultant_account_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "consultant_account.json")
-      )
-      rv_json_lists$consultant_business_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "consultant_business.json")
-      )
-      rv_json_lists$salary_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "salary.json"))
-      rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
-      rv_json_lists$grouped_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "grouped_costs.json"))
+      rv_json_lists <- reactive_saver(rv_temp_folder_session, rv_json_lists)
 
       last_element <- duplicate_last_list_element(rv_json_lists$oneliners_list)
       rv_json_lists$oneliners_list <- c(rv_json_lists$oneliners_list, last_element)
@@ -332,21 +306,7 @@ server <- function(id) { # nolint
     })
 
     observeEvent(grouped_vars$add_grouped_element(), {
-      rv_json_lists$final_currency_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "final_currency_inv_date.json")
-      )
-      rv_json_lists$business_to_bill_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "business_to_bill.json")
-      )
-      rv_json_lists$consultant_account_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "consultant_account.json")
-      )
-      rv_json_lists$consultant_business_list <- rjson_fromJSON(
-        file = file.path(rv_temp_folder_session(), "json", "consultant_business.json")
-      )
-      rv_json_lists$salary_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "salary.json"))
-      rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
-      rv_json_lists$grouped_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "grouped_costs.json"))
+      rv_json_lists <- reactive_saver(rv_temp_folder_session, rv_json_lists)
 
       last_element <- duplicate_last_list_element(rv_json_lists$grouped_list)
       rv_json_lists$grouped_list <- c(rv_json_lists$grouped_list, last_element)
@@ -361,21 +321,7 @@ server <- function(id) { # nolint
 
     observeEvent(file_reac(),
       {
-        rv_json_lists$final_currency_list <- rjson_fromJSON(
-          file = file.path(rv_temp_folder_session(), "json", "final_currency_inv_date.json")
-        )
-        rv_json_lists$business_to_bill_list <- rjson_fromJSON(
-          file = file.path(rv_temp_folder_session(), "json", "business_to_bill.json")
-        )
-        rv_json_lists$consultant_account_list <- rjson_fromJSON(
-          file = file.path(rv_temp_folder_session(), "json", "consultant_account.json")
-        )
-        rv_json_lists$consultant_business_list <- rjson_fromJSON(
-          file = file.path(rv_temp_folder_session(), "json", "consultant_business.json")
-        )
-        rv_json_lists$salary_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "salary.json"))
-        rv_json_lists$oneliners_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "oneliner_costs.json"))
-        rv_json_lists$grouped_list <- rjson_fromJSON(file = file.path(rv_temp_folder_session(), "json", "grouped_costs.json"))
+        rv_json_lists <- reactive_saver(rv_temp_folder_session, rv_json_lists)
 
         files_ready_reac(!files_ready_reac())
       },

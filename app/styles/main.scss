@@ -185,6 +185,7 @@ button[type="button"] {
   display: grid;
   gap: 15px;
 }
+.well .shiny-split-layout > div > div > #app-currency_date_ns-increaseInvoiceNumber,
 .well .shiny-split-layout > div > div > #app-currency_date_ns-increaseDate_Final,
 .well .shiny-split-layout > div > div > #app-salary_ns-increaseDate {
   width: 0;
@@ -200,6 +201,7 @@ button[type="button"] {
   box-shadow: none;
 }
 
+.well .shiny-split-layout > div > div > #app-currency_date_ns-decreaseInvoiceNumber,
 .well .shiny-split-layout > div > div > #app-currency_date_ns-decreaseDate_Final,
 .well .shiny-split-layout > div > div > #app-salary_ns-decreaseDate {
   width: 0;
@@ -241,4 +243,9 @@ a:hover {
   justify-content: space-between;
   max-width: 150px;
   align-items: center;
+}
+
+.col-sm-3 > img {
+  width: 100%;
+  max-width: 450px;
 }

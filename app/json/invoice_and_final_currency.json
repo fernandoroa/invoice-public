@@ -1,0 +1,17 @@
+{
+  "file_identifier": [
+    "invoice_and_final_currency"
+  ],
+  "invoice_number": [
+    "2022-6"
+  ],
+  "final_currency": [
+    "USD"
+  ],
+  "invoiceDate": [
+    "2022-06-30"
+  ],
+  "exchangeDate": [
+    "2022-06-30"
+  ]
+}

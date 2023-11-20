@@ -165,7 +165,7 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
     inputs,
     plain_list = rv_json_lists$final_currency_list,
     folders = folders,
-    file_name = "final_currency_inv_date.json",
+    file_name = "invoice_and_final_currency.json",
     useNS = TRUE,
     namespace = "currency_date_ns"
   )

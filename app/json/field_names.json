@@ -8,6 +8,10 @@
     "Consultant",
     "ME do consultor"
   ],
+  "consultantBusinessId": [
+    "VAT",
+    "CNPJ"
+  ],
   "consultantPhone": [
     "Contact No.",
     "No. de contato"
@@ -23,6 +27,10 @@
   "amount": [
     "AMOUNT",
     "Valor"
+  ],
+  "of": [
+    "of",
+    "de"
   ],
   "Signature": [
     "Signature",
