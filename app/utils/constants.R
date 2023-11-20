@@ -8,10 +8,10 @@ pattern_a <- "([[:lower:]]+)([[:upper:]])([[:alpha:]]+)([[:digit:]]?)"
 pattern_b <- "\\1 \\2\\3 \\4"
 
 #' @export
-delete_pattern <- "\\bunlink\\b|\\bfile.remove\\b|\\w*(?<!\\w|\\.)rm"
+delete_pattern <- "\\bunlink\\b|\\bfile.remove\\b|\\w*(?<!\\w|\\.)rm|\\w*(?<!\\w|\\.)mv|file\\.(?!p)"
 
 #' @export
-command_pattern <- "\\binstall.packages\\b|\\bsystem2\\b|\\bprintf\\b"
+command_pattern <- "\\binstall.packages\\b|\\bsystem2\\b|\\bprintf\\b|\\bCMD\\b|\\bRscript\\b"
 
 #' @export
 root_names <- c(

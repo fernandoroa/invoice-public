@@ -242,3 +242,8 @@ a:hover {
   max-width: 150px;
   align-items: center;
 }
+
+.col-sm-3 > img {
+  width: 100%;
+  max-width: 450px;
+}

@@ -8,6 +8,10 @@
     "Consultant",
     "ME do consultor"
   ],
+  "consultantBusinessId": [
+    "VAT",
+    "CNPJ"
+  ],
   "consultantPhone": [
     "Contact No.",
     "No. de contato"

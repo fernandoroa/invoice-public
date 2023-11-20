@@ -37,7 +37,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
         div(
           class = "add-button-container",
           br(),
-          actionButton(ns("save_and_add_oneliner"), "Save Changes, then add oneliner row")
+          actionButton(ns("save_and_add_oneliner"), "Save All Changes, then add oneliner row")
         ),
         br(),
         helpText("Go to Main tab to save all .json files"),
@@ -87,15 +87,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
         inputs,
         file.path(temp_folder_session(), "json"),
         rv_jsons, rv_input_to_remove(), grouped_vars$to_remove()
-      )
-
-      nested_json_save(
-        input,
-        nested_list = rv_jsons[[sublist]],
-        prefix = "",
-        folders = file.path(temp_folder_session(), "json"),
-        file_name,
-        to_remove = to_remove
       )
 
       rv_add_signal(!rv_add_signal())

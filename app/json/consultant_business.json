@@ -5,17 +5,17 @@
   "name": [
     "Consultant Name"
   ],
+  "id": [
+    "12345678901"
+  ],
   "address1": [
-    "Street placeholder"
+    "Street"
   ],
   "address2": [
-    "Neighborhood"
+    "City"
   ],
   "address3": [
-    "City and Postal Code"
-  ],
-  "country": [
-    "Country"
+    "Country and Postal Code"
   ],
   "phone": [
     "+00 00 00000 0000"

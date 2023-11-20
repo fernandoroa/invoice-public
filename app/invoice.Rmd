@@ -278,10 +278,10 @@ salary_days_pay_final_rounded_formatted <- format(salary_days_pay_final_rounded,
 <!-- part 2: right up: consultant business -->
 
 \raggedleft `r fields_names_list$consultantBusiness[lan_idx]`: `r consultant_business_list$name`    
+\raggedleft `r fields_names_list$consultantBusinessId[lan_idx]`: `r consultant_business_list$id`    
 \raggedleft `r consultant_business_list$address1`  
 \raggedleft `r consultant_business_list$address2`   
 \raggedleft `r consultant_business_list$address3`   
-\raggedleft `r consultant_business_list$country`    
 \raggedleft `r fields_names_list$consultantPhone[lan_idx]` :  `r consultant_business_list$phone` 
 
 <!-- part 3: left: bill to business -->

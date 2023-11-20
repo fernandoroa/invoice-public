@@ -126,7 +126,7 @@ ui <- function(id) {
           ),
           column(
             3,
-            img(src = "static/invoice_header.svg", style = "max-width:25vw")
+            img(src = "static/invoice_header.svg")
           )
         )
       )
@@ -138,7 +138,7 @@ ui <- function(id) {
           salary$ui(ns("salary_ns")),
           column(
             3,
-            img(src = "static/invoice_salary.svg", style = "max-width:25vw")
+            img(src = "static/invoice_salary.svg")
           )
         )
       )
@@ -154,7 +154,7 @@ ui <- function(id) {
           column(1),
           column(
             3,
-            img(src = "static/invoice_oneliners.svg", style = "max-width:25vw")
+            img(src = "static/invoice_oneliners.svg")
           )
         )
       )
@@ -171,7 +171,7 @@ ui <- function(id) {
           column(1),
           column(
             3,
-            img(src = "static/invoice_grouped.svg", style = "max-width:25vw")
+            img(src = "static/invoice_grouped.svg")
           )
         )
       )
@@ -187,7 +187,7 @@ ui <- function(id) {
           column(2),
           column(
             3,
-            img(src = "static/invoice_bank.svg", style = "max-width:25vw")
+            img(src = "static/invoice_bank.svg")
           )
         )
       )
