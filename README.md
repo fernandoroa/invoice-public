@@ -1,9 +1,8 @@
 # invoice creation with Shiny and RMarkdown
 
 This repository modifies https://github.com/shubham-maurya/shiny-invoice-generator/
-by Fernando Roa
 
-It has a lot of modifications, and now it is for single person use.
+It has lots of modifications, and now it is for single person use.
 
 ### Files
 
