@@ -24,7 +24,7 @@ server <- function(id, file_reac, temp_folder_session) {
             selectionId = "selection",
             mode = "json",
             placeholder = ".json not loaded",
-            value = paste0(readLines(file.path(temp_folder_session(), "json/field_names.json")))
+            value = paste0(readLines(file.path(temp_folder_session(), "json/field_names.json"), warn = FALSE))
           )
         ),
         column(
@@ -54,7 +54,7 @@ server <- function(id, file_reac, temp_folder_session) {
 
     observeEvent(file_reac(), {
       updateAceEditor(session, "ace",
-        value = paste0(readLines(file.path(temp_folder_session(), "json/field_names.json")),
+        value = paste0(readLines(file.path(temp_folder_session(), "json/field_names.json"), warn = FALSE),
           collapse = "\n"
         )
       )
