@@ -172,6 +172,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
 
       if (toupper(input$final_currency) != toupper(salary_currency())) {
         exchange_value <- try_exchange_rates_direct_and_indirect(input$exchangeDate, input$final_currency, salary_currency())
+
         if (inherits(exchange_value, "numeric")) {
           exchange_salary <- signif(exchange_value, 5)
           currency_date_rv$exchange_salary <- exchange_salary

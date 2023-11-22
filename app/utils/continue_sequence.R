@@ -12,7 +12,7 @@ continue_sequence <- function(chr_vector, sep = "_", factor = 1) {
 
   if (isTruthy(numeric_end)) {
     next_one <- max(numeric_end, na.rm = TRUE) + 1 * factor
-  } else if (is.character(end)) {
+  } else if (is.character(end) && length(end)) {
     pos <- grep(end, letters)
     if (length(pos)) {
       next_one <- letters[pos + 1 * factor]
@@ -20,6 +20,8 @@ continue_sequence <- function(chr_vector, sep = "_", factor = 1) {
       pos <- grep(end, LETTERS)
       next_one <- LETTERS[pos + 1 * factor]
     }
+  } else {
+    warning("sep was not found in strings")
   }
 
   beg <- sub(paste0("(.*)", sep, "[[:alnum:]]+"), "\\1", grep(paste0(sep, "([[:alnum:]]*)$"),

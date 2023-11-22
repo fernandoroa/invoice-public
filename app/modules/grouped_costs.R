@@ -178,7 +178,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         updateNumericInput(
           session,
           "currency_exchange_to_Final_Currency",
-          value = exchange_rate()
+          value = exchange_rate() |> as.numeric()
         )
       }
     })

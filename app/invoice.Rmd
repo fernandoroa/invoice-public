@@ -369,7 +369,7 @@ cat( # nolint
         grouped_strings,
         paste0(
           "|\\hspace{2mm}", grouped_df[grouped_idx, "name"], "| |", "|",
-          " ", grouped_df[grouped_idx, "value"], "|", grouped_df[grouped_idx, "currency"], " ", "| |", "\n"
+          " ", grouped_df[grouped_idx, "value_formatted"], "|", grouped_df[grouped_idx, "currency"], " ", "| |", "\n"
         )
       )
     }
