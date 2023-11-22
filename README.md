@@ -53,3 +53,30 @@ Shinyapps.io (demo) uses the same filesystem for every user. This app uses tempo
 and you can explicitly remove the temporary folder of your session with the `Reset` button.
 As this app allows for uploading an .Rmd file with R code or other content, the shinyapps.io app is vulnerable, despite
 measures taken to protect users data.
+
+### Running the app
+
+- Clone this repository and set as working folder in R.
+- In R run:
+  - `rhino::app()` or
+  - `shiny::runApp()`
+
+#### How to run in a local folder
+
+- Clone this repository and set as working folder in R.
+
+```
+# Read the main file
+main <- readLines("app/main.R")
+
+# Change string to use the local mode
+main <- sub("local_safe_computer_mode <- FALSE", "local_safe_computer_mode <- TRUE", main)
+writeLines(main, "app/main.R")
+shiny::runApp()
+```
+
+This way when you save changes or do any download action your files will be (also) in the local folder:
+
+```
+app/tmp_dir/
+```
