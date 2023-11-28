@@ -160,6 +160,11 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
         "invoiceDate",
         value = as.Date(rv_jsons[[sublist]]$invoiceDate)
       )
+      updateTextInput(
+        session,
+        "invoice_number",
+        value = rv_jsons[[sublist]]$invoice_number
+      )
     })
 
     currency_date_rv <- reactiveValues()
