@@ -16,8 +16,8 @@ ui <- function(id) {
     column(
       3,
       uiOutput(ns("salary_dates_panel")),
-      uiOutput(ns("salary_period_panel")),
-      uiOutput(ns("save_salary_box"))
+      uiOutput(ns("salary_single_panel")),
+      uiOutput(ns("salary_period_panel"))
     ),
     column(
       6,
@@ -35,7 +35,8 @@ ui <- function(id) {
           class = "non_working_days",
           uiOutput(ns("non_working_days_box"))
         )
-      )
+      ),
+      uiOutput(ns("save_salary_box"))
     )
   )
 }
@@ -112,7 +113,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
 
       child_namespace <- "main"
       wellPanel(
-        h4(strong("Salary Details")),
+        h4(strong("Details")),
         {
           char_names_currency_list <- create_text_input_wrap(
             char_names_currency,
@@ -164,15 +165,18 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     })
 
     output$save_salary_box <- renderUI({
-      wellPanel(
-        div(
-          helpText("Go to Main tab to save all .json files"),
-          downloadButton(ns("save_download_salary"),
-            strong(
-              "Save and Download", code("salary.json")
-            ),
-            style = "white-space: normal;
+      div(
+        class = "fit-content",
+        wellPanel(
+          div(
+            helpText("Go to Main tab to save all .json files"),
+            downloadButton(ns("save_download_salary"),
+              strong(
+                "Save and Download", code("salary.json")
+              ),
+              style = "white-space: normal;
                            word-wrap: break-word;"
+            )
           )
         )
       )
@@ -186,7 +190,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       logic_period <- names(which(sapply(salary_list$period, function(x) is.logical(x))))
       child_namespace <- "period"
       wellPanel(
-        h4(strong("Salary Period(s)")),
+        h4(strong("Period(s)")),
         splitLayout(
           cellWidths = c("30%", "30%", "10%", "20%"),
           create_numeric_input_child_pattern(
@@ -208,7 +212,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       salary_list <- rv_jsons[[sublist]]
 
       wellPanel(
-        h4(strong("Salary Dates")),
+        h4(strong("Date Range")),
         splitLayout(
           div(
             style = "display: flex;
@@ -217,7 +221,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
                max-width:150px;
                align-items:center;",
             br(),
-            checkboxInput(ns(paste0("dates", "-", "use")), "Show Dates", salary_list$dates$use),
+            checkboxInput(ns(paste0("dates", "-", "use")), "Show", salary_list$dates$use),
             actionButton(ns("increaseDate"), ""),
             span("1 Month"),
             br(),
@@ -228,37 +232,73 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
             textInput(ns(paste0("dates", "-", "date_connector")), "date connector", salary_list$dates$date_connector),
             dateInput(ns(paste0("dates", "-", "end")), "End Date: ", value = as.Date(salary_list$dates$end))
           )
-        ),
-        div(
-          class = "two_column_grid",
+        )
+      )
+    })
+
+    output$salary_single_panel <- renderUI({
+      salary_list <- rv_jsons[[sublist]]
+
+      wellPanel(
+        h4(strong("Single date/month")),
+        splitLayout(
           div(
-            class = "go-center",
-            span(strong("Deliver title"))
+            style = "display: flex;
+               flex-direction: column;
+               justify-content: space-between;
+               max-width:150px;
+               align-items:center;",
+            checkboxInput(ns(paste0("single", "-", "use")), "Show", salary_list$single$use),
+            actionButton(ns("increaseSingleDate"), ""),
+            span("1 Month"),
+            br(),
+            actionButton(ns("decreaseSingleDate"), "")
           ),
-          div(
-            class = "go-center",
-            textInput(ns(paste0("dates", "-", "delivery_month_text")), "", salary_list$dates$delivery_month_text)
+          tagList(
+            checkboxInput(
+              ns(paste0("single", "-", "show_month/year_only")),
+              div(
+                class = "wrap",
+                "Show Month/Year Only"
+              ),
+              salary_list$single$`show_month/year_only`
+            ),
+            dateInput(ns(paste0("single", "-", "date")), "Date: ", value = as.Date(salary_list$single$date)),
+            div(
+              class = "go-center",
+              textInput(ns(paste0("single", "-", "text")), "Title", salary_list$single$text)
+            )
           )
         )
       )
     })
 
-    observeEvent(input$increaseDate, {
-      sdate <- input$`dates-start`
-      edate <- input$`dates-end`
-      smon <- month(sdate)
-      emon <- month(edate)
-      updateDateInput(session, "dates-start", value = sdate + mon_span[smon + 1])
-      updateDateInput(session, "dates-end", value = edate + mon_span[emon + 2])
+    observeEvent(c(input$increaseDate, input$increaseSingleDate), ignoreInit = TRUE, {
+      if (input$increaseDate > 0 || input$increaseSingleDate > 0) {
+        sdate <- input$`dates-start`
+        edate <- input$`dates-end`
+        smon <- month(sdate)
+        emon <- month(edate)
+        updateDateInput(session, "dates-start", value = sdate + mon_span[smon + 1])
+        updateDateInput(session, "dates-end", value = edate + mon_span[emon + 2])
+        single_date <- input$`single-date`
+        single_month <- month(single_date)
+        updateDateInput(session, "single-date", value = single_date + mon_span[single_month + 2])
+      }
     })
 
-    observeEvent(input$decreaseDate, {
-      sdate <- input$`dates-start`
-      edate <- input$`dates-end`
-      smon <- month(sdate)
-      emon <- month(edate)
-      updateDateInput(session, "dates-start", value = sdate - mon_span[smon])
-      updateDateInput(session, "dates-end", value = edate - mon_span[emon + 1])
+    observeEvent(c(input$decreaseDate, input$decreaseSingleDate), ignoreInit = TRUE, {
+      if (input$increaseDate > 0 || input$increaseSingleDate > 0) {
+        sdate <- input$`dates-start`
+        edate <- input$`dates-end`
+        smon <- month(sdate)
+        emon <- month(edate)
+        updateDateInput(session, "dates-start", value = sdate - mon_span[smon])
+        updateDateInput(session, "dates-end", value = edate - mon_span[emon + 1])
+        single_date <- input$`single-date`
+        single_month <- month(single_date)
+        updateDateInput(session, "single-date", value = single_date - mon_span[single_month + 1])
+      }
     })
 
     output$save_download_salary <- downloadHandler(
@@ -285,7 +325,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       contentType = "json"
     )
 
-    observeEvent(file_reac(), {
+    observeEvent(file_reac(), ignoreInit = TRUE, {
       salary_list <- rv_jsons[[sublist]]
 
       updateCheckboxInput(
@@ -309,9 +349,24 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       )
 
       updateTextInput(
-        session, paste0("dates", "-", "delivery_month_text"),
-        value = salary_list$dates$delivery_month_text
+        session, paste0("single", "-", "text"),
+        value = salary_list$single$text
       )
+
+      updateDateInput(session, paste0("single", "-", "date"),
+        value = as.Date(salary_list$single$date)
+      )
+
+      updateCheckboxInput(
+        session, paste0("single", "-", "use"),
+        value = salary_list$single$use
+      )
+
+      updateCheckboxInput(
+        session, paste0("single", "-", "show_month/year_only"),
+        value = salary_list$single$`show_month/year_only`
+      )
+
       json_salary_list_main <- salary_list$main
       char_names <- names(which(sapply(json_salary_list_main, function(x) is.character(x))))
       num_names <- names(which(sapply(json_salary_list_main, function(x) is.numeric(x))))
@@ -374,6 +429,23 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         useChildNS = TRUE,
         child_namespace
       )
+
+      salary_list_non_working_days <- salary_list$non_working_days
+      num_non_working_days <- names(which(sapply(salary_list_non_working_days, function(x) is.numeric(x))))
+      logic_non_working_days <- names(which(sapply(salary_list_non_working_days, function(x) is.logical(x))))
+      child_namespace <- "non_working_days"
+
+      update_numeric_input_list(session,
+        num_non_working_days, salary_list_non_working_days,
+        useChildNS = TRUE,
+        child_namespace
+      )
+
+      update_checkbox_list(
+        session, logic_non_working_days, salary_list_non_working_days,
+        useChildNS = TRUE,
+        child_namespace
+      )
     })
 
     observeEvent(exchange_rate(), ignoreInit = TRUE, {
@@ -386,6 +458,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
 
     outputOptions(output, "non_working_days_box", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_dates_panel", suspendWhenHidden = FALSE)
+    outputOptions(output, "salary_single_panel", suspendWhenHidden = FALSE)
+
     outputOptions(output, "salary_period_panel", suspendWhenHidden = FALSE)
     outputOptions(output, "salary_box", suspendWhenHidden = FALSE)
     outputOptions(output, "modified_days_box", suspendWhenHidden = FALSE)

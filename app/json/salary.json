@@ -1,34 +1,89 @@
 {
-  "file_identifier": ["salary"],
+  "file_identifier": [
+    "salary"
+  ],
   "main": {
-    "currency_exchange_to_Final_Currency": [5.1594],
-    "salary": [4000],
-    "use_salary_and_related": [true],
-    "currency": ["BRL"],
-    "total_days": [21],
-    "section_title": ["Consultancy Charges"],
-    "common_days_text": ["other:"]
+    "currency_exchange_to_Final_Currency": [
+      5.1809
+    ],
+    "salary": [
+      4000
+    ],
+    "use_salary_and_related": [
+      true
+    ],
+    "currency": [
+      "BRL"
+    ],
+    "total_days": [
+      21
+    ],
+    "section_title": [
+      "Consultancy Charges"
+    ],
+    "common_days_text": [
+      "other:"
+    ]
   },
   "dates": {
-    "start": ["2022-03-01"],
-    "end": ["2022-03-31"],
-    "use": [true],
-    "date_connector": ["to"],
-    "delivery_month_text": ["Delivery date:"]
+    "start": [
+      "2022-03-01"
+    ],
+    "end": [
+      "2022-03-31"
+    ],
+    "use": [
+      false
+    ],
+    "date_connector": [
+      "to"
+    ]
   },
-  "modified_days": {
-    "days": [2],
-    "percentage": [45],
-    "use": [true],
-    "text": ["Services"]
-  },
-  "non_working_days": {
-    "days": [2],
-    "use": [true]
+  "single": {
+    "date": [
+      "2022-03-31"
+    ],
+    "use": [
+      true
+    ],
+    "show_month/year_only": [
+      false
+    ],
+    "text": [
+      "Delivery date:"
+    ]
   },
   "period": {
-    "use": [false],
-    "number": [1],
-    "name": ["month(s)"]
+    "use": [
+      false
+    ],
+    "number": [
+      1
+    ],
+    "name": [
+      "month:"
+    ]
+  },
+  "modified_days": {
+    "days": [
+      2
+    ],
+    "percentage": [
+      45
+    ],
+    "use": [
+      true
+    ],
+    "text": [
+      "Services"
+    ]
+  },
+  "non_working_days": {
+    "days": [
+      2
+    ],
+    "use": [
+      true
+    ]
   }
 }
