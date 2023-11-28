@@ -69,7 +69,10 @@ grouped_list <- grouped_list %>% discard(names(.) %in% "file_identifier")
 sm <- month(salary_list$dates$start, label = TRUE)
 
 em <- month(salary_list$dates$end, label = TRUE)
-emna <- month(salary_list$dates$end, label = TRUE, abbr = FALSE)
+
+single_month <- month(salary_list$single$date, label = TRUE, abbr = FALSE)
+single_year <- year(salary_list$single$date)
+single_day <- day(salary_list$single$date)
 
 sdt <- day(salary_list$dates$start)
 edt <- day(salary_list$dates$end)
@@ -102,18 +105,24 @@ if (final_to_salary_exchange_condition) {
 
 use_dates <- salary_list$dates$use
 use_salary_and_related <- salary_list$main$use_salary_and_related
+use_single_date <- salary_list$single$use
 use_period <- salary_list$period$use
 use_modified <- salary_list$modified_days$use
 use_nwd <- salary_list$non_working_days$use
 
-use_grouped <- grouped_list$use
+use_month <- salary_list$single$`show_month/year_only`
+single_string <- paste(single_month, single_year)
+
+if (use_single_date && !use_month) {
+  single_string <- paste(single_day, single_month, single_year)
+}
 
 total_days <- salary_list$main$total_days
 
 salary_periods <- salary_list$period$number
 
 periods_string <- ifelse((salary_periods == 0 || salary_periods == "") || !use_period, "",
-  paste0(salary_periods, " ", salary_list$period$name, ":")
+  paste0(salary_periods, " ", salary_list$period$name)
 )
 
 day_pay <- salary_list$main$salary / total_days
@@ -204,6 +213,8 @@ if (final_to_grouped_exchange_condition) {
 exchange_grouped_text <- "|"
 
 total_grouped_finals <- 0
+
+use_grouped <- grouped_list$use
 
 if (use_grouped) {
   grouped_list_root <- grouped_list %>% keep(names(.) %in% c(
@@ -303,17 +314,19 @@ salary_days_pay_final_rounded_formatted <- format(salary_days_pay_final_rounded,
 
 | `r fields_names_list$Services[lan_idx]`| |  |   |  | `r fields_names_list$amount[lan_idx]` |
 |--------|-------:|----|----:|----|-----------:|
-|`r salary_list$main$section_title`|  |  | | | |
 ``` {r table, results="asis", echo=F, eval=T}
 cat( # nolint
+  if (use_dates || use_single_date || use_period || use_salary_and_related) {
+    paste0("| ", salary_list$main$section_title, " | | | | | |\n")
+  },
   if (use_dates) {
     paste0(
       "|\\hspace{2mm}", "", sdt, " ", sm, " ", sy, " ",
       salary_list$dates$date_connector, " ", edt, " ", em, " ", ey, "| | |  |   |   |\n"
     )
   },
-  if (use_dates) {
-    paste0("|\\hspace{2mm}", salary_list$dates$delivery_month_text, " ", emna, " ", sy, "| | |  |   |   |\n")
+  if (use_single_date) {
+    paste0("|\\hspace{2mm}", salary_list$single$text, " ", single_string, "| | |  |   |   |\n")
   },
   if (use_modified && use_salary_and_related) {
     paste0(
@@ -326,6 +339,9 @@ cat( # nolint
       "|\\hspace{8mm}", salary_list$main$common_days_text, "|", common_payable_days, "/", total_days, "|",
       "|", common_payable_salary_days_pay_rounded, "|", salary_currency_text, "|  |", "\n"
     )
+  },
+  if (use_period && !use_salary_and_related) {
+    paste0("|\\hspace{2mm}", periods_string, " | | | | | |\n")
   },
   if (use_salary_and_related) {
     paste0(

@@ -52,22 +52,5 @@
     "text": [
       "Cost oneliner 3"
     ]
-  },
-  "cost_4": {
-    "use": [
-      true
-    ],
-    "currency_exchange_to_Final_Currency": [
-      5.1594
-    ],
-    "currency": [
-      "BRL"
-    ],
-    "value": [
-      10000
-    ],
-    "text": [
-      "Cost oneliner 4"
-    ]
   }
 }
