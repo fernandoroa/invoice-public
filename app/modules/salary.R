@@ -53,8 +53,8 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       tagList(
         wellPanel(
           h4(strong("non-working Days")),
-          splitLayout(
-            cellWidths = c("50%", "10%", "30%"),
+          div(
+            class = "nwd-grid",
             create_numeric_input(num_nwd, salary_list$non_working_days, ns,
               idx = 50, useChildNS = TRUE, child_namespace = child_namespace
             ),
