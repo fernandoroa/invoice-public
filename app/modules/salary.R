@@ -446,6 +446,29 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         useChildNS = TRUE,
         child_namespace
       )
+
+      salary_list_modified_days <- salary_list$modified_days
+      char_modified_days <- names(which(sapply(salary_list_modified_days, function(x) is.character(x))))
+      num_modified_days <- names(which(sapply(salary_list_modified_days, function(x) is.numeric(x))))
+      logic_modified_days <- names(which(sapply(salary_list_modified_days, function(x) is.logical(x))))
+      child_namespace <- "modified_days"
+
+      update_numeric_input_list(session,
+        num_modified_days, salary_list_modified_days,
+        useChildNS = TRUE,
+        child_namespace
+      )
+
+      update_text_input_list(
+        session, char_modified_days, salary_list_modified_days,
+        useChildNS = TRUE, child_namespace
+      )
+
+      update_checkbox_list(
+        session, logic_modified_days, salary_list_modified_days,
+        useChildNS = TRUE,
+        child_namespace
+      )
     })
 
     observeEvent(exchange_rate(), ignoreInit = TRUE, {

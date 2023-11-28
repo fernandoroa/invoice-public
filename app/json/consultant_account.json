@@ -1,14 +1,38 @@
 {
-  "file_identifier": ["consultant_account"],
-  "IBAN": ["B..............................222"],
-  "final_bank_swift": ["SWIFT CODE placeholder"],
-  "final_bank_name": ["BANK NAME"],
-  "final_bank_address": ["BANK ADDRESS"],
-  "final_bank_country": ["BANK COUNTRY"],
-  "use_intermediary": [false],
-  "intermediary_bank_swift (for intermediary = TRUE)": ["intermediary_swift"],
-  "intermediary_bank_name (for intermediary = TRUE)": ["int_bank"],
-  "intermediary_bank_country (for intermediary = TRUE)": ["int_bank_country"],
-  "final_bank_short_name (for intermediary = TRUE)": ["final_bank_abbrev"],
-  "final_bank_account (for intermediary = TRUE)": ["55555"]
+  "file_identifier": [
+    "consultant_account"
+  ],
+  "IBAN": [
+    "B..............................222"
+  ],
+  "final_bank_swift": [
+    "SWIFT CODE placeholder"
+  ],
+  "final_bank_name": [
+    "BANK NAME"
+  ],
+  "final_bank_address": [
+    "BANK ADDRESS"
+  ],
+  "final_bank_country": [
+    "BANK COUNTRY"
+  ],
+  "use_intermediary": [
+    false
+  ],
+  "intermediary_bank_swift_(for_intermediary_=_TRUE)": [
+    "intermediary_swift"
+  ],
+  "intermediary_bank_name_(for_intermediary_=_TRUE)": [
+    "int_bank"
+  ],
+  "intermediary_bank_country_(for_intermediary_=_TRUE)": [
+    "int_bank_country"
+  ],
+  "final_bank_short_name_(for_intermediary_=_TRUE)": [
+    "final_bank_abbrev"
+  ],
+  "final_bank_account_(for_intermediary_=_TRUE)": [
+    "55555"
+  ]
 }
