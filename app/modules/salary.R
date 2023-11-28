@@ -17,8 +17,7 @@ ui <- function(id) {
       3,
       uiOutput(ns("salary_dates_panel")),
       uiOutput(ns("salary_single_panel")),
-      uiOutput(ns("salary_period_panel")),
-      uiOutput(ns("save_salary_box"))
+      uiOutput(ns("salary_period_panel"))
     ),
     column(
       6,
@@ -36,7 +35,8 @@ ui <- function(id) {
           class = "non_working_days",
           uiOutput(ns("non_working_days_box"))
         )
-      )
+      ),
+      uiOutput(ns("save_salary_box"))
     )
   )
 }
@@ -165,15 +165,18 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     })
 
     output$save_salary_box <- renderUI({
-      wellPanel(
-        div(
-          helpText("Go to Main tab to save all .json files"),
-          downloadButton(ns("save_download_salary"),
-            strong(
-              "Save and Download", code("salary.json")
-            ),
-            style = "white-space: normal;
+      div(
+        class = "fit-content",
+        wellPanel(
+          div(
+            helpText("Go to Main tab to save all .json files"),
+            downloadButton(ns("save_download_salary"),
+              strong(
+                "Save and Download", code("salary.json")
+              ),
+              style = "white-space: normal;
                            word-wrap: break-word;"
+            )
           )
         )
       )
