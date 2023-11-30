@@ -169,6 +169,10 @@ oneliners_final <- 0
 if (length(oneliners_filtered_list) > 0) {
   oneliners_filtered_df <- bind_rows(oneliners_filtered_list, .id = "name")
 
+  if ("currency" %in% colnames(oneliners_filtered_df)) {
+    oneliners_filtered_df$currency <- toupper(oneliners_filtered_df$currency)
+  }
+
   oneliners_filtered_df$needs_exchange <- ifelse(oneliners_filtered_df$currency != final_currency, TRUE, FALSE)
 
   oneliners_filtered_df_not_exchanged <- oneliners_filtered_df |> filter(!needs_exchange)
@@ -228,6 +232,11 @@ if (use_grouped) {
 
   sublists_df <- bind_rows(grouped_sublists, .id = "json_name")
   grouped_root_df <- grouped_list_root |> bind_rows()
+
+  if ("currency" %in% colnames(grouped_root_df)) {
+    grouped_root_df$currency <- toupper(grouped_root_df$currency)
+  }
+
   grouped_df <- cbind(grouped_root_df, sublists_df)
 
   grouped_df$value_formatted <- format(grouped_df$value, scientific = FALSE)
