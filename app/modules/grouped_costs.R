@@ -174,13 +174,11 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
     )
 
     observeEvent(exchange_rate(), ignoreInit = TRUE, {
-      if (is.numeric(exchange_rate())) {
-        updateNumericInput(
-          session,
-          "currency_exchange_to_Final_Currency",
-          value = exchange_rate() |> as.numeric()
-        )
-      }
+      updateNumericInput(
+        session,
+        "currency_exchange_to_Final_Currency",
+        value = exchange_rate() |> as.numeric()
+      )
     })
 
     outputOptions(output, "grouped_box", suspendWhenHidden = FALSE)

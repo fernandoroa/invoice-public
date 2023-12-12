@@ -29,6 +29,7 @@ box::use(
   modules / account,
   modules / json_ace,
   modules / rmd_ace,
+  modules / spreadsheet
 )
 
 #' @export
@@ -195,6 +196,14 @@ ui <- function(id) {
           rmd_ace$ui(ns("rmd_ace_ns"))
         )
       )
+    ),
+    tabPanel(
+      "spreadsheet",
+      fluidPage(
+        fluidRow(
+          spreadsheet$ui(ns("spreadsheet_ns"))
+        )
+      )
     )
   )
 }
@@ -318,6 +327,8 @@ server <- function(id) { # nolint
     json_ace$server("json_ace_ns", files_ready_reac, rv_temp_folder_session)
 
     rmd_ace$server("rmd_ace_ns", files_ready_reac, rv_temp_folder_session)
+
+    spreadsheet$server("spreadsheet_ns", rv_json_lists, oneliner_vars, grouped_vars, rv_temp_folder_session, input)
 
     observeEvent(file_reac(),
       {

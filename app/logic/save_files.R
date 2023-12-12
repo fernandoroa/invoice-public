@@ -2,7 +2,7 @@ box::use(
   purrr[map, discard, keep],
   shiny[showNotification, tagList, p],
   magrittr[`%>%`],
-  jsonlite[validate],
+  jsonlite[validate, toJSON],
   tools[file_ext]
 )
 box::use(
@@ -21,7 +21,7 @@ plain_json_save <- function(input, plain_list, folders, file_name, useNS = FALSE
 
   names(list) <- names(plain_list)
   list$file_identifier <- sub(".json$", "", file_name)
-  json_data <- jsonlite::toJSON(x = list, pretty = TRUE, digits = 15)
+  json_data <- toJSON(x = list, pretty = TRUE, digits = 15)
   for (folder in folders) {
     file_path <- file.path(folder, file_name)
     write(json_data, file_path)
@@ -70,7 +70,7 @@ ace_save <- function(input, input_name, folders, file_name, useNS = FALSE, names
 
 #' @export
 nested_json_save <- function(
-    input, nested_list, prefix, folders, file_name, useNS = FALSE, namespace = "",
+    input, nested_list, folders, file_name, useNS = FALSE, namespace = "",
     to_remove = "") {
   list <- list()
   if (useNS) {
@@ -80,13 +80,14 @@ nested_json_save <- function(
   nested_list_names <- names(nested_list)
   for (name in nested_list_names) {
     list[[name]] <- lapply(names(nested_list[[name]]), function(x) {
-      input[[paste0(namespace, prefix, name, "-", x)]]
+      input[[paste0(namespace, name, "-", x)]]
     })
     names(list[[name]]) <- names(nested_list[[name]])
   }
   list <- list %>% discard(names(.) %in% to_remove)
+
   list$file_identifier <- sub(".json$", "", file_name)
-  json_data <- jsonlite::toJSON(x = list, pretty = TRUE, digits = 15)
+  json_data <- toJSON(x = list, pretty = TRUE, digits = 15)
 
   for (folder in folders) {
     file_path <- file.path(folder, file_name)
@@ -96,7 +97,7 @@ nested_json_save <- function(
 
 #' @export
 nested_and_root_save <- function(
-    input, nested_list, prefix, folders, file_name, useNS = FALSE,
+    input, nested_list, folders, file_name, useNS = FALSE,
     namespace = "",
     to_remove) {
   list <- list()
@@ -117,20 +118,20 @@ nested_and_root_save <- function(
   nested_list_names_sublists <- names(nested_list_sublists)
 
   list <- lapply(nested_list_names_root, function(x) {
-    input[[paste0(namespace, prefix, x)]]
+    input[[paste0(namespace, x)]]
   })
   names(list) <- nested_list_names_root
 
   for (sublist_name in nested_list_names_sublists) {
     list[[sublist_name]] <- lapply(names(nested_list[[sublist_name]]), function(x) {
-      input[[paste0(namespace, prefix, sublist_name, "-", x)]]
+      input[[paste0(namespace, sublist_name, "-", x)]]
     })
     names(list[[sublist_name]]) <- names(nested_list[[sublist_name]])
   }
   list <- list %>% discard(names(.) %in% to_remove)
 
   list$file_identifier <- sub(".json$", "", file_name)
-  json_data <- jsonlite::toJSON(x = list, pretty = TRUE, digits = 15)
+  json_data <- toJSON(x = list, pretty = TRUE, digits = 15)
 
   for (folder in folders) {
     file_path <- file.path(folder, file_name)
@@ -172,7 +173,6 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
   nested_json_save(
     inputs,
     nested_list = rv_json_lists$salary_list,
-    prefix = "",
     folders = folders,
     file_name = "salary.json",
     useNS = TRUE,
@@ -186,7 +186,6 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
   nested_json_save(
     inputs,
     nested_list = rv_json_lists$oneliners_list,
-    prefix = "",
     folders = folders,
     file_name = "oneliner_costs.json",
     useNS = TRUE,
@@ -202,7 +201,6 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
   nested_and_root_save(
     inputs,
     nested_list = rv_json_lists$grouped_list,
-    prefix = "",
     folders = folders,
     file_name = "grouped_costs.json",
     useNS = TRUE,
