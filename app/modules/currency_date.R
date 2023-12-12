@@ -174,7 +174,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
         title = "Getting all exchange rates",
         "An alert will pop-up if currency is not found!"
       ))
-
+      currency_date_rv$exchange_salary <- 1
       if (toupper(input$final_currency) != toupper(salary_currency())) {
         exchange_value <- try_exchange_rates_direct_and_indirect(input$exchangeDate, input$final_currency, salary_currency())
 
@@ -182,7 +182,6 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
           exchange_salary <- signif(exchange_value, 5)
           currency_date_rv$exchange_salary <- exchange_salary
         } else {
-          currency_date_rv$exchange_salary <- NA
           showNotification(paste0("the exchange for ", toupper(salary_currency()), " was not found"))
         }
       }
@@ -206,6 +205,8 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       currency_date_rv$exchange_oneliners <- list()
       for (currency_idx in seq_along(oneliners_currencies_list)) {
         currency <- oneliners_currencies_list[currency_idx]
+        currency_date_rv$exchange_oneliners[oneliners_currencies_list_names_no_ns[currency_idx]] <- 1
+
         if (toupper(input$final_currency) != toupper(currency)) {
           exchange_value <- try_exchange_rates_direct_and_indirect(input$exchangeDate, input$final_currency, currency)
 
@@ -213,7 +214,6 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
             exchange_oneliner <- signif(exchange_value, 5)
             currency_date_rv$exchange_oneliners[oneliners_currencies_list_names_no_ns[currency_idx]] <- exchange_oneliner
           } else {
-            currency_date_rv$exchange_oneliners <- NA
             showNotification(paste0("the exchange for ", toupper(currency), " was not found"))
           }
         }
@@ -221,14 +221,15 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
 
       for (currency_idx in seq_along(grouped_currencies_list)) {
         currency <- grouped_currencies_list[currency_idx]
+        currency_date_rv$exchange_grouped <- 1
         if (toupper(input$final_currency) != toupper(currency)) {
           exchange_value <- try_exchange_rates_direct_and_indirect(input$exchangeDate, input$final_currency, currency)
+
 
           if (inherits(exchange_value, "numeric")) {
             exchange_grouped <- signif(exchange_value, 5)
             currency_date_rv$exchange_grouped <- exchange_grouped
           } else {
-            currency_date_rv$exchange_grouped <- NA
             showNotification(paste0("the exchange for ", toupper(currency), " was not found"))
           }
         }
