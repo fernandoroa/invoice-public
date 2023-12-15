@@ -314,7 +314,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         nested_json_save(
           input,
           nested_list = salary_list,
-          prefix = "",
           folders = c(folder, file.path(temp_folder_session(), "json")),
           file_name
         )

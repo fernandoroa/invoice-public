@@ -1,4 +1,6 @@
-# invoice creation with Shiny and RMarkdown
+# Shiny App Submodule from shinyInvoice R-Package
+
+## Invoice Creation with Shiny and RMarkdown
 
 This repository modifies https://github.com/shubham-maurya/shiny-invoice-generator/
 
