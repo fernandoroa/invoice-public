@@ -126,7 +126,8 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
     })
 
     observeEvent(input$increaseInvoiceNumber, {
-      vector <- continue_sequence(input$invoice_number, sep = "-")
+      last <- get_last_symbol(input$invoice_number)
+      vector <- continue_sequence(input$invoice_number, sep = last)
       updateTextInput(session, "invoice_number", value = vector[length(vector)])
     })
 
@@ -140,7 +141,8 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
     })
 
     observeEvent(input$decreaseInvoiceNumber, {
-      vector <- continue_sequence(input$invoice_number, sep = "-", factor = -1)
+      last <- get_last_symbol(input$invoice_number)
+      vector <- continue_sequence(input$invoice_number, sep = last, factor = -1)
       updateTextInput(session, "invoice_number", value = vector[length(vector)])
     })
 
