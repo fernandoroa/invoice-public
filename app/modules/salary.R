@@ -1,6 +1,7 @@
 box::use(
   shiny[...],
   lubridate[...],
+  stats[runif]
 )
 
 box::use(
@@ -41,7 +42,7 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_session) {
+server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_session, bump_month_vars) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -273,32 +274,44 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       )
     })
 
-    observeEvent(c(input$increaseDate, input$increaseSingleDate), ignoreInit = TRUE, {
-      if (input$increaseDate > 0 || input$increaseSingleDate > 0) {
-        sdate <- input$`dates-start`
-        edate <- input$`dates-end`
-        smon <- month(sdate)
-        emon <- month(edate)
-        updateDateInput(session, "dates-start", value = sdate + mon_span[smon + 1])
-        updateDateInput(session, "dates-end", value = edate + mon_span[emon + 2])
-        single_date <- input$`single-date`
-        single_month <- month(single_date)
-        updateDateInput(session, "single-date", value = single_date + mon_span[single_month + 2])
-      }
+    decreaseDate_rv <- eventReactive(c(
+      input$decreaseDate,
+      input$decreaseSingleDate,
+      bump_month_vars$decreaseEverything()
+    ), ignoreInit = TRUE, {
+      runif(1)
     })
 
-    observeEvent(c(input$decreaseDate, input$decreaseSingleDate), ignoreInit = TRUE, {
-      if (input$increaseDate > 0 || input$increaseSingleDate > 0) {
-        sdate <- input$`dates-start`
-        edate <- input$`dates-end`
-        smon <- month(sdate)
-        emon <- month(edate)
-        updateDateInput(session, "dates-start", value = sdate - mon_span[smon])
-        updateDateInput(session, "dates-end", value = edate - mon_span[emon + 1])
-        single_date <- input$`single-date`
-        single_month <- month(single_date)
-        updateDateInput(session, "single-date", value = single_date - mon_span[single_month + 1])
-      }
+    increaseDate_rv <- eventReactive(c(
+      input$increaseDate,
+      input$increaseSingleDate,
+      bump_month_vars$increaseEverything()
+    ), ignoreInit = TRUE, {
+      runif(1)
+    })
+
+    observeEvent(increaseDate_rv(), ignoreInit = TRUE, {
+      sdate <- input$`dates-start`
+      edate <- input$`dates-end`
+      smon <- month(sdate)
+      emon <- month(edate)
+      updateDateInput(session, "dates-start", value = sdate + mon_span[smon + 1])
+      updateDateInput(session, "dates-end", value = edate + mon_span[emon + 2])
+      single_date <- input$`single-date`
+      single_month <- month(single_date)
+      updateDateInput(session, "single-date", value = single_date + mon_span[single_month + 2])
+    })
+
+    observeEvent(decreaseDate_rv(), ignoreInit = TRUE, {
+      sdate <- input$`dates-start`
+      edate <- input$`dates-end`
+      smon <- month(sdate)
+      emon <- month(edate)
+      updateDateInput(session, "dates-start", value = sdate - mon_span[smon])
+      updateDateInput(session, "dates-end", value = edate - mon_span[emon + 1])
+      single_date <- input$`single-date`
+      single_month <- month(single_date)
+      updateDateInput(session, "single-date", value = single_date - mon_span[single_month + 1])
     })
 
     output$save_download_salary <- downloadHandler(
