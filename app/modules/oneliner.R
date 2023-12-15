@@ -108,7 +108,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rates, temp_folder
 
         nested_json_save(input,
           nested_list = rv_jsons[[sublist]],
-          prefix = "",
           folders = c(folder, file.path(temp_folder_session(), "json")),
           file_name,
           to_remove = to_remove
