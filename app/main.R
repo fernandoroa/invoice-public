@@ -20,6 +20,7 @@ box::use(
   utils / reactive_saver[...],
   modules / upload,
   modules / currency_date,
+  modules / bump_month,
   modules / business,
   modules / download_zip,
   modules / generate_pdf,
@@ -111,7 +112,8 @@ ui <- function(id) {
           ),
           column(
             3,
-            currency_date$ui(ns("currency_date_ns"))
+            currency_date$ui(ns("currency_date_ns")),
+            bump_month$ui(ns("bump_month_ns"))
           ),
           column(
             3,
@@ -266,8 +268,11 @@ server <- function(id) { # nolint
     currency_date_vars <- currency_date$server(
       "currency_date_ns", rv_json_lists, "final_currency_list", salary_currency,
       input, files_ready_reac,
-      rv_temp_folder_session
+      rv_temp_folder_session,
+      bump_month_vars
     )
+
+    bump_month_vars <- bump_month$server("bump_month_ns")
 
     business$server("bill_to_ns", rv_json_lists,
       files_ready_reac,
@@ -291,7 +296,8 @@ server <- function(id) { # nolint
     salary_currency <- salary$server(
       "salary_ns", rv_json_lists, "salary_list",
       files_ready_reac, currency_date_vars$exchange_salary,
-      rv_temp_folder_session
+      rv_temp_folder_session,
+      bump_month_vars
     )
 
     oneliner_vars <- oneliner$server(

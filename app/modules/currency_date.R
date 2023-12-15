@@ -1,6 +1,7 @@
 box::use(
   shiny[...],
   lubridate[...],
+  stats[runif]
 )
 
 box::use(
@@ -15,7 +16,7 @@ ui <- function(id) {
   uiOutput(ns("currency_date"))
 }
 
-server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, temp_folder_session) {
+server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, temp_folder_session, bump_month_vars) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     output$currency_date <- renderUI({
@@ -116,7 +117,24 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       },
       contentType = "json"
     )
-    observeEvent(input$increaseDate_Final, {
+
+    decreaseDate_Final_rv <- eventReactive(c(input$decreaseDate_Final, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
+      runif(1)
+    })
+
+    increaseDate_Final_rv <- eventReactive(c(input$increaseDate_Final, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
+      runif(1)
+    })
+
+    decreaseInvoiceNumber_rv <- eventReactive(c(input$decreaseInvoiceNumber, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
+      runif(1)
+    })
+
+    increaseInvoiceNumber_rv <- eventReactive(c(input$increaseInvoiceNumber, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
+      runif(1)
+    })
+
+    observeEvent(increaseDate_Final_rv(), ignoreInit = TRUE, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
       cmon <- month(cdate)
@@ -125,13 +143,13 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       updateDateInput(session, "exchangeDate", value = edate + mon_span[emon + 1])
     })
 
-    observeEvent(input$increaseInvoiceNumber, {
+    observeEvent(increaseInvoiceNumber_rv(), ignoreInit = TRUE, {
       last <- get_last_symbol(input$invoice_number)
       vector <- continue_sequence(input$invoice_number, sep = last)
       updateTextInput(session, "invoice_number", value = vector[length(vector)])
     })
 
-    observeEvent(input$decreaseDate_Final, {
+    observeEvent(decreaseDate_Final_rv(), ignoreInit = TRUE, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
       cmon <- month(cdate)
@@ -140,7 +158,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       updateDateInput(session, "exchangeDate", value = edate - mon_span[emon])
     })
 
-    observeEvent(input$decreaseInvoiceNumber, {
+    observeEvent(decreaseInvoiceNumber_rv(), ignoreInit = TRUE, {
       last <- get_last_symbol(input$invoice_number)
       vector <- continue_sequence(input$invoice_number, sep = last, factor = -1)
       updateTextInput(session, "invoice_number", value = vector[length(vector)])
