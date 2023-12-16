@@ -6,7 +6,7 @@ box::use(
 box::use(
   .. / .. / logic / save_files[...],
   .. / .. / utils / validate[...],
-  .. / .. / modules / rmd_ace / upload_rmd
+  . / upload_rmd
 )
 ui <- function(id) {
   ns <- NS(id)

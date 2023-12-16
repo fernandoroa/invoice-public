@@ -8,7 +8,7 @@ box::use(
   .. / .. / utils / constants[...],
   .. / .. / logic / save_files[...],
   .. / .. / logic / input_fun[...],
-  .. / .. / modules / grouped_costs / grouped_element
+  . / grouped_element
 )
 
 ui <- function(id) {
