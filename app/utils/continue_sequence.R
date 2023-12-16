@@ -1,5 +1,10 @@
 box::use(
-  shiny[isTruthy]
+  shiny[isTruthy],
+  lubridate[month, day, year]
+)
+
+box::use(
+  .. / utils / constants[...],
 )
 
 continue_sequence <- function(chr_vector, sep = "_", factor = 1) {
@@ -73,4 +78,22 @@ duplicate_last_list_element <- function(list) {
 
 get_last_symbol <- function(string) {
   ifelse(grepl("[^[:alnum:]]", string), sub(".*([^[:alnum:]]).*", "\\1", string), "")
+}
+
+date_bump_month <- function(date, decrease = FALSE) {
+  year <- year(date)
+  if (year %in% leap_years) {
+    mon_span[3] <- 29
+  }
+  mon <- month(date)
+  day <- day(date)
+
+  modifier <- ifelse(day == mon_span[mon + 1], 1, 0)
+
+  if (!decrease) {
+    return(date + mon_span[mon + 1 + modifier])
+  } else {
+    subtract <- ifelse(day > mon_span[mon], day, mon_span[mon + modifier])
+    date - subtract
+  }
 }

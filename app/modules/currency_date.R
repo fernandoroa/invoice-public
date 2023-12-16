@@ -137,10 +137,12 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
     observeEvent(increaseDate_Final_rv(), ignoreInit = TRUE, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
-      cmon <- month(cdate)
-      emon <- month(edate)
-      updateDateInput(session, "invoiceDate", value = cdate + mon_span[cmon + 1])
-      updateDateInput(session, "exchangeDate", value = edate + mon_span[emon + 1])
+
+      new_date_c <- date_bump_month(cdate)
+      new_date_e <- date_bump_month(edate)
+
+      updateDateInput(session, "invoiceDate", value = new_date_c)
+      updateDateInput(session, "exchangeDate", value = new_date_e)
     })
 
     observeEvent(increaseInvoiceNumber_rv(), ignoreInit = TRUE, {
@@ -152,10 +154,12 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
     observeEvent(decreaseDate_Final_rv(), ignoreInit = TRUE, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
-      cmon <- month(cdate)
-      emon <- month(edate)
-      updateDateInput(session, "invoiceDate", value = cdate - mon_span[cmon])
-      updateDateInput(session, "exchangeDate", value = edate - mon_span[emon])
+
+      new_date_c <- date_bump_month(cdate, decrease = TRUE)
+      new_date_e <- date_bump_month(edate, decrease = TRUE)
+
+      updateDateInput(session, "invoiceDate", value = new_date_c)
+      updateDateInput(session, "exchangeDate", value = new_date_e)
     })
 
     observeEvent(decreaseInvoiceNumber_rv(), ignoreInit = TRUE, {
