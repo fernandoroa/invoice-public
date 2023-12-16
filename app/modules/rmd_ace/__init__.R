@@ -4,9 +4,9 @@ box::use(
 )
 
 box::use(
-  .. / logic / save_files[...],
-  .. / utils / validate[...],
-  .. / modules / upload_rmd
+  .. / .. / logic / save_files[...],
+  .. / .. / utils / validate[...],
+  .. / .. / modules / rmd_ace / upload_rmd
 )
 ui <- function(id) {
   ns <- NS(id)
@@ -94,7 +94,7 @@ server <- function(id, file_reac, temp_folder_session) {
         input_file <- rmd_upload_var()
         is_valid <- check_rmd(input_file$datapath)
         if (is_valid) {
-          file.copy(input_file$datapath, file.path(temp_folder_session(), input_file$name), overwrite = TRUE)
+          file.copy(input_file$datapath, file.path(temp_folder_session(), "invoice.Rmd"), overwrite = TRUE)
           rmd_ready_reac(!rmd_ready_reac())
         } else {
           showNotification("Forbidden strings found, nothing done", type = "error", duration = 15)
