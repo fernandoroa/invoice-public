@@ -3,7 +3,7 @@ box::use(
 )
 
 box::use(
-  .. / logic / input_fun[...],
+  .. / .. / logic / input_fun[...],
 )
 
 ui <- function(id) {

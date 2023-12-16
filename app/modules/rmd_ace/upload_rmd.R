@@ -17,7 +17,8 @@ server <- function(id, file_type = ".Rmd") {
 
     output$upload_ui <- renderUI({
       title <- tagList(
-        h4(paste("Upload", file_type))
+        h4(paste("Upload", file_type)),
+        helpText("If your file browser does not show .Rmd files, remove the extension filter")
       )
 
       wellPanel(
@@ -28,7 +29,7 @@ server <- function(id, file_type = ".Rmd") {
             "",
             multiple = FALSE,
             accept = c(
-              file_type
+              ".Rmd"
             )
           )
         )
