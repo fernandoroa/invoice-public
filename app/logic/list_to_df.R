@@ -122,43 +122,43 @@ get_nested_lists_details_salary <- function(
   list <- remove_from_list(list, "section_title")
   list <- remove_from_list(list, "common_days_text")
 
-  new_col_names_row_1 <- c(
+  new_col_names_main_salary_row <- c(
     days = "main_total_days", amount = "main_salary",
     exchange_factor = "main_currency_exchange_to_Final_Currency", currency = "main_currency"
   )
-  new_col_names_row_2 <- c(text = "single_text", date = "single_date", month_year_only = "single_show_month/year_only")
+  new_col_names_single_date_row <- c(text = "single_text", date = "single_date", month_year_only = "single_show_month/year_only")
 
-  new_col_names_row_3 <- c(date = "dates_start", date_end = "dates_end")
+  new_col_names_date_range_row <- c(date = "dates_start", date_end = "dates_end")
 
-  new_col_names_row_4 <- c(percentage = "modified_days_percentage", text = "modified_days_text", days = "modified_days_days")
+  new_col_names_modified_days_row <- c(percentage = "modified_days_percentage", text = "modified_days_text", days = "modified_days_days")
 
-  new_col_names_row_5 <- c(days = "non_working_days_days")
+  new_col_names_nwd_row <- c(days = "non_working_days_days")
 
   tibble <- list |>
     list_flatten() |>
     as_tibble()
 
-  tibble_row_1 <- prepare_row(tibble, new_col_names_row_1, "basic_salary", "days",
-    column_set = c("var", "days", "amount", "exchange_factor", "currency")
-  )
-
-  tibble_row_2 <- prepare_row(tibble, new_col_names_row_2, "single_date", "text",
+  tibble_row_single_date <- prepare_row(tibble, new_col_names_single_date_row, "single_date", "text",
     column_set = c("var", "text", "date", "month_year_only")
   )
 
-  tibble_row_3 <- prepare_row(tibble, new_col_names_row_3, "date_range", "date",
+  tibble_row_date_range <- prepare_row(tibble, new_col_names_date_range_row, "date_range", "date",
     column_set = c("var", "date", "date_end")
   )
 
-  tibble_row_4 <- prepare_row(tibble, new_col_names_row_4, "modified_days", "text",
+  tibble_row_main_salary <- prepare_row(tibble, new_col_names_main_salary_row, "basic_salary", "days",
+    column_set = c("var", "days", "amount", "exchange_factor", "currency")
+  )
+
+  tibble_row_modified_days <- prepare_row(tibble, new_col_names_modified_days_row, "modified_days", "text",
     column_set = c("var", "text", "days", "percentage")
   )
 
-  tibble_row_5 <- prepare_row(tibble, new_col_names_row_5, "non_working_days", "days",
+  tibble_row_nwd <- prepare_row(tibble, new_col_names_nwd_row, "non_working_days", "days",
     column_set = c("var", "days")
   )
 
-  bind_rows(tibble_row_1, tibble_row_2, tibble_row_3, tibble_row_4, tibble_row_5)
+  bind_rows(tibble_row_single_date, tibble_row_date_range, tibble_row_main_salary, tibble_row_modified_days, tibble_row_nwd)
 }
 
 #' @export
