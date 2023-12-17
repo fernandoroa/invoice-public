@@ -86,8 +86,9 @@ server <- function(id, file_reac, temp_folder_session) {
         json_path <- file.path(folder, file_name)
         file.copy(json_path, file)
       },
-      contentType = "Rmd"
+      contentType = "data:attachment/plain"
     )
+
     observeEvent(rmd_upload_var(),
       {
         req(rmd_upload_var())
@@ -97,7 +98,7 @@ server <- function(id, file_reac, temp_folder_session) {
           file.copy(input_file$datapath, file.path(temp_folder_session(), "invoice.Rmd"), overwrite = TRUE)
           rmd_ready_reac(!rmd_ready_reac())
         } else {
-          showNotification("Forbidden strings found, nothing done", type = "error", duration = 15)
+          showNotification("Forbidden strings found or not a .Rmd file, nothing done", type = "error", duration = 15)
         }
         unlink(input_file$datapath, recursive = TRUE, force = TRUE)
       },
