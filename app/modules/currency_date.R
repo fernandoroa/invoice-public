@@ -1,6 +1,5 @@
 box::use(
   shiny[...],
-  lubridate[...],
   stats[runif]
 )
 
@@ -69,10 +68,10 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
           div(
             class = "flex-dates",
             br(),
-            actionButton(ns("increaseDate_Final"), ""),
+            actionButton(ns("increaseDates"), ""),
             span("1 Month"),
             br(),
-            actionButton(ns("decreaseDate_Final"), "")
+            actionButton(ns("decreaseDates"), "")
           ),
           tagList(
             dateInput(ns("exchangeDate"),
@@ -118,27 +117,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       contentType = "json"
     )
 
-    decreaseDate_Final_rv <- eventReactive(c(input$decreaseDate_Final, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
-      runif(1)
-    })
-
-    increaseDate_Final_rv <- eventReactive(c(input$increaseDate_Final, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
-      runif(1)
-    })
-
-    decreaseInvoiceNumber_rv <- eventReactive(c(input$decreaseInvoiceNumber, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
-      runif(1)
-    })
-
-    increaseInvoiceNumber_rv <- eventReactive(c(input$increaseInvoiceNumber, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
-      runif(1)
-    })
-
-    current_date_rv <- eventReactive(bump_month_vars$update_dates(), ignoreInit = TRUE, {
-      runif(1)
-    })
-
-    observeEvent(increaseDate_Final_rv(), ignoreInit = TRUE, {
+    observeEvent(c(input$increaseDates, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
 
@@ -149,13 +128,13 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       updateDateInput(session, "exchangeDate", value = new_date_e)
     })
 
-    observeEvent(increaseInvoiceNumber_rv(), ignoreInit = TRUE, {
+    observeEvent(c(input$increaseInvoiceNumber, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
       last <- get_last_symbol(input$invoice_number)
       vector <- continue_sequence(input$invoice_number, sep = last)
       updateTextInput(session, "invoice_number", value = vector[length(vector)])
     })
 
-    observeEvent(decreaseDate_Final_rv(), ignoreInit = TRUE, {
+    observeEvent(c(input$decreaseDates, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
 
@@ -166,7 +145,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       updateDateInput(session, "exchangeDate", value = new_date_e)
     })
 
-    observeEvent(decreaseInvoiceNumber_rv(), ignoreInit = TRUE, {
+    observeEvent(c(input$decreaseInvoiceNumber, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
       last <- get_last_symbol(input$invoice_number)
       vector <- continue_sequence(input$invoice_number, sep = last, factor = -1)
       updateTextInput(session, "invoice_number", value = vector[length(vector)])
@@ -195,28 +174,20 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       )
     })
 
-    currency_date_rv <- reactiveValues(update_dates = TRUE)
+    currency_date_rv <- reactiveValues()
 
-    observeEvent(current_date_rv(), {
-      year <- current_year <- format(Sys.Date(), "%Y") |> as.numeric()
-      month <- current_month <- format(Sys.Date(), "%m") |> as.numeric()
-      current_day <- format(Sys.Date(), "%d") |> as.numeric()
+    observeEvent(c(bump_month_vars$update_everything()), ignoreInit = TRUE, {
+      year_month_vec <- get_current_month_year()
+      year_int <- year_month_vec[1]
+      month_int <- year_month_vec[2]
 
-      if (current_day <= 20) {
-        month <- current_month - 1
-      }
-      if (current_month == 12 && current_day > 20) {
-        year <- current_year + 1
-        month <- 1
-      }
-
-      putative_invoice_number <- paste0(c(year, month), collapse = "-")
+      putative_invoice_number <- paste0(c(year_int, month_int), collapse = "-")
 
       updateTextInput(session, "invoice_number", value = putative_invoice_number)
 
-      new_invoice_date <- get_new_date(input$invoiceDate, year, month, mon_span)
+      new_invoice_date <- get_new_date(input$invoiceDate, year_int, month_int, mon_span)
 
-      new_exchange_date <- get_new_date(input$exchangeDate, year, month, mon_span)
+      new_exchange_date <- get_new_date(input$exchangeDate, year_int, month_int, mon_span)
 
       updateDateInput(
         session,
@@ -230,7 +201,7 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
         value = new_invoice_date
       )
 
-      start_month_date <- paste0(c(year, month, "1"), collapse = "-") |> as.Date()
+      start_month_date <- paste0(c(year_int, month_int, "1"), collapse = "-") |> as.Date()
 
       currency_date_rv$start_month_date <- start_month_date
     })
@@ -304,10 +275,6 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       removeModal()
     })
 
-    observeEvent(input$update_dates, ignoreInit = TRUE, {
-      currency_date_rv$update_dates <- !currency_date_rv$update_dates
-    })
-
     outputOptions(output, "currency_date", suspendWhenHidden = FALSE)
 
     return(list(
@@ -319,12 +286,6 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       }),
       exchange_oneliners = reactive({
         currency_date_rv$exchange_oneliners
-      }),
-      start_month_date = reactive({
-        currency_date_rv$start_month_date
-      }),
-      update_dates = reactive({
-        currency_date_rv$update_dates
       })
     ))
   })

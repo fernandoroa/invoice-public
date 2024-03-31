@@ -278,27 +278,20 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
 
     decreaseDate_rv <- eventReactive(c(
       input$decreaseDate,
-      input$decreaseSingleDate,
-      bump_month_vars$decreaseEverything()
+      input$decreaseSingleDate
     ), ignoreInit = TRUE, {
       runif(1)
     })
 
     increaseDate_rv <- eventReactive(c(
       input$increaseDate,
-      input$increaseSingleDate,
-      bump_month_vars$increaseEverything()
+      input$increaseSingleDate
     ), ignoreInit = TRUE, {
       runif(1)
     })
 
-    currency_date_rv <- eventReactive(c(
-      bump_month_vars$update_dates()
-    ), ignoreInit = FALSE, {
-      runif(1)
-    })
 
-    observeEvent(increaseDate_rv(), ignoreInit = TRUE, {
+    observeEvent(c(increaseDate_rv(), bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
       sdate <- input$`dates-start`
       edate <- input$`dates-end`
       single_date <- input$`single-date`
@@ -312,7 +305,7 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
       updateDateInput(session, "single-date", value = new_date_single)
     })
 
-    observeEvent(decreaseDate_rv(), ignoreInit = TRUE, {
+    observeEvent(c(decreaseDate_rv(), bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
       sdate <- input$`dates-start`
       edate <- input$`dates-end`
       single_date <- input$`single-date`
@@ -326,17 +319,20 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
       updateDateInput(session, "single-date", value = new_date_single)
     })
 
-    observeEvent(currency_date_rv(), ignoreInit = TRUE, {
-      current_year <- year(currency_date_vars$start_month_date())
-      current_month <- month(currency_date_vars$start_month_date())
+    observeEvent(bump_month_vars$update_everything(), ignoreInit = TRUE, {
+      year_month_vec <- get_current_month_year()
+      year_int <- year_month_vec[1]
+      month_int <- year_month_vec[2]
 
-      updateDateInput(session, "dates-start", value = currency_date_vars$start_month_date())
+      new_start_date <- paste0(c(year_int, month_int, "1"), collapse = "-") |> as.Date()
 
-      new_end_date <- get_new_date(input$`dates-end`, current_year, current_month, mon_span)
+      updateDateInput(session, "dates-start", value = new_start_date)
+
+      new_end_date <- get_new_date(input$`dates-end`, year_int, month_int, mon_span)
 
       updateDateInput(session, "dates-end", value = new_end_date)
 
-      new_single_date <- get_new_date(input$`single-date`, current_year, current_month, mon_span)
+      new_single_date <- get_new_date(input$`single-date`, year_int, month_int, mon_span)
 
       updateDateInput(session, "single-date", value = new_single_date)
     })
