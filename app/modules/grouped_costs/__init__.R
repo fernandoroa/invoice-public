@@ -89,7 +89,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
               div(
                 class = "add-button-container",
                 br(),
-                actionButton(ns("save_and_add_element"), "Save All Changes, then add row")
+                actionButton(ns("save_and_add_element"), "Save All Changes, then, add row")
               ),
               br(),
               helpText("Go to Main tab to save all .json files"),

@@ -76,9 +76,7 @@ duplicate_last_list_element <- function(list) {
   last_element
 }
 
-get_last_symbol <- function(string) {
-  ifelse(grepl("[^[:alnum:]]", string), sub(".*([^[:alnum:]]).*", "\\1", string), "")
-}
+
 
 date_bump_month <- function(date, decrease = FALSE) {
   year_int <- year(date)
@@ -96,6 +94,10 @@ date_bump_month <- function(date, decrease = FALSE) {
     subtract <- ifelse(day_int > mon_span[mon], day_int, mon_span[mon + modifier])
     date - subtract
   }
+}
+
+get_last_symbol <- function(string) {
+  ifelse(grepl("[^[:alnum:]]", string), sub(".*([^[:alnum:]]).*", "\\1", string), "")
 }
 
 substitute_invalid_days <- function(year_int, day_int, month_int, mon_span) {

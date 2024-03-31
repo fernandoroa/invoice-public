@@ -265,14 +265,14 @@ server <- function(id) { # nolint
     json_upload_var <- upload$server("json_upload_ns", zip_upload_var, ".json")
     zip_upload_var <- upload$server("zip_upload_ns", json_upload_var, ".zip")
 
+    bump_month_vars <- bump_month$server("bump_month_ns")
+
     currency_date_vars <- currency_date$server(
       "currency_date_ns", rv_json_lists, "final_currency_list", salary_currency,
       input, files_ready_reac,
       rv_temp_folder_session,
       bump_month_vars
     )
-
-    bump_month_vars <- bump_month$server("bump_month_ns")
 
     business$server("bill_to_ns", rv_json_lists,
       files_ready_reac,
