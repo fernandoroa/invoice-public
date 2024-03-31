@@ -27,7 +27,9 @@ server <- function(id, rv_sublist, file_reac, temp_folder_session) {
         file_name <- "consultant_account.json"
         folder <- gsub("file", "folder_", tempfile(tmpdir = file.path(temp_folder_session(), "tmp_dir")))
         dir.create(folder, recursive = TRUE)
-
+        if (is.null(rv_sublist$consultant_account_list$show)) {
+          rv_sublist$consultant_account_list$show <- TRUE
+        }
         plain_json_save(
           input,
           plain_list = rv_sublist$consultant_account_list,
@@ -43,12 +45,25 @@ server <- function(id, rv_sublist, file_reac, temp_folder_session) {
 
     output$consultant_account_box <- renderUI({
       consultant_account_list <- rv_sublist$consultant_account_list %>% discard(names(.) %in% "file_identifier")
+      if (is.null(consultant_account_list$show)) {
+        consultant_account_list$show <- TRUE
+      }
       char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.character(x))))
       logic_char_consultant_account <- names(which(sapply(consultant_account_list, function(x) is.logical(x))))
 
       wellPanel(
         h4(strong("Consultant Account")),
-        create_check_box_input(logic_char_consultant_account, consultant_account_list, ns),
+        {
+          logic_inputs <- create_check_box_input(logic_char_consultant_account, consultant_account_list, ns)
+
+          logic_inputs_len <- length(logic_inputs)
+          half <- ceiling(logic_inputs_len / 2)
+          div(
+            class = "two_column_grid_gap",
+            div(logic_inputs[1:half]),
+            div(logic_inputs[(half + 1):logic_inputs_len]),
+          )
+        },
         {
           char_inputs <- create_text_input_with_patterns(char_consultant_account, consultant_account_list, ns)
 
