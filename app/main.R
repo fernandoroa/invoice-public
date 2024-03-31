@@ -295,7 +295,7 @@ server <- function(id) { # nolint
 
     salary_currency <- salary$server(
       "salary_ns", rv_json_lists, "salary_list",
-      files_ready_reac, currency_date_vars$exchange_salary,
+      files_ready_reac, currency_date_vars,
       rv_temp_folder_session,
       bump_month_vars
     )

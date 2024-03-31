@@ -134,6 +134,10 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       runif(1)
     })
 
+    current_date_rv <- eventReactive(bump_month_vars$update_dates(), ignoreInit = TRUE, {
+      runif(1)
+    })
+
     observeEvent(increaseDate_Final_rv(), ignoreInit = TRUE, {
       cdate <- input$invoiceDate
       edate <- input$exchangeDate
@@ -191,7 +195,45 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       )
     })
 
-    currency_date_rv <- reactiveValues()
+    currency_date_rv <- reactiveValues(update_dates = TRUE)
+
+    observeEvent(current_date_rv(), {
+      year <- current_year <- format(Sys.Date(), "%Y") |> as.numeric()
+      month <- current_month <- format(Sys.Date(), "%m") |> as.numeric()
+      current_day <- format(Sys.Date(), "%d") |> as.numeric()
+
+      if (current_day <= 20) {
+        month <- current_month - 1
+      }
+      if (current_month == 12 && current_day > 20) {
+        year <- current_year + 1
+        month <- 1
+      }
+
+      putative_invoice_number <- paste0(c(year, month), collapse = "-")
+
+      updateTextInput(session, "invoice_number", value = putative_invoice_number)
+
+      new_invoice_date <- get_new_date(input$invoiceDate, year, month, mon_span)
+
+      new_exchange_date <- get_new_date(input$exchangeDate, year, month, mon_span)
+
+      updateDateInput(
+        session,
+        "exchangeDate",
+        value = new_exchange_date
+      )
+
+      updateDateInput(
+        session,
+        "invoiceDate",
+        value = new_invoice_date
+      )
+
+      start_month_date <- paste0(c(year, month, "1"), collapse = "-") |> as.Date()
+
+      currency_date_rv$start_month_date <- start_month_date
+    })
 
     observeEvent(input$get_exchanges, {
       showModal(modalDialog(
@@ -262,6 +304,10 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       removeModal()
     })
 
+    observeEvent(input$update_dates, ignoreInit = TRUE, {
+      currency_date_rv$update_dates <- !currency_date_rv$update_dates
+    })
+
     outputOptions(output, "currency_date", suspendWhenHidden = FALSE)
 
     return(list(
@@ -273,6 +319,12 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       }),
       exchange_oneliners = reactive({
         currency_date_rv$exchange_oneliners
+      }),
+      start_month_date = reactive({
+        currency_date_rv$start_month_date
+      }),
+      update_dates = reactive({
+        currency_date_rv$update_dates
       })
     ))
   })

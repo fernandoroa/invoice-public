@@ -97,3 +97,47 @@ date_bump_month <- function(date, decrease = FALSE) {
     date - subtract
   }
 }
+
+substitute_invalid_days <- function(year, day, month, mon_span) {
+  last_day_of_month <- get_last_day_of_month(year, month, mon_span)
+  end_of_month_exceeded <- ifelse(day > last_day_of_month, TRUE, FALSE)
+  if (year %in% leap_years) {
+    mon_span[3] <- 29
+  }
+  if (end_of_month_exceeded) {
+    return(mon_span[month + 1])
+  }
+  day
+}
+get_last_day_of_month <- function(year, month, mon_span) {
+  if (year %in% leap_years) {
+    mon_span[3] <- 29
+  }
+  mon_span[month + 1]
+}
+is_last_day_of_month <- function(date, mon_span) {
+  if (year(date) %in% leap_years) {
+    mon_span[3] <- 29
+  }
+  if (day(date) == mon_span[month(date) + 1]) {
+    return(TRUE)
+  } else {
+    FALSE
+  }
+}
+
+get_new_date <- function(date_input, year, month, mon_span) {
+  invoice_date_day <- day(date_input)
+  invoice_date_day <- substitute_invalid_days(year, invoice_date_day, month, mon_span)
+
+  invoice_is_last_day_of_month_bool <- is_last_day_of_month(date_input, mon_span)
+
+  last_day_of_month <- get_last_day_of_month(year, month, mon_span)
+
+  if (invoice_is_last_day_of_month_bool) {
+    new_invoice_date <- paste0(c(year, month, last_day_of_month), collapse = "-") |> as.Date()
+    return(new_invoice_date)
+  } else {
+    paste0(c(year, month, invoice_date_day), collapse = "-") |> as.Date()
+  }
+}
