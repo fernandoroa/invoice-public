@@ -1,7 +1,7 @@
 box::use(
   rjson[rjson_fromJSON = fromJSON]
 )
-reactive_saver <- function(rv_temp_folder_session, rv_json_lists) {
+json_to_reactive_values <- function(rv_temp_folder_session, rv_json_lists) {
   rv_json_lists$final_currency_list <- rjson_fromJSON(
     file = file.path(rv_temp_folder_session(), "json", "invoice_and_final_currency.json")
   )

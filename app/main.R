@@ -17,7 +17,7 @@ box::use(
   utils / create_files[...],
   utils / validate[...],
   utils / continue_sequence[...],
-  utils / reactive_saver[...],
+  utils / json_to_reactive_values[...],
   modules / upload,
   modules / currency_date,
   modules / bump_month,
@@ -265,14 +265,14 @@ server <- function(id) { # nolint
     json_upload_var <- upload$server("json_upload_ns", zip_upload_var, ".json")
     zip_upload_var <- upload$server("zip_upload_ns", json_upload_var, ".zip")
 
+    bump_month_vars <- bump_month$server("bump_month_ns")
+
     currency_date_vars <- currency_date$server(
       "currency_date_ns", rv_json_lists, "final_currency_list", salary_currency,
       input, files_ready_reac,
       rv_temp_folder_session,
       bump_month_vars
     )
-
-    bump_month_vars <- bump_month$server("bump_month_ns")
 
     business$server("bill_to_ns", rv_json_lists,
       files_ready_reac,
@@ -295,7 +295,7 @@ server <- function(id) { # nolint
 
     salary_currency <- salary$server(
       "salary_ns", rv_json_lists, "salary_list",
-      files_ready_reac, currency_date_vars$exchange_salary,
+      files_ready_reac, currency_date_vars,
       rv_temp_folder_session,
       bump_month_vars
     )
@@ -313,7 +313,7 @@ server <- function(id) { # nolint
     )
 
     observeEvent(oneliner_vars$add_oneliner(), {
-      rv_json_lists <- reactive_saver(rv_temp_folder_session, rv_json_lists)
+      rv_json_lists <- json_to_reactive_values(rv_temp_folder_session, rv_json_lists)
 
       last_element <- duplicate_last_list_element(rv_json_lists$oneliners_list)
       rv_json_lists$oneliners_list <- c(rv_json_lists$oneliners_list, last_element)
@@ -321,7 +321,7 @@ server <- function(id) { # nolint
     })
 
     observeEvent(grouped_vars$add_grouped_element(), {
-      rv_json_lists <- reactive_saver(rv_temp_folder_session, rv_json_lists)
+      rv_json_lists <- json_to_reactive_values(rv_temp_folder_session, rv_json_lists)
 
       last_element <- duplicate_last_list_element(rv_json_lists$grouped_list)
       rv_json_lists$grouped_list <- c(rv_json_lists$grouped_list, last_element)
@@ -338,7 +338,7 @@ server <- function(id) { # nolint
 
     observeEvent(file_reac(),
       {
-        rv_json_lists <- reactive_saver(rv_temp_folder_session, rv_json_lists)
+        rv_json_lists <- json_to_reactive_values(rv_temp_folder_session, rv_json_lists)
 
         files_ready_reac(!files_ready_reac())
       },

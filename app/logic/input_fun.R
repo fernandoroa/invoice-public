@@ -253,7 +253,7 @@ create_check_box_input <- function(logic_fields, field_list, ns, useChildNS = FA
   lapply(logic_fields, function(x) {
     checkboxInput(
       ns(x),
-      gsub("_", " ", gsub(pattern_a, pattern_b, x)),
+      gsub("(^[[:alpha:]])", "\\U\\1", gsub("_", " ", gsub(pattern_a, pattern_b, x)), perl = TRUE),
       field_list[[x]]
     )
   })

@@ -2,6 +2,9 @@
   "file_identifier": [
     "consultant_account"
   ],
+  "show": [
+    true
+  ],
   "IBAN": [
     "B..............................222"
   ],

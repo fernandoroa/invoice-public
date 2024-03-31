@@ -11,7 +11,7 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    bump_month_rv <- reactiveValues(increaseEverything = TRUE, decreaseEverything = TRUE)
+    bump_month_rv <- reactiveValues(increaseEverything = 0, decreaseEverything = 0, update_everything = TRUE)
 
     output$bump_month <- renderUI({
       wellPanel(
@@ -21,18 +21,31 @@ server <- function(id) {
             class = "flex-dates",
             br(),
             actionButton(ns("increaseMonth"), ""),
+            span("1 Month"),
+            br(),
             actionButton(ns("decreaseMonth"), "")
+          ),
+          div(
+            class = "go-bottom",
+            actionButton(
+              ns("update_dates"),
+              "Update dates to current month"
+            )
           )
         )
       )
     })
 
     observeEvent(input$increaseMonth, ignoreInit = TRUE, {
-      bump_month_rv$increaseEverything <- !bump_month_rv$increaseEverything
+      bump_month_rv$increaseEverything <- bump_month_rv$increaseEverything + 1
     })
 
     observeEvent(input$decreaseMonth, ignoreInit = TRUE, {
-      bump_month_rv$decreaseEverything <- !bump_month_rv$decreaseEverything
+      bump_month_rv$decreaseEverything <- bump_month_rv$decreaseEverything + 1
+    })
+
+    observeEvent(input$update_dates, ignoreInit = TRUE, {
+      bump_month_rv$update_everything <- !bump_month_rv$update_everything
     })
 
     outputOptions(output, "bump_month", suspendWhenHidden = FALSE)
@@ -43,6 +56,9 @@ server <- function(id) {
       }),
       decreaseEverything = reactive({
         bump_month_rv$decreaseEverything
+      }),
+      update_everything = reactive({
+        bump_month_rv$update_everything
       })
     ))
   })

@@ -43,7 +43,7 @@ ui <- function(id) {
   )
 }
 
-server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_session, bump_month_vars) {
+server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_folder_session, bump_month_vars) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -240,6 +240,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
 
     output$salary_single_panel <- renderUI({
       salary_list <- rv_jsons[[sublist]]
+      single_ns <- "single"
 
       wellPanel(
         h4(strong("Single date/month")),
@@ -250,7 +251,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
                justify-content: space-between;
                max-width:150px;
                align-items:center;",
-            checkboxInput(ns(paste0("single", "-", "use")), "Show", salary_list$single$use),
+            checkboxInput(ns(paste0(single_ns, "-", "use")), "Show", salary_list$single$use),
             actionButton(ns("increaseSingleDate"), ""),
             span("1 Month"),
             br(),
@@ -258,17 +259,17 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
           ),
           tagList(
             checkboxInput(
-              ns(paste0("single", "-", "show_month/year_only")),
+              ns(paste0(single_ns, "-", "show_month/year_only")),
               div(
                 class = "wrap",
                 "Show Month/Year Only"
               ),
               salary_list$single$`show_month/year_only`
             ),
-            dateInput(ns(paste0("single", "-", "date")), "Date: ", value = as.Date(salary_list$single$date)),
+            dateInput(ns(paste0(single_ns, "-", "date")), "Date: ", value = as.Date(salary_list$single$date)),
             div(
               class = "go-center",
-              textInput(ns(paste0("single", "-", "text")), "Title", salary_list$single$text)
+              textInput(ns(paste0(single_ns, "-", "text")), "Title", salary_list$single$text)
             )
           )
         )
@@ -277,21 +278,20 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
 
     decreaseDate_rv <- eventReactive(c(
       input$decreaseDate,
-      input$decreaseSingleDate,
-      bump_month_vars$decreaseEverything()
+      input$decreaseSingleDate
     ), ignoreInit = TRUE, {
       runif(1)
     })
 
     increaseDate_rv <- eventReactive(c(
       input$increaseDate,
-      input$increaseSingleDate,
-      bump_month_vars$increaseEverything()
+      input$increaseSingleDate
     ), ignoreInit = TRUE, {
       runif(1)
     })
 
-    observeEvent(increaseDate_rv(), ignoreInit = TRUE, {
+
+    observeEvent(c(increaseDate_rv(), bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
       sdate <- input$`dates-start`
       edate <- input$`dates-end`
       single_date <- input$`single-date`
@@ -305,7 +305,7 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       updateDateInput(session, "single-date", value = new_date_single)
     })
 
-    observeEvent(decreaseDate_rv(), ignoreInit = TRUE, {
+    observeEvent(c(decreaseDate_rv(), bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
       sdate <- input$`dates-start`
       edate <- input$`dates-end`
       single_date <- input$`single-date`
@@ -318,6 +318,31 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
       updateDateInput(session, "dates-end", value = new_date_e)
       updateDateInput(session, "single-date", value = new_date_single)
     })
+
+    observeEvent(bump_month_vars$update_everything(), ignoreInit = TRUE, {
+      year_month_vec <- get_current_month_year()
+      year_int <- year_month_vec[1]
+      month_int <- year_month_vec[2]
+
+      new_start_date <- paste0(c(year_int, month_int, "1"), collapse = "-") |> as.Date()
+
+      updateDateInput(session, "dates-start", value = new_start_date)
+
+      new_end_date <- get_new_date(input$`dates-end`, year_int, month_int, mon_span)
+
+      updateDateInput(session, "dates-end", value = new_end_date)
+
+      new_single_date <- get_new_date(input$`single-date`, year_int, month_int, mon_span)
+
+      updateDateInput(session, "single-date", value = new_single_date)
+    })
+
+    observeEvent(currency_date_vars$exchange_salary(), ignoreInit = TRUE, {
+      updateNumericInput(session, paste0("main", "-", "currency_exchange_to_Final_Currency"),
+        value = currency_date_vars$exchange_salary() |> as.numeric()
+      )
+    })
+
 
     output$save_download_salary <- downloadHandler(
       filename = function() {
@@ -485,12 +510,6 @@ server <- function(id, rv_jsons, sublist, file_reac, exchange_rate, temp_folder_
         session, logic_modified_days, salary_list_modified_days,
         useChildNS = TRUE,
         child_namespace
-      )
-    })
-
-    observeEvent(exchange_rate(), ignoreInit = TRUE, {
-      updateNumericInput(session, paste0("main", "-", "currency_exchange_to_Final_Currency"),
-        value = exchange_rate() |> as.numeric()
       )
     })
 

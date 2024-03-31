@@ -41,9 +41,20 @@
   box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
 }
 
-.generate_buttons #app-report_ns-report,
 .generate_buttons #app-modify_all {
   background-color: rgb(8, 197, 255);
+  box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
+}
+
+.generate_buttons #app-report_ns-report,
+#app-bump_month_ns-update_dates {
+  background-color: rgb(8, 197, 128);
+  box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
+  margin: 5px;
+}
+
+.generate_buttons #app-download_zip_ns-downloadPresets {
+  background-color: #43beee;
   box-shadow: 5px 5px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -202,7 +213,7 @@ button[type="button"] {
   gap: 15px;
 }
 .well .shiny-split-layout > div > div > #app-currency_date_ns-increaseInvoiceNumber,
-.well .shiny-split-layout > div > div > #app-currency_date_ns-increaseDate_Final,
+.well .shiny-split-layout > div > div > #app-currency_date_ns-increaseDates,
 .well .shiny-split-layout > div > div > #app-bump_month_ns-increaseMonth,
 .well .shiny-split-layout > div > div > #app-salary_ns-increaseSingleDate,
 .well .shiny-split-layout > div > div > #app-salary_ns-increaseDate {
@@ -220,7 +231,7 @@ button[type="button"] {
 }
 
 .well .shiny-split-layout > div > div > #app-currency_date_ns-decreaseInvoiceNumber,
-.well .shiny-split-layout > div > div > #app-currency_date_ns-decreaseDate_Final,
+.well .shiny-split-layout > div > div > #app-currency_date_ns-decreaseDates,
 .well .shiny-split-layout > div > div > #app-bump_month_ns-decreaseMonth,
 .well .shiny-split-layout > div > div > #app-salary_ns-decreaseSingleDate,
 .well .shiny-split-layout > div > div > #app-salary_ns-decreaseDate {

@@ -62,6 +62,14 @@ grouped_list <- rjson_fromJSON(file = file.path(params$app_path, "json/grouped_c
 grouped_list <- grouped_list %>% discard(names(.) %in% "file_identifier")
 
 #
+#  account field check
+#
+
+if (is.null(consultant_account_list$show)) {
+  consultant_account_list$show <- TRUE
+}
+
+#
 #   READING DATES
 #
 
@@ -425,9 +433,13 @@ cat( # nolint
 
 <!-- part 7: left: bank Account and swift -->
 
-\Large  \textbf{`r fields_names_list$WireInstructions[lan_idx]`} / \normalsize `r fields_names_list$BankAccountInformation[lan_idx]`
+``` {r account_header, results="asis", echo=F, eval=consultant_account_list$show} 
+cat(paste0(
+  "\\large \\textbf{", fields_names_list$WireInstructions[lan_idx], "} /",
+  "\\normalsize ", fields_names_list$BankAccountInformation[lan_idx], ""))
+```
 
-``` {r intermediary, results="asis", echo=F, eval=consultant_account_list$use_intermediary} 
+``` {r intermediary, results="asis", echo=F, eval=all(consultant_account_list$use_intermediary, consultant_account_list$show) } 
 cat(paste0(
   "\\large \\textbf{", fields_names_list$Intermediary[lan_idx], "} /",
   fields_names_list$CorrespondentBank[lan_idx], "\\textbf{ (Field 56):}  \n  "
@@ -439,36 +451,48 @@ cat(paste0(
 ))
 ```
 
-\large `r fields_names_list$Beneficiary[lan_idx]` \textbf{`r fields_names_list$Bank[lan_idx]`:}  
-\normalsize \hspace{5mm} SWIFT: \textbf{`r consultant_account_list$final_bank_swift`}  
-``` {r bank, results="asis", echo=F, eval=T} 
+``` {r bank_details, results="asis", echo=F, eval=consultant_account_list$show} 
+cat(paste0(
+  "\\large ", fields_names_list$Beneficiary[lan_idx], " \\textbf{", fields_names_list$Bank[lan_idx], ":}  \n",
+  "\\normalsize \\hspace{5mm}SWIFT: \\textbf{", consultant_account_list$final_bank_swift, "}  \n"
+))
+```
+``` {r bank, results="asis", echo=F, eval=consultant_account_list$show} 
 if (consultant_account_list$use_intermediary) {
-  cat(paste(
+  cat(paste0(
     "\\hspace{5mm}",
-    paste0(
-      "**",
-      paste(c(
-        consultant_account_list$final_bank_short_name,
-        " ",
-        fields_names_list$Account[lan_idx]
-      )[fields_names_list$order[[lan_idx]]], collapse = " "),
-      " **", fields_names_list$with[lan_idx]
-    ),
+    "**",
+    paste0(c(
+      consultant_account_list$final_bank_short_name,
+      " ",
+      fields_names_list$Account[lan_idx]
+    )[fields_names_list$order[[lan_idx]]], collapse = " "),
+    " **", 
+    fields_names_list$with[lan_idx], " ",
     consultant_account_list$intermediary_bank_name,
-    ":",
-    paste0("**", consultant_account_list$final_bank_account, "**  \n")
+    ": ",
+    "**", consultant_account_list$final_bank_account, "**  \n"
   ))
 } else {
   cat("<!-- avoid line break -->")
 }
 ```
-\hspace{5mm} `r fields_names_list$Name[lan_idx]`: \textbf{`r consultant_account_list$final_bank_name`}  
-\hspace{5mm} `r fields_names_list$Address[lan_idx]`: `r consultant_account_list$final_bank_address`, `r consultant_account_list$final_bank_country`  
+``` {r account_details, results="asis", echo=F, eval=consultant_account_list$show} 
+cat(paste0(
+  "\\hspace{5mm}", fields_names_list$Name[lan_idx], ": \\textbf{", consultant_account_list$final_bank_name, "}  \n",
+  "\\hspace{5mm}", fields_names_list$Address[lan_idx], ": ", consultant_account_list$final_bank_address, ", ",
+  consultant_account_list$final_bank_country, "  \n"
+))
+```
 
-\large\textbf{`r fields_names_list$consultantBusiness[lan_idx]`} / `r fields_names_list$BeneficiaryCustomer[lan_idx]` \textbf{}:  
-\hspace{5mm} \normalsize `r fields_names_list$Name[lan_idx]`: `r consultant_business_list$name`    
-\hspace{5mm} IBAN: **`r consultant_account_list$IBAN`**  
-
+``` {r account_details2, results="asis", echo=F, eval=consultant_account_list$show} 
+cat(paste0(
+  "\\large\\textbf{", fields_names_list$consultantBusiness[lan_idx], "} / ", fields_names_list$BeneficiaryCustomer[lan_idx],
+  "  \n",
+  "\\hspace{5mm}\\normalsize ", fields_names_list$Name[lan_idx], ": ", consultant_business_list$name, "  \n",
+  "\\hspace{5mm}IBAN: **", consultant_account_list$IBAN, "**  \n"
+))
+```
 <!-- part 8: optional -->
 
 <!-- \large `r fields_names_list$RemittanceInformation[lan_idx]` \textbf{(Field 70)}:   -->

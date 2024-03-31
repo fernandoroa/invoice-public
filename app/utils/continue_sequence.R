@@ -76,24 +76,87 @@ duplicate_last_list_element <- function(list) {
   last_element
 }
 
-get_last_symbol <- function(string) {
-  ifelse(grepl("[^[:alnum:]]", string), sub(".*([^[:alnum:]]).*", "\\1", string), "")
-}
+
 
 date_bump_month <- function(date, decrease = FALSE) {
-  year <- year(date)
-  if (year %in% leap_years) {
+  year_int <- year(date)
+  if (year_int %in% leap_years) {
     mon_span[3] <- 29
   }
   mon <- month(date)
-  day <- day(date)
+  day_int <- day(date)
 
-  modifier <- ifelse(day == mon_span[mon + 1], 1, 0)
+  modifier <- ifelse(day_int == mon_span[mon + 1], 1, 0)
 
   if (!decrease) {
     return(date + mon_span[mon + 1 + modifier])
   } else {
-    subtract <- ifelse(day > mon_span[mon], day, mon_span[mon + modifier])
+    subtract <- ifelse(day_int > mon_span[mon], day_int, mon_span[mon + modifier])
     date - subtract
   }
+}
+
+get_last_symbol <- function(string) {
+  ifelse(grepl("[^[:alnum:]]", string), sub(".*([^[:alnum:]]).*", "\\1", string), "")
+}
+
+substitute_invalid_days <- function(year_int, day_int, month_int, mon_span) {
+  last_day_of_month <- get_last_day_of_month(year_int, month_int, mon_span)
+  end_of_month_exceeded <- ifelse(day_int > last_day_of_month, TRUE, FALSE)
+  if (year_int %in% leap_years) {
+    mon_span[3] <- 29
+  }
+  if (end_of_month_exceeded) {
+    return(mon_span[month_int + 1])
+  }
+  day_int
+}
+
+get_last_day_of_month <- function(year_int, month_int, mon_span) {
+  if (year_int %in% leap_years) {
+    mon_span[3] <- 29
+  }
+  mon_span[month_int + 1]
+}
+
+is_last_day_of_month <- function(date, mon_span) {
+  if (year(date) %in% leap_years) {
+    mon_span[3] <- 29
+  }
+  if (day(date) == mon_span[month(date) + 1]) {
+    return(TRUE)
+  } else {
+    FALSE
+  }
+}
+
+get_new_date <- function(date_input, year_int, month_int, mon_span) {
+  invoice_date_day <- day(date_input)
+  invoice_date_day <- substitute_invalid_days(year_int, invoice_date_day, month_int, mon_span)
+
+  invoice_is_last_day_of_month_bool <- is_last_day_of_month(date_input, mon_span)
+
+  last_day_of_month <- get_last_day_of_month(year_int, month_int, mon_span)
+
+  if (invoice_is_last_day_of_month_bool) {
+    new_invoice_date <- paste0(c(year_int, month_int, last_day_of_month), collapse = "-") |> as.Date()
+    return(new_invoice_date)
+  } else {
+    paste0(c(year_int, month_int, invoice_date_day), collapse = "-") |> as.Date()
+  }
+}
+
+get_current_month_year <- function() {
+  year_int <- current_year <- format(Sys.Date(), "%Y") |> as.numeric()
+  month_int <- current_month <- format(Sys.Date(), "%m") |> as.numeric()
+  current_day <- format(Sys.Date(), "%d") |> as.numeric()
+
+  if (current_day <= 20) {
+    month_int <- current_month - 1
+  }
+  if (current_month == 12 && current_day > 20) {
+    year_int <- current_year + 1
+    month_int <- 1
+  }
+  return(c(year_int, month_int))
 }

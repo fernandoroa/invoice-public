@@ -148,6 +148,9 @@ save_all <- function(inputs, folders, rv_json_lists, oneliner_to_remove, grouped
     useNS = TRUE,
     namespace = "consultant_business_ns"
   )
+  if (is.null(rv_json_lists$consultant_account_list$show)) {
+    rv_json_lists$consultant_account_list$show <- TRUE
+  }
   plain_json_save(
     inputs,
     plain_list = rv_json_lists$consultant_account_list,

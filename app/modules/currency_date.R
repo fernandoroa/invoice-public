@@ -1,6 +1,5 @@
 box::use(
   shiny[...],
-  lubridate[...],
   stats[runif]
 )
 
@@ -69,10 +68,10 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
           div(
             class = "flex-dates",
             br(),
-            actionButton(ns("increaseDate_Final"), ""),
+            actionButton(ns("increaseDates"), ""),
             span("1 Month"),
             br(),
-            actionButton(ns("decreaseDate_Final"), "")
+            actionButton(ns("decreaseDates"), "")
           ),
           tagList(
             dateInput(ns("exchangeDate"),
@@ -118,54 +117,46 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
       contentType = "json"
     )
 
-    decreaseDate_Final_rv <- eventReactive(c(input$decreaseDate_Final, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
-      runif(1)
+    observeEvent(c(input$increaseDates, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
+      if (input$increaseDates > 0 || bump_month_vars$increaseEverything() > 0) {
+        cdate <- input$invoiceDate
+        edate <- input$exchangeDate
+
+        new_date_c <- date_bump_month(cdate)
+        new_date_e <- date_bump_month(edate)
+
+        updateDateInput(session, "invoiceDate", value = new_date_c)
+        updateDateInput(session, "exchangeDate", value = new_date_e)
+      }
     })
 
-    increaseDate_Final_rv <- eventReactive(c(input$increaseDate_Final, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
-      runif(1)
+    observeEvent(c(input$increaseInvoiceNumber, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
+      if (input$increaseInvoiceNumber > 0 || bump_month_vars$increaseEverything() > 0) {
+        last <- get_last_symbol(input$invoice_number)
+        vector <- continue_sequence(input$invoice_number, sep = last)
+        updateTextInput(session, "invoice_number", value = vector[length(vector)])
+      }
     })
 
-    decreaseInvoiceNumber_rv <- eventReactive(c(input$decreaseInvoiceNumber, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
-      runif(1)
+    observeEvent(c(input$decreaseDates, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
+      if (input$decreaseDates > 0 || bump_month_vars$decreaseEverything() > 0) {
+        cdate <- input$invoiceDate
+        edate <- input$exchangeDate
+
+        new_date_c <- date_bump_month(cdate, decrease = TRUE)
+        new_date_e <- date_bump_month(edate, decrease = TRUE)
+
+        updateDateInput(session, "invoiceDate", value = new_date_c)
+        updateDateInput(session, "exchangeDate", value = new_date_e)
+      }
     })
 
-    increaseInvoiceNumber_rv <- eventReactive(c(input$increaseInvoiceNumber, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
-      runif(1)
-    })
-
-    observeEvent(increaseDate_Final_rv(), ignoreInit = TRUE, {
-      cdate <- input$invoiceDate
-      edate <- input$exchangeDate
-
-      new_date_c <- date_bump_month(cdate)
-      new_date_e <- date_bump_month(edate)
-
-      updateDateInput(session, "invoiceDate", value = new_date_c)
-      updateDateInput(session, "exchangeDate", value = new_date_e)
-    })
-
-    observeEvent(increaseInvoiceNumber_rv(), ignoreInit = TRUE, {
-      last <- get_last_symbol(input$invoice_number)
-      vector <- continue_sequence(input$invoice_number, sep = last)
-      updateTextInput(session, "invoice_number", value = vector[length(vector)])
-    })
-
-    observeEvent(decreaseDate_Final_rv(), ignoreInit = TRUE, {
-      cdate <- input$invoiceDate
-      edate <- input$exchangeDate
-
-      new_date_c <- date_bump_month(cdate, decrease = TRUE)
-      new_date_e <- date_bump_month(edate, decrease = TRUE)
-
-      updateDateInput(session, "invoiceDate", value = new_date_c)
-      updateDateInput(session, "exchangeDate", value = new_date_e)
-    })
-
-    observeEvent(decreaseInvoiceNumber_rv(), ignoreInit = TRUE, {
-      last <- get_last_symbol(input$invoice_number)
-      vector <- continue_sequence(input$invoice_number, sep = last, factor = -1)
-      updateTextInput(session, "invoice_number", value = vector[length(vector)])
+    observeEvent(c(input$decreaseInvoiceNumber, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
+      if (input$decreaseInvoiceNumber > 0 || bump_month_vars$decreaseEverything() > 0) {
+        last <- get_last_symbol(input$invoice_number)
+        vector <- continue_sequence(input$invoice_number, sep = last, factor = -1)
+        updateTextInput(session, "invoice_number", value = vector[length(vector)])
+      }
     })
 
     observeEvent(file_reac(), {
@@ -192,6 +183,36 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
     })
 
     currency_date_rv <- reactiveValues()
+
+    observeEvent(c(bump_month_vars$update_everything()), ignoreInit = TRUE, {
+      year_month_vec <- get_current_month_year()
+      year_int <- year_month_vec[1]
+      month_int <- year_month_vec[2]
+
+      putative_invoice_number <- paste0(c(year_int, month_int), collapse = "-")
+
+      updateTextInput(session, "invoice_number", value = putative_invoice_number)
+
+      new_invoice_date <- get_new_date(input$invoiceDate, year_int, month_int, mon_span)
+
+      new_exchange_date <- get_new_date(input$exchangeDate, year_int, month_int, mon_span)
+
+      updateDateInput(
+        session,
+        "exchangeDate",
+        value = new_exchange_date
+      )
+
+      updateDateInput(
+        session,
+        "invoiceDate",
+        value = new_invoice_date
+      )
+
+      start_month_date <- paste0(c(year_int, month_int, "1"), collapse = "-") |> as.Date()
+
+      currency_date_rv$start_month_date <- start_month_date
+    })
 
     observeEvent(input$get_exchanges, {
       showModal(modalDialog(
