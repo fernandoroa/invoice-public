@@ -118,37 +118,45 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
     )
 
     observeEvent(c(input$increaseDates, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
-      cdate <- input$invoiceDate
-      edate <- input$exchangeDate
+      if (input$increaseDates > 0 || bump_month_vars$increaseEverything() > 0) {
+        cdate <- input$invoiceDate
+        edate <- input$exchangeDate
 
-      new_date_c <- date_bump_month(cdate)
-      new_date_e <- date_bump_month(edate)
+        new_date_c <- date_bump_month(cdate)
+        new_date_e <- date_bump_month(edate)
 
-      updateDateInput(session, "invoiceDate", value = new_date_c)
-      updateDateInput(session, "exchangeDate", value = new_date_e)
+        updateDateInput(session, "invoiceDate", value = new_date_c)
+        updateDateInput(session, "exchangeDate", value = new_date_e)
+      }
     })
 
     observeEvent(c(input$increaseInvoiceNumber, bump_month_vars$increaseEverything()), ignoreInit = TRUE, {
-      last <- get_last_symbol(input$invoice_number)
-      vector <- continue_sequence(input$invoice_number, sep = last)
-      updateTextInput(session, "invoice_number", value = vector[length(vector)])
+      if (input$increaseInvoiceNumber > 0 || bump_month_vars$increaseEverything() > 0) {
+        last <- get_last_symbol(input$invoice_number)
+        vector <- continue_sequence(input$invoice_number, sep = last)
+        updateTextInput(session, "invoice_number", value = vector[length(vector)])
+      }
     })
 
     observeEvent(c(input$decreaseDates, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
-      cdate <- input$invoiceDate
-      edate <- input$exchangeDate
+      if (input$decreaseDates > 0 || bump_month_vars$decreaseEverything() > 0) {
+        cdate <- input$invoiceDate
+        edate <- input$exchangeDate
 
-      new_date_c <- date_bump_month(cdate, decrease = TRUE)
-      new_date_e <- date_bump_month(edate, decrease = TRUE)
+        new_date_c <- date_bump_month(cdate, decrease = TRUE)
+        new_date_e <- date_bump_month(edate, decrease = TRUE)
 
-      updateDateInput(session, "invoiceDate", value = new_date_c)
-      updateDateInput(session, "exchangeDate", value = new_date_e)
+        updateDateInput(session, "invoiceDate", value = new_date_c)
+        updateDateInput(session, "exchangeDate", value = new_date_e)
+      }
     })
 
     observeEvent(c(input$decreaseInvoiceNumber, bump_month_vars$decreaseEverything()), ignoreInit = TRUE, {
-      last <- get_last_symbol(input$invoice_number)
-      vector <- continue_sequence(input$invoice_number, sep = last, factor = -1)
-      updateTextInput(session, "invoice_number", value = vector[length(vector)])
+      if (input$decreaseInvoiceNumber > 0 || bump_month_vars$decreaseEverything() > 0) {
+        last <- get_last_symbol(input$invoice_number)
+        vector <- continue_sequence(input$invoice_number, sep = last, factor = -1)
+        updateTextInput(session, "invoice_number", value = vector[length(vector)])
+      }
     })
 
     observeEvent(file_reac(), {

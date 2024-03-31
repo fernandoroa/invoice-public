@@ -11,7 +11,7 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    bump_month_rv <- reactiveValues(increaseEverything = TRUE, decreaseEverything = TRUE, update_everything = TRUE)
+    bump_month_rv <- reactiveValues(increaseEverything = 0, decreaseEverything = 0, update_everything = TRUE)
 
     output$bump_month <- renderUI({
       wellPanel(
@@ -37,11 +37,11 @@ server <- function(id) {
     })
 
     observeEvent(input$increaseMonth, ignoreInit = TRUE, {
-      bump_month_rv$increaseEverything <- !bump_month_rv$increaseEverything
+      bump_month_rv$increaseEverything <- bump_month_rv$increaseEverything + 1
     })
 
     observeEvent(input$decreaseMonth, ignoreInit = TRUE, {
-      bump_month_rv$decreaseEverything <- !bump_month_rv$decreaseEverything
+      bump_month_rv$decreaseEverything <- bump_month_rv$decreaseEverything + 1
     })
 
     observeEvent(input$update_dates, ignoreInit = TRUE, {
