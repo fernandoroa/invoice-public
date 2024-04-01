@@ -68,7 +68,10 @@ server <- function(id, char_names_currency_this_name, num_names_currency_this_na
           class = "go-bottom",
           logic_names_oneliners_list
         ),
-        drop_button
+        div(
+          class = "go-center-vertical",
+          drop_button
+        )
       )
     })
 

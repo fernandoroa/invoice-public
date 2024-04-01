@@ -24,19 +24,14 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
         splitLayout(
           div(
             class = "flex-dates",
-            br(),
             actionButton(ns("increaseInvoiceNumber"), ""),
             actionButton(ns("decreaseInvoiceNumber"), "")
           ),
           tagList(
             div(
               class = "go-center",
-              span(strong("Invoice Number"))
-            ),
-            div(
-              class = "go-center",
               textInput(
-                ns("invoice_number"), "",
+                ns("invoice_number"), "Invoice Number",
                 rv_jsons[[sublist]]$invoice_number
               )
             )
@@ -47,14 +42,11 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
           class = "two_column_grid",
           textInput(
             ns("final_currency"),
-            div(
-              class = "wrap",
-              HTML("<i>Final</i> Currency")
-            ),
+            "",
             rv_jsons[[sublist]]$final_currency
           ),
           div(
-            class = "go-bottom",
+            class = "go-center-vertical",
             div(
               id = "exchange_container", style = "display:inline-block", title = "Updates exchange values in other tabs",
               actionButton(
@@ -70,7 +62,6 @@ server <- function(id, rv_jsons, sublist, salary_currency, inputs, file_reac, te
             br(),
             actionButton(ns("increaseDates"), ""),
             span("1 Month"),
-            br(),
             actionButton(ns("decreaseDates"), "")
           ),
           tagList(
