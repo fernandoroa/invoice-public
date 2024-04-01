@@ -32,7 +32,7 @@ server <- function(id, file_reac, temp_folder_session) {
             value = paste0(readLines(file.path(temp_folder_session(), "invoice.Rmd"))),
             autoScrollEditorIntoView = TRUE,
             minLines = 20,
-            maxLines = 60,
+            maxLines = 60
           )
         ),
         column(

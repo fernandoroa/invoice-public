@@ -22,7 +22,6 @@ server <- function(id) {
             br(),
             actionButton(ns("increaseMonth"), ""),
             span("1 Month"),
-            br(),
             actionButton(ns("decreaseMonth"), "")
           ),
           div(

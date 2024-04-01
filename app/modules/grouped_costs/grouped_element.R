@@ -44,7 +44,10 @@ server <- function(id, char_names_grouped_this_name, num_names_grouped_this_name
           class = "go-bottom",
           num_names_list
         ),
-        drop_button
+        div(
+          class = "go-center-vertical",
+          drop_button
+        )
       )
     })
 

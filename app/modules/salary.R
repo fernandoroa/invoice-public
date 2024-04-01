@@ -61,9 +61,12 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
               idx = 50, useChildNS = TRUE, child_namespace = child_namespace
             ),
             div(),
-            create_check_box_input(logic_nwd, salary_list$non_working_days,
-              ns,
-              useChildNS = TRUE, child_namespace = child_namespace
+            div(
+              class = "go-bottom",
+              create_check_box_input(logic_nwd, salary_list$non_working_days,
+                ns,
+                useChildNS = TRUE, child_namespace = child_namespace
+              )
             )
           )
         )
@@ -81,7 +84,7 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
         wellPanel(
           h4(strong("Modified Pay Days")),
           div(
-            class = "three_column_grid_left_big",
+            class = "four_items_grid",
             create_text_input_nc_simple(
               char_modified, salary_list$modified_days, ns,
               useChildNS = TRUE,
@@ -92,8 +95,11 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
               idx = 50,
               useChildNS = TRUE, child_namespace = child_namespace
             ),
-            create_check_box_input(logic_modified, salary_list$modified_days, ns,
-              useChildNS = TRUE, child_namespace = child_namespace
+            div(
+              class = "go-bottom",
+              create_check_box_input(logic_modified, salary_list$modified_days, ns,
+                useChildNS = TRUE, child_namespace = child_namespace
+              )
             )
           )
         )
@@ -155,7 +161,14 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
             ),
             div(
               class = "three_column_grid_left_big",
-              char_list,
+              div(
+                class = "go-bottom",
+                char_list[1]
+              ),
+              div(
+                class = "go-bottom",
+                char_list[2]
+              ),
               div(
                 class = "go-bottom",
                 logic_list
@@ -193,8 +206,8 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
       child_namespace <- "period"
       wellPanel(
         h4(strong("Period(s)")),
-        splitLayout(
-          cellWidths = c("30%", "30%", "10%", "20%"),
+        div(
+          class = "three_column_grid_equal",
           create_numeric_input_child_pattern(
             num_period, salary_list$period, ns,
             child_namespace = child_namespace
@@ -202,9 +215,11 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
           create_text_input_with_child_patterns(
             char_period, salary_list$period, ns, child_namespace
           ),
-          div(),
-          create_check_box_input(logic_period, salary_list$period, ns,
-            useChildNS = TRUE, child_namespace = child_namespace
+          div(
+            class = "go-bottom",
+            create_check_box_input(logic_period, salary_list$period, ns,
+              useChildNS = TRUE, child_namespace = child_namespace
+            )
           )
         )
       )
@@ -221,12 +236,12 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
                flex-direction: column;
                justify-content: space-between;
                max-width:150px;
-               align-items:center;",
+               align-items:center;
+               gap: 10px",
             br(),
             checkboxInput(ns(paste0("dates", "-", "use")), "Show", salary_list$dates$use),
             actionButton(ns("increaseDate"), ""),
             span("1 Month"),
-            br(),
             actionButton(ns("decreaseDate"), "")
           ),
           tagList(
@@ -250,11 +265,11 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
                flex-direction: column;
                justify-content: space-between;
                max-width:150px;
-               align-items:center;",
+               align-items:center;
+               gap: 10px",
             checkboxInput(ns(paste0(single_ns, "-", "use")), "Show", salary_list$single$use),
             actionButton(ns("increaseSingleDate"), ""),
             span("1 Month"),
-            br(),
             actionButton(ns("decreaseSingleDate"), "")
           ),
           tagList(
@@ -267,10 +282,7 @@ server <- function(id, rv_jsons, sublist, file_reac, currency_date_vars, temp_fo
               salary_list$single$`show_month/year_only`
             ),
             dateInput(ns(paste0(single_ns, "-", "date")), "Date: ", value = as.Date(salary_list$single$date)),
-            div(
-              class = "go-center",
-              textInput(ns(paste0(single_ns, "-", "text")), "Title", salary_list$single$text)
-            )
+            textInput(ns(paste0(single_ns, "-", "text")), "Title", salary_list$single$text)
           )
         )
       )

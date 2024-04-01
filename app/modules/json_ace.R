@@ -24,7 +24,10 @@ server <- function(id, file_reac, temp_folder_session) {
             selectionId = "selection",
             mode = "json",
             placeholder = ".json not loaded",
-            value = paste0(readLines(file.path(temp_folder_session(), "json/field_names.json"), warn = FALSE))
+            value = paste0(readLines(file.path(temp_folder_session(), "json/field_names.json"), warn = FALSE)),
+            autoScrollEditorIntoView = TRUE,
+            minLines = 20,
+            maxLines = 60
           )
         ),
         column(
