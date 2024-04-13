@@ -83,3 +83,7 @@ This way when you save changes or do any download action your files will be (als
 ```
 app/tmp_dir/
 ```
+
+### UI
+
+![UI](UI.png)
